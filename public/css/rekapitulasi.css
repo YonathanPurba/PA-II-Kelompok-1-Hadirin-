@@ -1,0 +1,19 @@
+.data-rekapitulasi {
+    width: 100%;
+    border-collapse: collapse;
+    margin: auto;
+    border: 1px solid #000;
+}
+
+.data-rekapitulasi th, .data-rekapitulasi td {
+    border: 1px solid #000;
+}
+
+.nama-lengkap {
+    width: 200px;
+}
+
+th {
+    width: 15px;
+    height: 15px;
+}
