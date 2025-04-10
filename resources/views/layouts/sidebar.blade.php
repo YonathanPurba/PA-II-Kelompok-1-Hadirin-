@@ -9,7 +9,7 @@
         <!-- Primary top nav -->
         <ul class="nav-list primary-nav">
             <li class="nav-item">
-                <a href="{{ url('/beranda') }}" class="nav-link">
+                <a href="{{ url('/admin/beranda') }}" class="nav-link">
                     <span class="nav-icon material-symbols-rounded">dashboard</span>
                     <span class="nav-label">Beranda</span>
                 </a>

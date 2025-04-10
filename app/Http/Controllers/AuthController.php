@@ -79,7 +79,7 @@ class AuthController extends Controller
                 $user->save();
             }
 
-            return view('admin.pages.beranda', compact('user'));
+           return redirect()->route('admin.beranda');
         }
 
         // Jika gagal login, redirect kembali dengan error

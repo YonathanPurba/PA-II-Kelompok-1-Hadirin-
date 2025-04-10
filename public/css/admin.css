@@ -1,16 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
 }
+
 body {
   height: 100vh;
   overflow: hidden;
 }
 
-.container{
+.container {
   display: grid;
   grid-template-columns: calc(100%-300px) auto;
   height: 100vh;
@@ -39,14 +41,15 @@ body {
 }
 
 .sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar.collapsed {
   width: 90px;
 }
+
 .sidebar .sidebar-header {
   display: flex;
   position: relative;
@@ -54,6 +57,7 @@ body {
   align-items: center;
   justify-content: space-between;
 }
+
 .sidebar-header .header-logo img {
   width: 100px;
   display: block;
@@ -67,7 +71,7 @@ body {
 
 }
 
-.sidebar-nav{
+.sidebar-nav {
   white-space: nowrap;
 }
 
@@ -88,19 +92,24 @@ body {
   border-radius: 8px;
   transition: 0.4s ease;
 }
+
 .sidebar-header .sidebar-toggler {
   position: absolute;
   right: 20px;
 }
+
 .sidebar-header .menu-toggler {
   display: none;
 }
+
 .sidebar.collapsed .sidebar-header .toggler {
   transform: translate(-8px);
 }
+
 .sidebar-header .toggler:hover {
   background: #dde4fb;
 }
+
 .sidebar-header .toggler span {
   font-size: 1.75rem;
   transition: 0.4s ease;
@@ -114,6 +123,7 @@ body {
 .sidebar.collapsed .sidebar-header .toggler span {
   transform: rotate(180deg);
 }
+
 .sidebar-nav .nav-list {
   list-style: none;
   display: flex;
@@ -125,11 +135,11 @@ body {
 }
 
 .sidebar-nav .nav-list .nav-item .nav-link .nav-icon {
-    color: #000;
+  color: #000;
 }
 
 .sidebar-nav .nav-list .nav-item .nav-link .nav-label {
-    color: black;
+  color: black;
 }
 
 .sidebar-nav .nav-link {
@@ -143,23 +153,29 @@ body {
   text-decoration: none;
   transition: 0.4s ease;
 }
+
 .sidebar.collapsed .sidebar-nav .nav-link {
   border-radius: 12px;
 }
+
 .sidebar .sidebar-nav .nav-link .nav-label {
   transition: opacity 0.3s ease;
 }
+
 .sidebar.collapsed .sidebar-nav .nav-link .nav-label {
   opacity: 0;
   pointer-events: none;
 }
+
 .sidebar-nav .nav-link:hover {
   color: #151A2D;
   background: #fff;
 }
+
 .sidebar-nav .nav-item {
   position: relative;
 }
+
 .sidebar-nav .nav-tooltip {
   position: absolute;
   top: -10px;
@@ -175,18 +191,20 @@ body {
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
   transition: 0s;
 }
+
 .sidebar.collapsed .sidebar-nav .nav-tooltip {
   display: block;
 }
+
 .sidebar-nav .nav-item:hover .nav-tooltip {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(50%);
   transition: all 0.4s ease;
 }
+
 .sidebar-nav .secondary-nav {
   position: absolute;
   bottom: 30px;
   width: 100%;
 }
-

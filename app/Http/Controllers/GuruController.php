@@ -11,22 +11,22 @@ class GuruController extends Controller
 {
     public function index()
     {
-        $gurus = Guru::with('user')->get(); // Jika relasi dengan user diperlukan
+        $gurus = Guru::with('user', 'kelas')->get();
 
         return view('admin.pages.guru.manajemen_data_guru', compact('gurus'));
     }
-    
+
     public function show($id)
     {
         $guru = Guru::with(['user', 'mataPelajaran', 'jadwalPelajaran'])->find($id);
-        
+
         if (!$guru) {
             return response()->json([
                 'success' => false,
                 'message' => 'Guru tidak ditemukan',
             ], 404);
         }
-        
+
         return response()->json([
             'success' => true,
             'data' => $guru,
@@ -54,7 +54,7 @@ class GuruController extends Controller
         }
 
         $guru = Guru::create($request->all());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Guru berhasil ditambahkan',
@@ -65,14 +65,14 @@ class GuruController extends Controller
     public function update(Request $request, $id)
     {
         $guru = Guru::find($id);
-        
+
         if (!$guru) {
             return response()->json([
                 'success' => false,
                 'message' => 'Guru tidak ditemukan',
             ], 404);
         }
-        
+
         $validator = Validator::make($request->all(), [
             'nip' => 'string|max:20|unique:guru,nip,' . $id . ',id_guru',
             'nama' => 'string|max:255',
@@ -92,7 +92,7 @@ class GuruController extends Controller
         }
 
         $guru->update($request->all());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Guru berhasil diperbarui',
@@ -103,16 +103,16 @@ class GuruController extends Controller
     public function destroy($id)
     {
         $guru = Guru::find($id);
-        
+
         if (!$guru) {
             return response()->json([
                 'success' => false,
                 'message' => 'Guru tidak ditemukan',
             ], 404);
         }
-        
+
         $guru->delete();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Guru berhasil dihapus',

@@ -11,39 +11,42 @@ class Siswa extends Model
 
     protected $table = 'siswa';
     protected $primaryKey = 'id_siswa';
-    public $timestamps = false;
+    public $timestamps = false; // karena menggunakan kolom waktu kustom, bukan timestamps default
 
     protected $fillable = [
-        'nama_lengkap',
-        'nisn',
+        'nama',
+        'nis',
+        'id_orangtua',
+        'id_kelas',
+        'tanggal_lahir',
         'jenis_kelamin',
-        'kelas_id',
-        'id_user',
-        'id_orang_tua',
+        'dibuat_pada',
+        'dibuat_oleh',
+        'diperbarui_pada',
+        'diperbarui_oleh',
     ];
 
-    public function user()
+    // Relasi ke orangtua
+    public function orangtua()
     {
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->belongsTo(Orangtua::class, 'id_orangtua');
     }
 
+    // Relasi ke kelas
     public function kelas()
     {
-        return $this->belongsTo(Kelas::class, 'kelas_id');
+        return $this->belongsTo(Kelas::class, 'id_kelas');
     }
 
-    public function orangTua()
-    {
-        return $this->belongsTo(OrangTua::class, 'id_orang_tua');
-    }
-
+    // Relasi ke absensi
     public function absensi()
     {
         return $this->hasMany(Absensi::class, 'id_siswa');
     }
 
-    public function suratIzin()
+    // Relasi ke rekap absensi
+    public function rekapAbsensi()
     {
-        return $this->hasMany(SuratIzin::class, 'id_siswa');
+        return $this->hasMany(RekapAbsensi::class, 'id_siswa');
     }
 }

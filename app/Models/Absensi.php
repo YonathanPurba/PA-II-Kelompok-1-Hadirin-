@@ -11,34 +11,30 @@ class Absensi extends Model
 
     protected $table = 'absensi';
     protected $primaryKey = 'id_absensi';
-    
+
     protected $fillable = [
-        'tanggal_absensi',
-        'id_user',
-        'id_jadwal',
         'id_siswa',
-        'id_surat_izin',
-        'status_absensi',
+        'id_jadwal',
+        'tanggal',
+        'status',
         'catatan',
+        'dibuat_pada',
+        'dibuat_oleh',
+        'diperbarui_pada',
+        'diperbarui_oleh',
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'id_user');
-    }
+    public $timestamps = false; // karena memakai timestamp kustom
 
-    public function jadwalPelajaran()
-    {
-        return $this->belongsTo(JadwalPelajaran::class, 'id_jadwal');
-    }
-
+    // Relasi ke Siswa
     public function siswa()
     {
         return $this->belongsTo(Siswa::class, 'id_siswa');
     }
 
-    public function suratIzin()
+    // Relasi ke Jadwal
+    public function jadwal()
     {
-        return $this->belongsTo(SuratIzin::class, 'id_surat_izin');
+        return $this->belongsTo(Jadwal::class, 'id_jadwal');
     }
 }

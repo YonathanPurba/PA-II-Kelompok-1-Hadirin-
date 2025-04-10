@@ -4,17 +4,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuruController;
-use App\Http\Controllers\SiswaController;
-use App\Http\Controllers\OrangTuaController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\KelasController;
+use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\OrangTuaController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SuratIzinController;
 use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\JadwalPelajaranController;
-use App\Http\Controllers\AbsensiController;
-use App\Http\Controllers\SuratIzinController;
-use App\Http\Controllers\UserController;
 // use App\Http\Controllers\UserController;
 
 // Menampilkan formulir login
+Route::get('/', [AuthController::class, 'showLoginForm']);
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 
 // Memproses data login
@@ -23,8 +25,9 @@ Route::post('/login', [AuthController::class, 'processLogin']);
 // Protected Routes - pakai middleware auth (session)
 Route::middleware('auth')->group(function () {
     
-    Route::get('/beranda', function () { return view('admin.pages.beranda');
-    });    
+    // Dashboard
+    Route::get('/admin/beranda', [DashboardController::class, 'index'])->name('admin.beranda');
+    
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/profile', [AuthController::class, 'profile']);

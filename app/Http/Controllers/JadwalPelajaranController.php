@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Jadwal;
 use App\Models\JadwalPelajaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,7 +12,7 @@ class JadwalPelajaranController extends Controller
 {
     public function index()
     {
-        $jadwalPelajaran = JadwalPelajaran::with(['user', 'kelas', 'mataPelajaran', 'guru'])->get();
+        $jadwalPelajaran = Jadwal::with(['user', 'kelas', 'mataPelajaran', 'guru'])->get();
         
         return response()->json([
             'success' => true,
@@ -21,7 +22,7 @@ class JadwalPelajaranController extends Controller
 
     public function show($id)
     {
-        $jadwalPelajaran = JadwalPelajaran::with(['user', 'kelas', 'mataPelajaran', 'guru', 'absensi'])->find($id);
+        $jadwalPelajaran = Jadwal::with(['user', 'kelas', 'mataPelajaran', 'guru', 'absensi'])->find($id);
         
         if (!$jadwalPelajaran) {
             return response()->json([
@@ -54,7 +55,7 @@ class JadwalPelajaranController extends Controller
             ], 422);
         }
 
-        $jadwalPelajaran = JadwalPelajaran::create($request->all());
+        $jadwalPelajaran = Jadwal::create($request->all());
         
         return response()->json([
             'success' => true,
@@ -65,7 +66,7 @@ class JadwalPelajaranController extends Controller
 
     public function update(Request $request, $id)
     {
-        $jadwalPelajaran = JadwalPelajaran::find($id);
+        $jadwalPelajaran = Jadwal::find($id);
         
         if (!$jadwalPelajaran) {
             return response()->json([
@@ -101,7 +102,7 @@ class JadwalPelajaranController extends Controller
 
     public function destroy($id)
     {
-        $jadwalPelajaran = JadwalPelajaran::find($id);
+        $jadwalPelajaran = Jadwal::find($id);
         
         if (!$jadwalPelajaran) {
             return response()->json([
@@ -120,7 +121,7 @@ class JadwalPelajaranController extends Controller
 
     public function getByKelas($kelasId)
     {
-        $jadwalPelajaran = JadwalPelajaran::with(['mataPelajaran', 'guru'])
+        $jadwalPelajaran = Jadwal::with(['mataPelajaran', 'guru'])
             ->where('kelas_id', $kelasId)
             ->get();
         
@@ -132,7 +133,7 @@ class JadwalPelajaranController extends Controller
 
     public function getByGuru($guruId)
     {
-        $jadwalPelajaran = JadwalPelajaran::with(['kelas', 'mataPelajaran'])
+        $jadwalPelajaran = Jadwal::with(['kelas', 'mataPelajaran'])
             ->where('guru_id', $guruId)
             ->get();
         

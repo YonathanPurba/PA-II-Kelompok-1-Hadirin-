@@ -5,19 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OrangTua extends Model
+class Orangtua extends Model
 {
     use HasFactory;
 
-    protected $table = 'orang_tua';
-    protected $primaryKey = 'id_orang_tua';
-    public $timestamps = false;
+    protected $table = 'orangtua';
+    protected $primaryKey = 'id_orangtua';
 
     protected $fillable = [
         'id_user',
         'nama_lengkap',
-        'no_telepon',
         'alamat',
+        'pekerjaan',
+        'dibuat_pada',
+        'dibuat_oleh',
+        'diperbarui_pada',
+        'diperbarui_oleh',
     ];
 
     public function user()
@@ -27,6 +30,6 @@ class OrangTua extends Model
 
     public function siswa()
     {
-        return $this->hasMany(Siswa::class, 'id_orang_tua');
+        return $this->hasMany(Siswa::class, 'id_orangtua');
     }
 }

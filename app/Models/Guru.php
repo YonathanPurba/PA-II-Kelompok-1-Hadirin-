@@ -35,11 +35,16 @@ class Guru extends Model
 
     public function jadwalPelajaran()
     {
-        return $this->hasMany(JadwalPelajaran::class, 'guru_id');
+        return $this->hasMany(Jadwal::class, 'guru_id');
     }
 
     public function suratIzin()
     {
         return $this->hasMany(SuratIzin::class, 'id_guru');
+    }
+    
+    public function kelas()
+    {
+        return $this->hasOne(Kelas::class, 'id_guru_wali', 'id_guru');
     }
 }

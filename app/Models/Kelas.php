@@ -15,23 +15,26 @@ class Kelas extends Model
 
     protected $fillable = [
         'nama_kelas',
-        'tingkat_kelas',
-        'tahun_ajaran',
-        'id_user',
+        'tingkat',
+        'id_guru_wali',
+        'dibuat_pada',
+        'dibuat_oleh',
+        'diperbarui_pada',
+        'diperbarui_oleh',
     ];
 
-    public function user()
+    public function guruWali()
     {
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->belongsTo(Guru::class, 'id_guru_wali', 'id_guru');
     }
 
     public function siswa()
     {
-        return $this->hasMany(Siswa::class, 'kelas_id');
+        return $this->hasMany(Siswa::class, 'id_kelas');
     }
 
     public function jadwalPelajaran()
     {
-        return $this->hasMany(JadwalPelajaran::class, 'kelas_id');
+        return $this->hasMany(Jadwal::class, 'id_kelas');
     }
 }

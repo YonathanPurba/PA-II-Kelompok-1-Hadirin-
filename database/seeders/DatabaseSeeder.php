@@ -14,11 +14,17 @@ class DatabaseSeeder extends Seeder
     {
         // Menjalankan seeder untuk role terlebih dahulu
         $this->call([
-            RoleSeeder::class,  // Pastikan RoleSeeder dijalankan lebih dulu
-            UserSeeder::class,  // Kemudian UserSeeder agar user memiliki role yang valid
+            RoleSeeder::class, 
+            UserSeeder::class,  
             MataPelajaranSeeder::class,
             GuruSeeder::class,
             GuruMataPelajaranSeeder::class,
+            KelasSeeder::class,
+            JadwalSeeder::class,
+            OrangtuaSeeder::class,
+            SiswaSeeder::class,
+            AbsensiSeeder::class,
+            RekapAbsensiSeeder::class,
         ]);
     }
 }
