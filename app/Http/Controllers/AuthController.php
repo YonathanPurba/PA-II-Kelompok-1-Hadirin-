@@ -79,14 +79,16 @@ class AuthController extends Controller
                 $user->save();
             }
 
-           return redirect()->route('admin.beranda');
+            // Kirim success message jika login berhasil
+            return redirect()->route('admin.beranda')->with('success', 'Selamat datang, Anda berhasil login!');
         }
 
         // Jika gagal login, redirect kembali dengan error
         return redirect('/')->withInput()->withErrors([
             'login' => 'Username atau password salah.'
-        ]);
+        ])->with('error', 'Login gagal, periksa kembali username dan password Anda.');
     }
+
 
     public function logout(Request $request)
     {

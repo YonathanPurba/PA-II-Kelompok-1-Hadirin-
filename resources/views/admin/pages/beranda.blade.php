@@ -3,87 +3,75 @@
 @section('title', 'Dashboard Admin')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         <main class="main-content">
             <div class="isi">
                 <!-- Judul Header -->
                 <header class="judul">
-                    <h1>Dashboard Admin</h1>
-                    <p>Selamat datang di halaman utama sistem informasi absensi</p>
+                    <h1 class="mb-3">Dashboard Admin</h1>
+                    <p class="mb-4">Selamat datang di halaman utama sistem informasi absensi</p>
                 </header>
 
                 <div class="data">
                     <div class="statistik-sekolah">
                         <!-- Header Section -->
-                        <div class="header-data"
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px">
+                        <div class="header-data d-flex justify-content-between align-items-center mb-4">
                             <h2>Statistik Sekolah</h2>
                         </div>
                         <!-- Kartu Statistik -->
-                        <div class="daftar-kelas" style="display: flex; flex-wrap: wrap; gap: 20px;">
-
+                        <div class="daftar-kelas d-flex flex-wrap gap-4">
                             <!-- Jumlah Guru -->
-                            <div class="card"
-                                style="flex: 1 1 220px; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); background-color: #fff; display: flex; flex-direction: column; justify-content: space-between; gap: 15px;">
-
-                                <!-- Bagian ikon dan jumlah -->
-                                <div style="display: flex; align-items: center; gap: 15px;">
+                            <div class="card flex-fill p-4 rounded shadow" style="background-color: #fff;">
+                                <div class="d-flex align-items-center gap-3">
                                     <div style="font-size: 40px; color: #17a2b8;">
                                         <i class="bi bi-person-badge-fill"></i>
                                     </div>
                                     <div>
-                                        <p style="margin: 0; font-size: 14px;">Total Guru</p>
-                                        <h3 style="margin: 0;">{{ $jumlahGuru }}</h3>
+                                        <p class="mb-0 fs-6">Total Guru</p>
+                                        <h3 class="mb-0">{{ $jumlahGuru }}</h3>
                                     </div>
                                 </div>
-
                                 <!-- View All -->
-                                <div class="button-right" style="display: flex; justify-content: flex-end; width:100%">
-                                    <a href="" style="font-size: 12px; text-decoration: none; color: #17a2b8;">
+                                <div class="d-flex justify-content-end mt-3 w-100">
+                                    <a href="#" class="fs-7 text-decoration-none text-primary">
                                         View All <i class="bi bi-arrow-right-short"></i>
                                     </a>
                                 </div>
                             </div>
 
                             <!-- Jumlah Siswa -->
-                            <div class="card"
-                                style="flex: 1 1 220px; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); background-color: #fff; display: flex; flex-direction: column; justify-content: center; gap: 15px;">
-                                <div style="display: flex; align-items: center; gap: 15px;">
+                            <div class="card flex-fill p-4 rounded shadow" style="background-color: #fff;">
+                                <div class="d-flex align-items-center gap-3">
                                     <div style="font-size: 40px; color: #28a745;">
                                         <i class="bi bi-people-fill"></i>
                                     </div>
                                     <div>
-                                        <p style="margin: 0; font-size: 14px;">Total Siswa</p>
-                                        <h3 style="margin: 0;">{{ $jumlahSiswa }}</h3>
+                                        <p class="mb-0 fs-6">Total Siswa</p>
+                                        <h3 class="mb-0">{{ $jumlahSiswa }}</h3>
                                     </div>
                                 </div>
-
                                 <!-- Tombol View All di kanan -->
-                                <div class="button-right" style="display: flex; justify-content: flex-end; width:100%">
-                                    <a href="" style="font-size: 12px; text-decoration: none; color: #28a745;">
+                                <div class="d-flex justify-content-end mt-3 w-100">
+                                    <a href="#" class="fs-7 text-decoration-none text-success">
                                         View All <i class="bi bi-arrow-right-short"></i>
                                     </a>
                                 </div>
                             </div>
 
                             <!-- Jumlah Kelas -->
-                            <div class="card"
-                                style="flex: 1 1 220px; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); background-color: #fff; display: flex; flex-direction: column; justify-content: space-between; gap: 15px;">
-
-                                <!-- Ikon dan Jumlah -->
-                                <div style="display: flex; align-items: center; gap: 15px;">
+                            <div class="card flex-fill p-4 rounded shadow" style="background-color: #fff;">
+                                <div class="d-flex align-items-center gap-3">
                                     <div style="font-size: 40px; color: #ffc107;">
                                         <i class="bi bi-building-fill"></i>
                                     </div>
                                     <div>
-                                        <p style="margin: 0; font-size: 14px;">Total Kelas</p>
-                                        <h3 style="margin: 0;">{{ $jumlahKelas }}</h3>
+                                        <p class="mb-0 fs-6">Total Kelas</p>
+                                        <h3 class="mb-0">{{ $jumlahKelas }}</h3>
                                     </div>
                                 </div>
-
                                 <!-- View All -->
-                                <div class="button-right" style="display: flex; justify-content: flex-end; width:100%">
-                                    <a href="" style="font-size: 12px; text-decoration: none; color: #ffc107;">
+                                <div class="d-flex justify-content-end mt-3 w-100">
+                                    <a href="#" class="fs-7 text-decoration-none text-warning">
                                         View All <i class="bi bi-arrow-right-short"></i>
                                     </a>
                                 </div>
@@ -91,74 +79,72 @@
                         </div>
                     </div>
 
-                    <div class="statistik-absensi" style="margin-top: 30px;">
+                    <div class="container-fluid mt-5">
                         <!-- Header Section -->
-                        <div class="header-data"
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <div class="header-data d-flex justify-content-between align-items-center mb-5">
                             <h2>Statistik Absensi</h2>
                         </div>
 
                         <!-- Kontainer Utama -->
-                        <div style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;">
-
+                        <div class="d-flex flex-wrap gap-5 justify-content-center">
                             <!-- Grafik + Total + Penjelasan dalam satu kolom vertikal -->
-                            <div class="grafik-total-data"
-                                style="flex: 1 1 600px; display: flex; flex-direction: column; gap: 30px; background: #fff; 
-                                       padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
-
+                            <div class="grafik-total-data bg-white p-4 rounded shadow" style="flex: 1 1 600px;">
                                 <!-- Grafik Absensi -->
-                                <div>
-                                    <canvas id="barChartAbsensiBulan" height="100"></canvas>
+                                <div id="grafik-container" style="height: 400px;">
+                                    <canvas id="barChartAbsensiBulan" data-labels='@json($absensiPerHari->pluck('tanggal')->map(fn($t) => \Carbon\Carbon::parse($t)->translatedFormat('d M')))'
+                                        data-hadir='@json($absensiPerHari->pluck('hadir'))' data-alpa='@json($absensiPerHari->pluck('alpa'))'
+                                        data-sakit='@json($absensiPerHari->pluck('sakit'))' data-izin='@json($absensiPerHari->pluck('izin'))'>
+                                    </canvas>
                                 </div>
 
-                                <div class="keterangan" style="display: flex; gap: 40px;">
+
+                                <div class="keterangan d-flex gap-5 mt-4">
                                     <!-- Total Absensi -->
                                     <div>
-                                        <h4 style="margin-bottom: 20px; color: #333;">Total Absensi</h4>
-                                        <ul style="padding-left: 0; list-style: none; font-size: 16px; color: #222;">
-                                            <li><strong style="color: #007bff;">Hadir:</strong> {{ $totalHadir }}</li>
-                                            <li><strong style="color: #dc3545;">Alpa:</strong> {{ $totalAlpa }}</li>
-                                            <li><strong style="color: #fd7e14;">Sakit:</strong> {{ $totalSakit }}</li>
-                                            <li><strong style="color: #20c997;">Izin:</strong> {{ $totalIzin }}</li>
+                                        <h4 class="mb-3 text-dark">Total Absensi</h4>
+                                        <ul class="list-unstyled fs-5 text-dark">
+                                            <li><strong class="text-primary">Hadir:</strong> {{ $totalHadir }}</li>
+                                            <li><strong class="text-danger">Alpa:</strong> {{ $totalAlpa }}</li>
+                                            <li><strong class="text-warning">Sakit:</strong> {{ $totalSakit }}</li>
+                                            <li><strong class="text-success">Izin:</strong> {{ $totalIzin }}</li>
                                         </ul>
                                     </div>
 
                                     <!-- Total Minggu Ini -->
                                     <div>
-                                        <h4 style="margin-bottom: 20px; color: #333;">Total Minggu Ini</h4>
-                                        <ul style="padding-left: 0; list-style: none; font-size: 16px; color: #222;">
-                                            <li><strong style="color: #007bff;">Hadir:</strong> {{ $totalMingguIni->hadir }}
+                                        <h4 class="mb-3 text-dark">Total Minggu Ini</h4>
+                                        <ul class="list-unstyled fs-5 text-dark">
+                                            <li><strong class="text-primary">Hadir:</strong> {{ $totalMingguIni->hadir }}
                                             </li>
-                                            <li><strong style="color: #dc3545;">Alpa:</strong> {{ $totalMingguIni->alpa }}
+                                            <li><strong class="text-danger">Alpa:</strong> {{ $totalMingguIni->alpa }}</li>
+                                            <li><strong class="text-warning">Sakit:</strong> {{ $totalMingguIni->sakit }}
                                             </li>
-                                            <li><strong style="color: #fd7e14;">Sakit:</strong> {{ $totalMingguIni->sakit }}
-                                            </li>
-                                            <li><strong style="color: #20c997;">Izin:</strong> {{ $totalMingguIni->izin }}
+                                            <li><strong class="text-success">Izin:</strong> {{ $totalMingguIni->izin }}
                                             </li>
                                         </ul>
                                     </div>
 
                                     <!-- Absensi Berdasarkan Kelas -->
-                                    <div style="">
-                                        <h4 style="margin-bottom: 20px; color: #333;">Absensi Minggu Ini per Kelas</h4>
-                                        <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
-                                            <thead>
-                                                <tr style="background-color: #f0f0f0;">
-                                                    <th style="padding: 8px; text-align: left;">Kelas</th>
-                                                    <th style="padding: 8px; text-align: left; color: #007bff;">Hadir</th>
-                                                    <th style="padding: 8px; text-align: left; color: #dc3545;">Alpa</th>
-                                                    <th style="padding: 8px; text-align: left; color: #fd7e14;">Sakit</th>
-                                                    <th style="padding: 8px; text-align: left; color: #20c997;">Izin</th>
+                                    <div>
+                                        <h4 class="mb-3 text-dark">Absensi Minggu Ini per Kelas</h4>
+                                        <table class="table table-bordered table-sm">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th class="p-2 text-start">Kelas</th>
+                                                    <th class="p-2 text-start text-primary">Hadir</th>
+                                                    <th class="p-2 text-start text-danger">Alpa</th>
+                                                    <th class="p-2 text-start text-warning">Sakit</th>
+                                                    <th class="p-2 text-start text-success">Izin</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach ($absensiPerKelasMingguIni as $kelas)
                                                     <tr>
-                                                        <td style="padding: 8px;">{{ $kelas->nama_kelas }}</td>
-                                                        <td style="padding: 8px;">{{ $kelas->hadir }}</td>
-                                                        <td style="padding: 8px;">{{ $kelas->alpa }}</td>
-                                                        <td style="padding: 8px;">{{ $kelas->sakit }}</td>
-                                                        <td style="padding: 8px;">{{ $kelas->izin }}</td>
+                                                        <td class="p-2">{{ $kelas->nama_kelas }}</td>
+                                                        <td class="p-2">{{ $kelas->hadir }}</td>
+                                                        <td class="p-2">{{ $kelas->alpa }}</td>
+                                                        <td class="p-2">{{ $kelas->sakit }}</td>
+                                                        <td class="p-2">{{ $kelas->izin }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -166,39 +152,35 @@
                                     </div>
                                 </div>
 
-
                                 <!-- Penjelasan Grafik -->
-                                <div>
-                                    <h4 style="margin-bottom: 20px; color: #333;">📊 Penjelasan Grafik Absensi</h4>
-                                    <ul style="padding-left: 20px; color: #555; font-size: 15px;">
-                                        <li><strong style="color: #28a745;">Hadir:</strong> Total kehadiran siswa tiap bulan
+                                <div class="mt-4">
+                                    <h4 class="mb-3 text-dark">Penjelasan Grafik Absensi</h4>
+                                    <ul class="fs-5 text-dark">
+                                        <li><strong class="text-success">Hadir:</strong> Total kehadiran siswa tiap bulan
                                         </li>
-                                        <li><strong style="color: #e83e8c;">Alpa:</strong> Ketidakhadiran tanpa keterangan
-                                        </li>
-                                        <li><strong style="color: #ffc107;">Sakit:</strong> Ketidakhadiran karena sakit</li>
-                                        <li><strong style="color: #17a2b8;">Izin:</strong> Ketidakhadiran dengan izin resmi
+                                        <li><strong class="text-danger">Alpa:</strong> Ketidakhadiran tanpa keterangan</li>
+                                        <li><strong class="text-warning">Sakit:</strong> Ketidakhadiran karena sakit</li>
+                                        <li><strong class="text-primary">Izin:</strong> Ketidakhadiran dengan izin resmi
                                         </li>
                                     </ul>
-                                    <p style="font-size: 14px; color: #666; margin-top: 20px;">
-                                        📈 Data ini membantu memantau konsistensi kehadiran siswa dan mendeteksi tren yang
+                                    <p class="fs-6 text-dark mt-4">
+                                        Data ini membantu memantau konsistensi kehadiran siswa dan mendeteksi tren yang
                                         perlu perhatian khusus.
                                     </p>
                                 </div>
-
                             </div>
                         </div>
                     </div>
 
-                    <div class="informasi-guru">
+                    <div class="container-fluid mt-5">
                         <!-- Informasi Guru -->
-                        <div class="header-data"
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; margin-top: 30px;">
+                        <div class="header-data d-flex justify-content-between align-items-center mb-5">
                             <h2>Informasi Guru</h2>
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-striped table-bordered" style="background-color: #fff;">
-                                <thead class="table-success">
+                            <table id="guruTable" class="table table-striped table-bordered table-sm">
+                                <thead class="bg-success text-white">
                                     <tr>
                                         <th>No</th>
                                         <th>Nama Guru</th>
@@ -211,7 +193,7 @@
                                             <td>{{ $index + 1 }}</td>
                                             <td>{{ $g->nama_lengkap }}</td>
                                             <td>
-                                                @forelse ($g->mataPelajaran ?? [] as $mp)
+                                                @forelse ($g->mataPelajaran as $mp)
                                                     {{ $mp->nama }}<br>
                                                 @empty
                                                     <span>-</span>
@@ -224,37 +206,33 @@
                         </div>
                     </div>
 
-
-                    <div class="detail-kelas">
+                    <div class="detail-kelas mt-5">
                         <!-- Detail Kelas -->
-                        <div class="header-data"
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; margin-top:30px">
+                        <div class="header-data d-flex justify-content-between align-items-center mb-5">
                             <h2>Detail Kelas</h2>
                         </div>
-
-                        @if ($kelas && $kelas->count())
-                            <div class="daftar-kelas" style="display: flex; flex-wrap: wrap; gap: 20px;">
-                                @foreach ($kelas as $k)
-                                    <div class="card"
-                                        style="flex: 1 1 220px; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); background-color: #fff; display: flex; flex-direction: column; gap: 15px;">
-                                        <div>
-                                            {{-- <p style="margin: 0; font-size: 14px;">Nama Kelas</p> --}}
-                                            {{-- <h3 style="margin: 0;">{{ $k->nama_kelas }}</h3> --}}
-                                        </div>
-                                        <div>
-                                            {{-- <p style="margin: 0; font-size: 14px;">Guru Wali</p> --}}
-                                            {{-- <h3 style="margin: 0;">{{ $k->guruWali->nama_lengkap ?? 'Tidak Ada' }}</h3> --}}
-                                        </div>
+                        <div class="daftar-kelas" style="display: flex; flex-wrap: wrap; gap: 20px;">
+                            @forelse ($detailKelas as $kelases)
+                                <div class="card"
+                                    style="width: 240px; height: auto; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); background-color: #fff; display: flex; flex-direction: column; align-items: center;">
+                                    <!-- Icon -->
+                                    <div style="font-size: 60px; color: #28a745; margin-bottom: 10px;">
+                                        <i class="bi bi-door-open-fill"></i>
                                     </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p>Tidak ada data kelas.</p>
-                        @endif
 
+                                    <div style="text-align: center;">
+                                        <p><strong>{{ $kelases->nama_kelas ?? '-' }}</strong></p>
+                                        <p>Wali: <strong>{{ $kelases->guru->nama_lengkap ?? '-' }}</strong></p>
+                                    </div>
+                                </div>
+                            @empty
+                                <p style="padding: 10px;">Tidak ada data kelas yang tersedia.</p>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
+
 @endsection

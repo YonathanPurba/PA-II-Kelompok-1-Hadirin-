@@ -1,39 +1,33 @@
 <?php
 
 namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Kelas extends Model
+class GuruMataPelajaran extends Model
 {
     use HasFactory;
 
-    protected $table = 'kelas';
-    protected $primaryKey = 'id_kelas';
+    protected $table = 'guru_mata_pelajaran';
+    protected $primaryKey = 'id_guru_mata_pelajaran';
     public $timestamps = false;
 
     protected $fillable = [
-        'nama_kelas',
-        'tingkat',
         'id_guru',
+        'id_mata_pelajaran',
         'dibuat_pada',
         'dibuat_oleh',
         'diperbarui_pada',
         'diperbarui_oleh',
     ];
+
     public function guru()
     {
         return $this->belongsTo(Guru::class, 'id_guru', 'id_guru');
     }
 
-    public function siswa()
+    public function mataPelajaran()
     {
-        return $this->hasMany(Siswa::class, 'id_kelas');
-    }
-
-    public function jadwalPelajaran()
-    {
-        return $this->hasMany(Jadwal::class, 'id_kelas');
+        return $this->belongsTo(MataPelajaran::class, 'id_mata_pelajaran', 'id_mata_pelajaran');
     }
 }

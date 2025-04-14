@@ -1,6 +1,6 @@
 @extends('layouts.admin-layout')
 
-@section('title', 'Tambah Data Guru')
+@section('title', 'Edit Data Guru')
 
 @section('content')
     <div class="container-fluid">
@@ -8,19 +8,21 @@
             <div class="isi">
                 <!-- Header Judul -->
                 <header class="judul mb-4">
-                    <h1 class="mb-2">Tambah Data Guru</h1>
-                    <p class="text-muted">Halaman untuk menambahkan guru baru</p>
+                    <h1 class="mb-2">Edit Data Guru</h1>
+                    <p class="text-muted">Halaman untuk mengubah informasi guru</p>
                 </header>
                 <div class="data">
-                    <form action="{{ url('/guru') }}" method="POST" class="p-4 pt-1 rounded-4 bg-white shadow-sm">
+                    <form action="{{ url('guru/' . $guru->id_guru) }}" method="POST"
+                        class="p-4 pt-1 rounded-4 bg-white shadow-sm">
                         @csrf
+                        @method('PUT')
 
                         <!-- Nama Lengkap -->
                         <div class="mb-3">
                             <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
                             <input type="text" name="nama_lengkap" id="nama_lengkap"
                                 class="form-control @error('nama_lengkap') is-invalid @enderror"
-                                value="{{ old('nama_lengkap') }}" required>
+                                value="{{ old('nama_lengkap', $guru->nama_lengkap) }}" required>
                             @error('nama_lengkap')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -30,8 +32,8 @@
                         <div class="mb-3">
                             <label for="nama" class="form-label">Nama Pengguna</label>
                             <input type="text" name="nama" id="nama"
-                                class="form-control @error('nama') is-invalid @enderror" value="{{ old('nama') }}"
-                                required>
+                                class="form-control @error('nama') is-invalid @enderror"
+                                value="{{ old('nama', $guru->user->username ?? '') }}" required>
                             @error('nama')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -41,43 +43,34 @@
                         <div class="mb-3">
                             <label for="nip" class="form-label">NIP</label>
                             <input type="text" name="nip" id="nip"
-                                class="form-control @error('nip') is-invalid @enderror" value="{{ old('nip') }}">
+                                class="form-control @error('nip') is-invalid @enderror"
+                                value="{{ old('nip', $guru->nip) }}">
                             @error('nip')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <!-- Password -->
+                        <!-- Email -->
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" id="password"
-                                class="form-control @error('password') is-invalid @enderror" required>
-                            @error('password')
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" name="email" id="email"
+                                class="form-control @error('email') is-invalid @enderror"
+                                value="{{ old('email', $guru->user->email ?? '') }}">
+                            @error('email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-
-                        <!-- Konfirmasi Password -->
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation"
-                                class="form-control @error('password_confirmation') is-invalid @enderror" required>
-                            @error('password_confirmation')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
 
                         <!-- Nomor Telepon -->
                         <div class="mb-3">
                             <label for="nomor_telepon" class="form-label">Nomor Telepon</label>
                             <input type="text" name="nomor_telepon" id="nomor_telepon"
                                 class="form-control @error('nomor_telepon') is-invalid @enderror"
-                                value="{{ old('nomor_telepon') }}">
+                                value="{{ old('nomor_telepon', $guru->user->nomor_telepon ?? '') }}">
                             @error('nomor_telepon')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>                      
+                        </div>
 
                         <!-- Tombol Aksi -->
                         <div class="d-flex justify-content-between">

@@ -2,34 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\Kelas;
 use App\Models\OrangTua;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class OrangTuaController extends Controller
 {
     public function index()
     {
-        $orangTua = OrangTua::with('user')->get();
-        
-        return response()->json([
-            'success' => true,
-            'data' => $orangTua,
-        ], 200);
+        $kelasList = Kelas::withCount('siswa')->with('guru')->get();
+
+        return view('admin.pages.orang_tua.data-orang-tua', compact('kelasList'));
+    }
+
+    public function showByKelas($id_kelas)
+    {
+        $kelas = Kelas::with(['guru', 'siswa.orangtua'])->findOrFail($id_kelas);
+
+        return view('admin.pages.orang_tua.detail-orang-tua', compact('kelas'));
     }
 
     public function show($id)
     {
         $orangTua = OrangTua::with(['user', 'siswa'])->find($id);
-        
+
         if (!$orangTua) {
             return response()->json([
                 'success' => false,
                 'message' => 'Orang tua tidak ditemukan',
             ], 404);
         }
-        
+
         return response()->json([
             'success' => true,
             'data' => $orangTua,
@@ -54,7 +59,7 @@ class OrangTuaController extends Controller
         }
 
         $orangTua = OrangTua::create($request->all());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Orang tua berhasil ditambahkan',
@@ -65,14 +70,14 @@ class OrangTuaController extends Controller
     public function update(Request $request, $id)
     {
         $orangTua = OrangTua::find($id);
-        
+
         if (!$orangTua) {
             return response()->json([
                 'success' => false,
                 'message' => 'Orang tua tidak ditemukan',
             ], 404);
         }
-        
+
         $validator = Validator::make($request->all(), [
             'id_user' => 'exists:users,id_user',
             'nama_lengkap' => 'string|max:255',
@@ -89,7 +94,7 @@ class OrangTuaController extends Controller
         }
 
         $orangTua->update($request->all());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Orang tua berhasil diperbarui',
@@ -100,16 +105,16 @@ class OrangTuaController extends Controller
     public function destroy($id)
     {
         $orangTua = OrangTua::find($id);
-        
+
         if (!$orangTua) {
             return response()->json([
                 'success' => false,
                 'message' => 'Orang tua tidak ditemukan',
             ], 404);
         }
-        
+
         $orangTua->delete();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Orang tua berhasil dihapus',

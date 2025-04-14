@@ -24,12 +24,12 @@ Route::post('/login', [AuthController::class, 'processLogin']);
 
 // Protected Routes - pakai middleware auth (session)
 Route::middleware('auth')->group(function () {
-    
+
     // Dashboard
     Route::get('/admin/beranda', [DashboardController::class, 'index'])->name('admin.beranda');
-    
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // Profile
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
 
@@ -46,6 +46,9 @@ Route::middleware('auth')->group(function () {
 
     // Orang Tua
     Route::resource('orang-tua', OrangTuaController::class);
+
+    // Halaman detail berdasarkan kelas yang dipilih
+    Route::get('/orang-tua/kelas/{id_kelas}', [OrangTuaController::class, 'showByKelas'])->name('orangtua.kelas');
 
     // Kelas
     Route::resource('kelas', KelasController::class);

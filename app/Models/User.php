@@ -13,8 +13,7 @@ class User extends Authenticatable
     public $timestamps = false; // Karena menggunakan field timestamp kustom
 
     protected $fillable = [
-        'nama',
-        'email',
+        'username',        
         'password',
         'id_role',
         'nomor_telepon',
@@ -57,7 +56,7 @@ class User extends Authenticatable
 
     public function jadwalPelajaran()
     {
-        return $this->hasMany(JadwalPelajaran::class, 'id_user');
+        return $this->hasMany(Jadwal::class, 'id_user');
     }
 
     public function absensi()

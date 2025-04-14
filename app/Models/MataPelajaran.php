@@ -11,24 +11,22 @@ class MataPelajaran extends Model
 
     protected $table = 'mata_pelajaran';
     protected $primaryKey = 'id_mata_pelajaran';
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
-        'nama_mata_pelajaran',
-        'deskripsi_mata_pelajaran',
-        'id_user',
+        'nama',
+        'kode',
+        'deskripsi',
     ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'id_user');
-    }
 
     public function guru()
     {
-        return $this->hasMany(Guru::class, 'id_mata_pelajaran');
+        return $this->belongsToMany(Guru::class, 'guru_mata_pelajaran', 'id_mata_pelajaran', 'id_guru')
+            ->using(GuruMataPelajaran::class)
+            ->withPivot('dibuat_pada', 'dibuat_oleh', 'diperbarui_pada', 'diperbarui_oleh');
     }
 
+    // Relasi ke jadwal pelajaran (jika ada foreign key)
     public function jadwalPelajaran()
     {
         return $this->hasMany(Jadwal::class, 'mata_pelajaran_id');

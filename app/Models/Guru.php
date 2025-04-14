@@ -15,12 +15,14 @@ class Guru extends Model
 
     protected $fillable = [
         'nip',
-        'nama',
-        'alamat',
-        'jenis_kelamin',
-        'foto_profil',
-        'id_user',
-        'id_mata_pelajaran',
+        'nama_lengkap',
+        'foto_profil', // Pastikan kolom ini sesuai dengan yang ada di migrasi Anda
+        'id_user', // Pastikan id_user digunakan di tabel guru
+        // 'bidang_studi', // Kolom bidang_studi di migrasi
+        'dibuat_pada',
+        // 'dibuat_oleh',
+        'diperbarui_pada',
+        'diperbarui_oleh'
     ];
 
     public function user()
@@ -30,21 +32,23 @@ class Guru extends Model
 
     public function mataPelajaran()
     {
-        return $this->belongsTo(MataPelajaran::class, 'id_mata_pelajaran');
+        return $this->belongsToMany(MataPelajaran::class, 'guru_mata_pelajaran', 'id_guru', 'id_mata_pelajaran')
+            ->withPivot('dibuat_pada', 'dibuat_oleh', 'diperbarui_pada', 'diperbarui_oleh');
     }
+    // App\Models\Guru.php
 
-    public function jadwalPelajaran()
+    public function jadwal()
     {
-        return $this->hasMany(Jadwal::class, 'guru_id');
+        return $this->hasMany(Jadwal::class, 'id_guru')->with(['kelas', 'mataPelajaran']);
     }
 
     public function suratIzin()
     {
         return $this->hasMany(SuratIzin::class, 'id_guru');
     }
-    
+
     public function kelas()
     {
-        return $this->hasOne(Kelas::class, 'id_guru_wali', 'id_guru');
+        return $this->hasOne(Kelas::class, 'id_guru', 'id_guru');
     }
 }

@@ -16,25 +16,25 @@ class DashboardController extends Controller
         $jumlahGuru = Guru::count();
         $jumlahSiswa = Siswa::count();
         $jumlahKelas = Kelas::count();
+        $detailKelas = Kelas::with('guru')->get();
 
         $totalHadir = Absensi::where('status', 'hadir')->count();
         $totalAlpa = Absensi::where('status', 'alpa')->count();
         $totalSakit = Absensi::where('status', 'sakit')->count();
         $totalIzin = Absensi::where('status', 'izin')->count();
 
-        $guru = Guru::with('mataPelajaran')->get();
-        $kelas = Kelas::with('guruWali')->get();
+        $guru = Guru::with('mataPelajaran')->get();        
 
         // Ganti jadi minggu ini
         $startOfWeek = Carbon::now()->startOfWeek(Carbon::MONDAY)->toDateString(); // mulai hari Senin
         $endOfWeek = Carbon::now()->endOfWeek(Carbon::SUNDAY)->toDateString();     // sampai Minggu
 
         $absensiPerHari = Absensi::selectRaw("
-            DATE(tanggal) as tanggal,
-            SUM(CASE WHEN status = 'hadir' THEN 1 ELSE 0 END) as hadir,
-            SUM(CASE WHEN status = 'alpa' THEN 1 ELSE 0 END) as alpa,
-            SUM(CASE WHEN status = 'sakit' THEN 1 ELSE 0 END) as sakit,
-            SUM(CASE WHEN status = 'izin' THEN 1 ELSE 0 END) as izin")
+        DATE(tanggal) as tanggal,
+        SUM(CASE WHEN status = 'hadir' THEN 1 ELSE 0 END) as hadir,
+        SUM(CASE WHEN status = 'alpa' THEN 1 ELSE 0 END) as alpa,
+        SUM(CASE WHEN status = 'sakit' THEN 1 ELSE 0 END) as sakit,
+        SUM(CASE WHEN status = 'izin' THEN 1 ELSE 0 END) as izin")
             ->whereBetween('tanggal', [$startOfWeek, $endOfWeek])
             ->groupBy('tanggal')
             ->orderBy('tanggal', 'asc')
@@ -53,8 +53,7 @@ class DashboardController extends Controller
         SUM(CASE WHEN absensi.status = 'hadir' THEN 1 ELSE 0 END) as hadir,
         SUM(CASE WHEN absensi.status = 'alpa' THEN 1 ELSE 0 END) as alpa,
         SUM(CASE WHEN absensi.status = 'sakit' THEN 1 ELSE 0 END) as sakit,
-        SUM(CASE WHEN absensi.status = 'izin' THEN 1 ELSE 0 END) as izin
-    ")
+        SUM(CASE WHEN absensi.status = 'izin' THEN 1 ELSE 0 END) as izin")
             ->join('jadwal', 'absensi.id_jadwal', '=', 'jadwal.id_jadwal')
             ->join('kelas', 'jadwal.id_kelas', '=', 'kelas.id_kelas')
             ->whereBetween('absensi.tanggal', [$startOfWeek, $endOfWeek])
@@ -72,10 +71,10 @@ class DashboardController extends Controller
             'totalSakit',
             'totalIzin',
             'guru',
-            'kelas',
+            'detailKelas',
             'absensiPerHari',
             'totalMingguIni',
-            'absensiPerKelasMingguIni'
+            'absensiPerKelasMingguIni',
         ));
     }
 }

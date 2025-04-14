@@ -11,7 +11,7 @@ class Jadwal extends Model
 
     protected $table = 'jadwal';
     protected $primaryKey = 'id_jadwal';
-    
+
     protected $fillable = [
         'id_kelas',
         'id_mata_pelajaran',
@@ -42,7 +42,7 @@ class Jadwal extends Model
     // Relasi ke Guru
     public function guru()
     {
-        return $this->belongsTo(Guru::class, 'id_guru');
+        return $this->belongsTo(Guru::class, 'id_guru', 'id_guru');
     }
 
     // Relasi ke Absensi

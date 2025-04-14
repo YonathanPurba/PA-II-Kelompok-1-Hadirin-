@@ -12,14 +12,21 @@ body {
   overflow: hidden;
 }
 
-.container {
-  display: grid;
-  grid-template-columns: calc(100%-300px) auto;
-  height: 100vh;
+.container-fluid {
+  width: 100vh;
+
+  padding: 0% !important;
+  margin: 0% !important;
 }
 
 .content {
-  width: 100%;
+  margin-left: 320px;
+  transition: margin-left 0.4s ease;
+}
+
+.main-content {
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .sidebar {
@@ -29,15 +36,6 @@ body {
   transition: all 0.4s ease;
   overflow: hidden;
   position: fixed;
-}
-
-.main-content {
-  margin-left: 300px;
-  padding: 20px;
-  flex-grow: 1;
-  height: 100vh;
-  overflow-y: auto;
-  width: 100%;
 }
 
 .sidebar-header {
@@ -103,7 +101,12 @@ body {
 }
 
 .sidebar.collapsed .sidebar-header .toggler {
-  transform: translate(-8px);
+  transform: none;
+  position: absolute;
+  right: 20px;
+  top: 25px;
+  z-index: 100;
+  /* pastikan tampil di atas elemen lain */
 }
 
 .sidebar-header .toggler:hover {
@@ -167,9 +170,16 @@ body {
   pointer-events: none;
 }
 
-.sidebar-nav .nav-link:hover {
+.sidebar-nav .nav-link:hover,
+.sidebar-nav .nav-link.active {
   color: #151A2D;
   background: #fff;
+}
+
+/* Optional tambahan untuk memberikan kesan visual yang kuat pada active */
+.sidebar-nav .nav-link.active {
+  font-weight: bold;
+  border-left: 4px solid #1E5631;
 }
 
 .sidebar-nav .nav-item {
@@ -207,4 +217,185 @@ body {
   position: absolute;
   bottom: 30px;
   width: 100%;
+}
+
+/* Saat sidebar di-collapse */
+.sidebar.collapsed~.content {
+  margin-left: 90px;
+  /* lebar sidebar setelah collapsed */
+}
+
+.judul {
+  background: #f1f1f1;
+  width: 100%;
+  top: 0;
+  padding: 20px 20px;
+  position: fixed;
+  height: 120px;
+}
+
+.judul h1 {
+  color: #174D38;
+}
+
+.judul p {
+  color: #9898A3;
+}
+
+.data {
+  width: 100%;
+  margin-top: 140px;
+  background-color: #fff;
+  padding: 10px 20px;
+}
+
+.header-data {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-data button {
+  width: 180px;
+  height: 40px;
+  background-color: #174D38;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.header-data button a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.search {
+  background-color: #CBD2DC;
+  padding: 20px;
+  margin-top: 15px;
+  border-radius: 8px;
+  display: flex;
+  text-align: center;
+  justify-content: space-between;
+}
+
+.search input {
+  width: 500px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  text-indent: 10px;
+}
+
+.search button {
+  width: 120px;
+  height: 30px;
+  border: 1px solid #CBD2DC;
+  border-radius: 8px;
+  color: #280559;
+}
+
+.card {
+  width: 120px;
+  height: 120px;
+  margin: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.5;
+  position: static !important;
+}
+
+.isi-data {
+  display: flex;
+  justify-content: space-around;
+}
+
+.data-guru-baru, .username-pw-baru {
+  display: flex;
+  margin-top: 20px;
+}
+
+.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.data-guru-baru input, textarea {
+  margin-left: 30px;
+  width: 50%;
+}
+
+.data-guru-baru label {
+  width: 150px;
+  margin-right: 20px;
+  text-align: start;
+}
+
+.username-pw-baru label {
+  width: 150px;
+  margin-right: 20px;
+  text-align: start;
+}
+
+.data-guru-baru label::after {
+  margin-left: 10px;
+}
+
+.username-pw-baru label {
+  width: 150px;
+  margin-right: 20px;
+  text-align: start;
+}
+
+.username-pw-baru input {
+  width: 50%;
+  margin-left: 30px;
+}
+
+.daftar-kelas {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.daftar-kelas a {
+  text-decoration: none;
+  color: #174D38;
+}
+
+.tabel-orang-tua {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabel {
+  width: 80%;
+  border: none;
+}
+
+.pilihan th {
+  font-weight: normal;
+}
+
+.tabel tr, .tabel td, .tabel th {
+  padding: 10px;
+  border: none;
+}
+
+input[type="checkbox"] {
+  transform: scale(1.5);
+}
+
+/* beranda */
+canvas#barChartAbsensiBulan {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
 }
