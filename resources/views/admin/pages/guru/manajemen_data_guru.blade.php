@@ -7,10 +7,10 @@
         <main class="main-content">
             <div class="isi">
                 <!-- Header Judul -->
-                <header class="judul mb-4">
-                    <h1 class="mb-2">Manajemen Data Guru</h1>
-                    <p class="text-muted">Staff dapat menambah, melihat, dan mengubah data guru</p>
-                </header>
+                <header class="judul">
+                    <h1 class="mb-3">Manajemen Data Guru</h1>
+                    <p class="mb-4">Staff dapat menambah, melihat, dan mengubah data guru</p>
+                </header>            
 
                 <!-- Data Guru -->
                 <div class="data">

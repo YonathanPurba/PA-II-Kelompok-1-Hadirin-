@@ -144,6 +144,15 @@ $(document).ready(function () {
     });
 });
 
+$(document).ready(function () {
+    $('#orangtuaTable').DataTable({
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+        }
+    });
+});
+
 // Tooltip
 document.addEventListener('DOMContentLoaded', function () {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -151,6 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
 });
+
 $(document).ready(function () {
     $('.btn-view-guru').on('click', function () {
         const idGuru = $(this).data('id');
@@ -210,6 +220,31 @@ $(document).ready(function () {
                 $('#table-jadwal-body').html('<tr><td colspan="5" class="text-center text-danger">Gagal memuat jadwal.</td></tr>');
                 $('#modalViewGuru').modal('show');
             }
+        });
+    });
+});
+
+// Modal Orang Tua 
+document.addEventListener('DOMContentLoaded', function () {
+    // Ambil semua tombol "Lihat"
+    const viewButtons = document.querySelectorAll('.btn-view-orangtua');
+
+    // Setiap kali tombol "Lihat" diklik
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Ambil data dari data-attributes
+            const nama = this.getAttribute('data-nama');
+            const alamat = this.getAttribute('data-alamat');
+            const pekerjaan = this.getAttribute('data-pekerjaan');
+            const nomor = this.getAttribute('data-nomor');
+            const anak = this.getAttribute('data-anak');
+
+            // Isi modal dengan data
+            document.getElementById('modal-nama').textContent = nama;
+            document.getElementById('modal-alamat').textContent = alamat;
+            document.getElementById('modal-pekerjaan').textContent = pekerjaan;
+            document.getElementById('modal-nomor').textContent = nomor;
+            document.getElementById('modal-anak').innerHTML = anak.split(', ').map(anak => `<li>${anak}</li>`).join('');
         });
     });
 });

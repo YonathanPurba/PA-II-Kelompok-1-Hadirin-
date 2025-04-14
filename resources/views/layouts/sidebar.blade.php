@@ -56,7 +56,7 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ url('/admin/siswa/manajemen_data_siswa') }}"
+                <a href="{{ url('/siswa') }}"
                     class="nav-link {{ Request::is('admin/siswa*') || Request::is('siswa*') ? 'active' : '' }}">
                     <span class="nav-icon material-symbols-rounded">manage_accounts</span>
                     <span class="nav-label">Manajemen Data Siswa</span>

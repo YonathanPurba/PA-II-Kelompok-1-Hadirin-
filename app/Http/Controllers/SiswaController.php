@@ -2,34 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\Kelas;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class SiswaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $siswa = Siswa::with(['user', 'kelas', 'orangTua'])->get();
-        
-        return response()->json([
-            'success' => true,
-            'data' => $siswa,
-        ], 200);
+        // Ambil semua data kelas untuk dropdown filter
+        $kelasList = Kelas::all();
+
+        // Cek apakah ada filter kelas
+        $idKelas = $request->input('kelas');
+
+        // Ambil data siswa sesuai filter (jika ada)
+        $siswaList = Siswa::with('kelas')
+            ->when($idKelas, function ($query) use ($idKelas) {
+                return $query->where('id_kelas', $idKelas);
+            })
+            ->get();
+
+        // Kirim data ke view
+        return view('admin.pages.siswa.manajemen_data_siswa', compact('siswaList', 'kelasList'));
     }
 
     public function show($id)
     {
         $siswa = Siswa::with(['user', 'kelas', 'orangTua', 'absensi'])->find($id);
-        
+
         if (!$siswa) {
             return response()->json([
                 'success' => false,
                 'message' => 'Siswa tidak ditemukan',
             ], 404);
         }
-        
+
         return response()->json([
             'success' => true,
             'data' => $siswa,
@@ -56,7 +66,7 @@ class SiswaController extends Controller
         }
 
         $siswa = Siswa::create($request->all());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Siswa berhasil ditambahkan',
@@ -67,14 +77,14 @@ class SiswaController extends Controller
     public function update(Request $request, $id)
     {
         $siswa = Siswa::find($id);
-        
+
         if (!$siswa) {
             return response()->json([
                 'success' => false,
                 'message' => 'Siswa tidak ditemukan',
             ], 404);
         }
-        
+
         $validator = Validator::make($request->all(), [
             'nama_lengkap' => 'string|max:255',
             'nisn' => 'string|max:10|unique:siswa,nisn,' . $id . ',id_siswa',
@@ -93,7 +103,7 @@ class SiswaController extends Controller
         }
 
         $siswa->update($request->all());
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Siswa berhasil diperbarui',
@@ -104,16 +114,16 @@ class SiswaController extends Controller
     public function destroy($id)
     {
         $siswa = Siswa::find($id);
-        
+
         if (!$siswa) {
             return response()->json([
                 'success' => false,
                 'message' => 'Siswa tidak ditemukan',
             ], 404);
         }
-        
+
         $siswa->delete();
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Siswa berhasil dihapus',
@@ -125,7 +135,7 @@ class SiswaController extends Controller
         $siswa = Siswa::with(['user', 'orangTua'])
             ->where('kelas_id', $kelasId)
             ->get();
-        
+
         return response()->json([
             'success' => true,
             'data' => $siswa,
@@ -137,7 +147,7 @@ class SiswaController extends Controller
         $siswa = Siswa::with(['kelas'])
             ->where('id_orang_tua', $orangTuaId)
             ->get();
-        
+
         return response()->json([
             'success' => true,
             'data' => $siswa,

@@ -7,9 +7,9 @@
         <main class="main-content">
             <div class="isi">
                 <!-- Header Judul -->
-                <header class="judul mb-4">
-                    <h1 class="mb-2">Tambah Data Guru</h1>
-                    <p class="text-muted">Halaman untuk menambahkan guru baru</p>
+                <header class="judul">
+                    <h1 class="mb-3">Tambah Data Guru</h1>
+                    <p class="mb-4">Halaman untuk menambahkan guru baru</p>
                 </header>
                 <div class="data">
                     <form action="{{ url('/guru') }}" method="POST" class="p-4 pt-1 rounded-4 bg-white shadow-sm">
