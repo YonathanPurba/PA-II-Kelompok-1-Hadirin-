@@ -15,6 +15,7 @@ class GuruSeeder extends Seeder
                 'id_user' => 2,
                 'nama_lengkap' => 'Budi Santoso', // ✅ Tambahkan nama_lengkap
                 'nip' => '1987654321',
+                'nomor_telepon' => '1987654321',
                 'bidang_studi' => 'Matematika',
                 'dibuat_pada' => now(),
                 'dibuat_oleh' => 'Seeder',
@@ -25,6 +26,7 @@ class GuruSeeder extends Seeder
                 'id_user' => 3,
                 'nama_lengkap' => 'Siti Aminah', // ✅ Tambahkan nama_lengkap
                 'nip' => '1987654322',
+                'nomor_telepon' => '1987654321',
                 'bidang_studi' => 'Bahasa Indonesia',
                 'dibuat_pada' => now(),
                 'dibuat_oleh' => 'Seeder',
