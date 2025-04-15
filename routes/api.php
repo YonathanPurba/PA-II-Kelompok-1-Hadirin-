@@ -30,12 +30,14 @@ Route::post("/register", [RegisterTest::class, "register"]);
 // Login
 Route::post('/login', [AuthController::class, 'login']);
 
+
 // Protected routes - menggunakan middleware 
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     // Akun Siapa yang sedang login
-    Route::get('/me', [AuthController::class, 'me']);    
+    Route::get('/me', [AuthController::class, 'me']);
+    
 
     // Absensi
     Route::prefix('absensi')->group(function () {

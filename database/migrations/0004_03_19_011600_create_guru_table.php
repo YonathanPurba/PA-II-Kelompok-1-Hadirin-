@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('guru', function (Blueprint $table) {
             $table->id('id_guru');
             $table->foreignId('id_user')->constrained('users', 'id_user')->onDelete('cascade');
-            $table->string('nama_lengkap'); // ✅ Tambahkan ini
+            $table->string('nama_lengkap');
             $table->string('nip')->unique()->nullable();
+            $table->string(column: 'nomor_telepon')->nullable();
             $table->string('bidang_studi')->nullable();
             $table->timestamp('dibuat_pada')->nullable();
             $table->string('dibuat_oleh')->nullable();
