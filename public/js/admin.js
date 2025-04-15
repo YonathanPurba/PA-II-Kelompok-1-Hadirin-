@@ -85,49 +85,50 @@ if (barCanvas) {
     });
 }
 
-$(document).ready(function () {
-    $('#guruTable').DataTable({
-        paging: true,
-        searching: true,
-        ordering: true,
-        responsive: true,
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ entri",
-            info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
-            infoEmpty: "Tidak ada data tersedia",
-            zeroRecords: "Tidak ditemukan data yang cocok",
-            paginate: {
-                previous: "Sebelumnya",
-                next: "Berikutnya"
-            }
-        }
-    });
-});
-
-$(document).ready(function () {
-    $('#kelasTable').DataTable({
-        paging: true,
-        searching: true,
-        ordering: true,
-        responsive: true,
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ entri",
-            info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
-            infoEmpty: "Tidak ada data tersedia",
-            zeroRecords: "Tidak ditemukan data yang cocok",
-            paginate: {
-                previous: "Sebelumnya",
-                next: "Berikutnya"
-            }
-        }
-    });
-});
+// $(document).ready(function () {
+//     $('#guruTable').DataTable({
+//         paging: true,
+//         searching: true,
+//         ordering: true,
+//         responsive: true,
+//         language: {
+//             search: "Cari:",
+//             lengthMenu: "Tampilkan _MENU_ entri",
+//             info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
+//             infoEmpty: "Tidak ada data tersedia",
+//             zeroRecords: "Tidak ditemukan data yang cocok",
+//             paginate: {
+//                 previous: "Sebelumnya",
+//                 next: "Berikutnya"
+//             }
+//         }
+//     });
+// });
 
 
+// $(document).ready(function () {
+//     $('#kelasTable').DataTable({
+//         paging: true,
+//         searching: true,
+//         ordering: true,
+//         responsive: true,
+//         language: {
+//             search: "Cari:",
+//             lengthMenu: "Tampilkan _MENU_ entri",
+//             info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
+//             infoEmpty: "Tidak ada data tersedia",
+//             zeroRecords: "Tidak ditemukan data yang cocok",
+//             paginate: {
+//                 previous: "Sebelumnya",
+//                 next: "Berikutnya"
+//             }
+//         }
+//     });
+// });
+
+// Data Table 
 $(document).ready(function () {
-    $('#tabel-guru').DataTable({
+    $('#siswaTable, #guruTable, #orangtuaTable').DataTable({
         language: {
             search: "Cari:",
             lengthMenu: "Tampilkan _MENU_ entri",
@@ -144,14 +145,25 @@ $(document).ready(function () {
     });
 });
 
-$(document).ready(function () {
-    $('#orangtuaTable').DataTable({
-        responsive: true,
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
-        }
-    });
-});
+// $(document).ready(function () {
+//     $('#orangtuaTable').DataTable({
+//         paging: true,
+//         searching: true,
+//         ordering: true,
+//         responsive: true,
+//         language: {
+//             search: "Cari:",
+//             lengthMenu: "Tampilkan _MENU_ entri",
+//             info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
+//             infoEmpty: "Tidak ada data tersedia",
+//             zeroRecords: "Tidak ditemukan data yang cocok",
+//             paginate: {
+//                 previous: "Sebelumnya",
+//                 next: "Berikutnya"
+//             }
+//         }
+//     });
+// });
 
 // Tooltip
 document.addEventListener('DOMContentLoaded', function () {
@@ -246,5 +258,19 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-nomor').textContent = nomor;
             document.getElementById('modal-anak').innerHTML = anak.split(', ').map(anak => `<li>${anak}</li>`).join('');
         });
-    });
+    }); 
+});
+
+// Modal Siswa
+$(document).on('click', '.btn-view-siswa', function () {
+    const siswa = $(this).data('siswa');
+
+    $('#viewNama').text(siswa.nama ?? '-');
+    $('#viewGender').text(siswa.jenis_kelamin ?? '-');
+    $('#viewNisn').text(siswa.nis ?? '-');
+    $('#viewAlamat').text(siswa.alamat ?? '-');
+
+    // Jika relasi kelas kosong, hindari error
+    const namaKelas = siswa.kelas && siswa.kelas.nama_kelas ? siswa.kelas.nama_kelas : '-';
+    $('#viewKelas').text(namaKelas);
 });

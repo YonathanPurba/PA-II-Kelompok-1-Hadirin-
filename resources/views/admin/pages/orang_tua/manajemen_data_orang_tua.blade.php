@@ -8,8 +8,8 @@
             <div class="isi">
                 <!-- Header Judul -->
                 <header class="judul">
-                    <h1 class="mb-3">Data Orang Tua</h1>
-                    <p class="mb-4">Pilih kelas untuk memfilter data orang tua berdasarkan kelas anak mereka</p>
+                    <h1 class="mb-3">Manajemen Data Orang Tua</h1>
+                    <p class="mb-2">Pilih kelas untuk memfilter data orang tua berdasarkan kelas anak mereka</p>
                 </header>
                 <div class="data">
                     <!-- Filter Kelas -->
@@ -35,8 +35,6 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Orang Tua</th>
-                                    <th>Alamat</th>
-                                    <th>Pekerjaan</th>
                                     <th>Nama Anak</th>
                                     <th class="text-center">Aksi</th>
                                 </tr>
@@ -46,8 +44,6 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $orangTua->nama_lengkap }}</td>
-                                        <td>{{ $orangTua->alamat }}</td>
-                                        <td>{{ $orangTua->pekerjaan }}</td>
                                         <td>
                                             <ul class="mb-0 ps-3">
                                                 @foreach ($orangTua->siswa as $anak)
@@ -66,12 +62,12 @@
                                                     data-anak="{{ $orangTua->siswa->pluck('nama')->join(', ') }}"
                                                     data-bs-toggle="modal" data-bs-target="#modalViewOrangtua"
                                                     title="Lihat">
-                                                    <i class="bi bi-eye-fill"></i>
+                                                    <i class="bi bi-eye-fill fs-5"></i>
                                                 </a>
 
                                                 <a href="{{ route('orang-tua.edit', $orangTua->id_orangtua) }}"
                                                     class="text-warning" title="Edit">
-                                                    <i class="bi bi-pencil-square"></i>
+                                                    <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
                                             </div>
                                         </td>
@@ -88,36 +84,47 @@
             </div>
         </main>
     </div>
-
+    <!-- Modal View Orang Tua -->
     <div class="modal fade" id="modalViewOrangtua" tabindex="-1" aria-labelledby="modalViewOrangtuaLabel"
         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-success text-white">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header bg-success text-white rounded-top-4">
                     <h5 class="modal-title" id="modalViewOrangtuaLabel">Detail Orang Tua</h5>
-                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Tutup"></button>
                 </div>
-                <div class="modal-body">
-                    <dl class="row mb-4">
-                        <dt class="col-sm-4">Nama Lengkap</dt>
-                        <dd class="col-sm-8" id="modal-nama">-</dd>
+                <div class="modal-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Nama Lengkap:</strong>
+                            <p id="modal-nama" class="mb-2">-</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Pekerjaan:</strong>
+                            <p id="modal-pekerjaan" class="mb-2">-</p>
+                        </div>
+                    </div>
 
-                        <dt class="col-sm-4">Alamat</dt>
-                        <dd class="col-sm-8" id="modal-alamat">-</dd>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Nomor Telepon:</strong>
+                            <p id="modal-nomor" class="mb-2">-</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Alamat:</strong>
+                            <p id="modal-alamat" class="mb-2">-</p>
+                        </div>
+                    </div>
 
-                        <dt class="col-sm-4">Pekerjaan</dt>
-                        <dd class="col-sm-8" id="modal-pekerjaan">-</dd>
-
-                        <dt class="col-sm-4">Nomor Telepon</dt>
-                        <dd class="col-sm-8" id="modal-nomor">-</dd>
-
-                        <dt class="col-sm-4">Anak</dt>
-                        <dd class="col-sm-8">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Anak:</strong>
                             <ul id="modal-anak" class="mb-0 ps-3">
                                 <!-- Anak-anak akan diisi via JS -->
                             </ul>
-                        </dd>
-                    </dl>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -125,6 +132,5 @@
             </div>
         </div>
     </div>
-
 
 @endsection

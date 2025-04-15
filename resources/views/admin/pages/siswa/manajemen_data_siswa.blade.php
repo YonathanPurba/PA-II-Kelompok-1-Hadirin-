@@ -8,15 +8,16 @@
             <div class="isi">
                 <!-- Header Judul -->
                 <header class="judul">
-                    <h1 class="mb-3">Data Siswa</h1>
-                    <p class="mb-4">Pilih kelas untuk memfilter data siswa berdasarkan kelas</p>
+                    <h1 class="mb-3">Manajemen Data Siswa</h1>
+                    <p class="mb-2">Pilih kelas untuk memfilter data siswa berdasarkan kelas</p>
                 </header>
 
                 <div class="data">
-                    <!-- Filter Kelas -->
-                    <div class="mb-4">
+
+                    <!-- Filter & Export Bar -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-2">
-                            <label for="kelas" class="me-2">Filter Kelas:</label>
+                            <label for="kelas" class="me-2 mb-0">Filter Kelas:</label>
                             <select name="kelas" id="kelas" class="form-select w-auto" onchange="this.form.submit()">
                                 <option value="">Semua Kelas</option>
                                 @foreach ($kelasList as $kelas)
@@ -27,7 +28,19 @@
                                 @endforeach
                             </select>
                         </form>
+
+                        <div>
+                            <a href="{{ route('siswa.export.pdf', ['kelas' => request('kelas')]) }}"
+                                class="btn btn-danger me-2">
+                                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export PDF
+                            </a>
+                            <a href="{{ route('siswa.export.excel', ['kelas' => request('kelas')]) }}"
+                                class="btn btn-success">
+                                <i class="bi bi-file-earmark-excel-fill me-1"></i> Export Excel
+                            </a>
+                        </div>
                     </div>
+
 
                     <!-- Tabel Siswa -->
                     <div class="table-responsive">
@@ -37,8 +50,6 @@
                                     <th>No</th>
                                     <th>Nama Siswa</th>
                                     <th>Jenis Kelamin</th>
-                                    <th>Kelas</th>
-                                    <th>Tempat Tanggal Lahir</th>
                                     <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -46,35 +57,35 @@
                                 @forelse ($siswaList as $index => $siswa)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td>{{ $siswa->nama }}</td>
-                                        <td>{{ $siswa->jenis_kelamin }}</td>
-                                        <td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
-                                        <td>{{ $siswa->tempat_lahir }}, {{ \Carbon\Carbon::parse($siswa->tanggal_lahir)->translatedFormat('d F Y') }}</td>
+                                        <td>{{ $siswa->nama ?? '-' }}</td>
+                                        <td>{{ $siswa->jenis_kelamin ?? '-' }}</td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-4">
-                                                <a href="{{ route('siswa.edit', $siswa->id_siswa) }}" class="text-warning" title="Edit">
-                                                    <i class="bi bi-pencil-square fs-5"></i>
+                                                {{-- Tombol View --}}
+                                                <a href="javascript:void(0);" class="text-primary btn-view-siswa"
+                                                    data-siswa='@json($siswa)' data-bs-toggle="modal"
+                                                    data-bs-target="#modalViewSiswa" title="Lihat">
+                                                    <i class="bi bi-eye-fill fs-5"></i>
                                                 </a>
 
-                                                <form action="{{ route('siswa.destroy', $siswa->id_siswa) }}" method="POST"
-                                                    onsubmit="return confirm('Yakin ingin menghapus data ini?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn p-0 text-danger" title="Hapus">
-                                                        <i class="bi bi-trash3-fill fs-5"></i>
-                                                    </button>
-                                                </form>
+                                                <!-- Edit Button -->
+                                                <a href="{{ url('siswa/' . $siswa->id_siswa . '/edit') }}"
+                                                    class="text-warning" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                    title="Edit">
+                                                    <i class="bi bi-pencil-square fs-5"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">Tidak ada data siswa.</td>
+                                        <td colspan="4" class="text-center">Tidak ada data siswa.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
+
 
                     <!-- Tombol Tambah -->
                     <div class="mt-4 text-end">
@@ -86,4 +97,46 @@
             </div>
         </main>
     </div>
+
+    <!-- Modal View Siswa -->
+    <div class="modal fade" id="modalViewSiswa" tabindex="-1" aria-labelledby="modalViewSiswaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4">
+                <div class="modal-header bg-success text-white rounded-top-4">
+                    <h5 class="modal-title" id="modalViewSiswaLabel">Detail Siswa</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Nama Siswa:</strong>
+                            <p id="viewNama" class="mb-2"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Jenis Kelamin:</strong>
+                            <p id="viewGender" class="mb-2"></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>NISN:</strong>
+                            <p id="viewNisn" class="mb-2"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Kelas:</strong>
+                            <p id="viewKelas" class="mb-2"></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Alamat:</strong>
+                            <p id="viewAlamat" class="mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection

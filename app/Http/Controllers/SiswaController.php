@@ -4,12 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Models\Kelas;
 use App\Models\Siswa;
+use App\Exports\SiswaExport;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
 class SiswaController extends Controller
 {
+
+    public function exportPdf(Request $request)
+    {
+        $kelas = $request->kelas;
+        $siswaList = Siswa::when($kelas, function ($query, $kelas) {
+            return $query->where('id_kelas', $kelas);
+        })->get();
+
+        $pdf = Pdf::loadView('exports.siswa_pdf', compact('siswaList'));
+        return $pdf->download('data_siswa.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        return Excel::download(new SiswaExport($request->kelas), 'data_siswa.xlsx');
+    }
+    
     public function index(Request $request)
     {
         // Ambil semua data kelas untuk dropdown filter
@@ -46,6 +66,15 @@ class SiswaController extends Controller
         ], 200);
     }
 
+    public function create()
+    {
+        // Ambil semua data kelas
+        $kelasList = Kelas::all();
+
+        // Tampilkan view create siswa dengan data kelas
+        return view('admin.pages.siswa.tambah_siswa', compact('kelasList'));
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -72,6 +101,14 @@ class SiswaController extends Controller
             'message' => 'Siswa berhasil ditambahkan',
             'data' => $siswa,
         ], 201);
+    }
+
+    public function edit($id)
+    {
+        $siswa = Siswa::findOrFail($id);
+        $kelasList = Kelas::all();
+
+        return view('admin.pages.siswa.edit_siswa', compact('siswa', 'kelasList'));
     }
 
     public function update(Request $request, $id)

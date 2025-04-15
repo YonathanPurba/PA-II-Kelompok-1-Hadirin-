@@ -7,10 +7,16 @@
         <main class="main-content">
             <div class="isi">
                 <!-- Header Judul -->
-                <header class="judul">
-                    <h1 class="mb-3">Edit Data Guru</h1>
-                    <p class="mb-4">Halaman untuk mengubah informasi guru</p>
+                <header class="judul mb-4">
+                    <h1 class="mb-3">
+                        <a href="{{ url('/guru') }}" class="text-decoration-none text-success fw-semibold">
+                            Manajemen Data Guru
+                        </a>
+                        <span class="fs-5 text-muted">/ Edit Data Guru</span>
+                    </h1>
+                    <p class="mb-2">Halaman untuk mengubah informasi guru</p>
                 </header>
+
                 <div class="data">
                     <form action="{{ url('guru/' . $guru->id_guru) }}" method="POST"
                         class="p-4 pt-1 rounded-4 bg-white shadow-sm">

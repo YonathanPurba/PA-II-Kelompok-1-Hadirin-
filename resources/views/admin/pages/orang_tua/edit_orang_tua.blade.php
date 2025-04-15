@@ -7,10 +7,16 @@
         <main class="main-content">
             <div class="isi">
                 <!-- Header Judul -->
-                <header class="judul">
-                    <h1 class="mb-3">Edit Data Orang Tua</h1>
-                    <p class="mb-4">Halaman untuk mengubah informasi orang tua</p>
+                <header class="judul mb-4">
+                    <h1 class="mb-3">
+                        <a href="{{ url('/orang-tua') }}" class="text-decoration-none text-success fw-semibold">
+                            Manajemen Data Orang Tua
+                        </a>
+                        <span class="fs-5 text-muted">/ Edit Data Orang Tua</span>
+                    </h1>
+                    <p class="mb-2">Halaman untuk mengubah informasi orang tua</p>
                 </header>
+
                 <div class="data">
                     <form action="{{ url('orang-tua/' . $orangTua->id_orangtua) }}" method="POST"
                         class="p-4 pt-1 rounded-4 bg-white shadow-sm">
@@ -42,9 +48,7 @@
                         <!-- Alamat -->
                         <div class="mb-3">
                             <label for="alamat" class="form-label">Alamat</label>
-                            <textarea name="alamat" id="alamat"
-                                class="form-control @error('alamat') is-invalid @enderror"
-                                rows="3">{{ old('alamat', $orangTua->alamat) }}</textarea>
+                            <textarea name="alamat" id="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3">{{ old('alamat', $orangTua->alamat) }}</textarea>
                             @error('alamat')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

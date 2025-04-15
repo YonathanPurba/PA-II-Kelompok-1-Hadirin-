@@ -45,23 +45,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/siswa/kelas/{kelasId}', [SiswaController::class, 'getByKelas']);
     Route::get('/siswa/orang-tua/{orangTuaId}', [SiswaController::class, 'getByOrangTua']);
 
+    // Export Siswa
+    Route::get('/siswa/export/pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
+    Route::get('/siswa/export/excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
+
+
     // Orang Tua
     Route::resource('orang-tua', OrangTuaController::class);
-    Route::get('/orang-tua/{id}', function ($id) {
-        $orangTua = OrangTua::with(['user', 'siswa.kelas'])->findOrFail($id);
+    // Route::get('/orang-tua/{id}', function ($id) {
+    //     $orangTua = OrangTua::with(['user', 'siswa.kelas'])->findOrFail($id);
 
-        return response()->json([
-            'nama_lengkap' => $orangTua->nama_lengkap,
-            'alamat' => $orangTua->alamat,
-            'pekerjaan' => $orangTua->pekerjaan,
-            'nomor_telepon' => $orangTua->user->nomor_telepon ?? '-',
-            'email' => $orangTua->user->email ?? '-',
-            'anak' => $orangTua->siswa->map(fn($s) => [
-                'nama' => $s->nama,
-                'kelas' => $s->kelas->nama_kelas ?? '-',
-            ])
-        ]);
-    });
+    //     return response()->json([
+    //         'nama_lengkap' => $orangTua->nama_lengkap,
+    //         'alamat' => $orangTua->alamat,
+    //         'pekerjaan' => $orangTua->pekerjaan,
+    //         'nomor_telepon' => $orangTua->user->nomor_telepon ?? '-',
+    //         'email' => $orangTua->user->email ?? '-',
+    //         'anak' => $orangTua->siswa->map(fn($s) => [
+    //             'nama' => $s->nama,
+    //             'kelas' => $s->kelas->nama_kelas ?? '-',
+    //         ])
+    //     ]);
+    // });
 
     // Halaman detail berdasarkan kelas yang dipilih
     Route::get('/orang-tua/kelas/{id_kelas}', [OrangTuaController::class, 'showByKelas'])->name('orangtua.kelas');
