@@ -7,18 +7,13 @@
         <main class="main-content">
             <div class="isi">
                 <!-- Header Judul -->
-                <header class="judul mb-4">
-                    <h1 class="mb-2">Manajemen Data Guru</h1>
-                    <p class="text-muted">Staff dapat menambah, melihat, dan mengubah data guru</p>
+                <header class="judul">
+                    <h1 class="mb-3">Manajemen Data Guru</h1>
+                    <p class="mb-2">Staff dapat menambah, melihat, dan mengubah data guru</p>
                 </header>
-
-                <!-- Data Guru -->
                 <div class="data">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <a href="{{ url('guru/create') }}" class="btn btn-success">
-                            Tambah Guru
-                        </a>
-                    </div>
+                    <!-- Data Guru -->
+
 
                     <!-- Tabel Data Guru -->
                     <div class="table-responsive">
@@ -42,12 +37,12 @@
                                                 <a href="javascript:void(0);" class="text-primary btn-view-guru"
                                                     data-id="{{ $guru->id_guru }}" data-bs-toggle="modal"
                                                     data-bs-target="#modalViewGuru" title="Lihat">
-                                                    <i class="bi bi-eye-fill"></i>
+                                                    <i class="bi bi-eye-fill fs-5"></i>
                                                 </a>
 
                                                 <a href="{{ url('guru/' . $guru->id_guru . '/edit') }}" class="text-warning"
                                                     data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
-                                                    <i class="bi bi-pencil-square"></i>
+                                                    <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
                                             </div>
                                         </td>
@@ -56,6 +51,12 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <a href="{{ url('guru/create') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i>Tambah Guru
+                        </a>
                     </div>
                 </div>
             </div>

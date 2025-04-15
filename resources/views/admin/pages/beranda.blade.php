@@ -9,7 +9,7 @@
                 <!-- Judul Header -->
                 <header class="judul">
                     <h1 class="mb-3">Dashboard Admin</h1>
-                    <p class="mb-4">Selamat datang di halaman utama sistem informasi absensi</p>
+                    <p class="mb-2">Selamat datang di halaman utama sistem informasi absensi</p>
                 </header>
 
                 <div class="data">
@@ -33,7 +33,7 @@
                                 </div>
                                 <!-- View All -->
                                 <div class="d-flex justify-content-end mt-3 w-100">
-                                    <a href="#" class="fs-7 text-decoration-none text-primary">
+                                    <a href="{{ url('/guru') }}" class="fs-7 text-decoration-none text-primary">
                                         View All <i class="bi bi-arrow-right-short"></i>
                                     </a>
                                 </div>
@@ -52,7 +52,7 @@
                                 </div>
                                 <!-- Tombol View All di kanan -->
                                 <div class="d-flex justify-content-end mt-3 w-100">
-                                    <a href="#" class="fs-7 text-decoration-none text-success">
+                                    <a href="{{ url('/siswa ') }}" class="fs-7 text-decoration-none text-success">
                                         View All <i class="bi bi-arrow-right-short"></i>
                                     </a>
                                 </div>

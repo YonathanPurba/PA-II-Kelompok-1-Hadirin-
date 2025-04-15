@@ -225,13 +225,54 @@ body {
   /* lebar sidebar setelah collapsed */
 }
 
+.breadcrumb {
+  background: none;
+  font-size: 0.95rem;
+}
+
+.breadcrumb a {
+  text-decoration: none;
+}
+
 .judul {
   background: #f1f1f1;
   width: 100%;
-  top: 0;
-  padding: 20px 20px;
+  top: 0;  
+  padding: 1rem 1.25rem;
   position: fixed;
-  height: 120px;
+  height: auto;
+  z-index: 1000;
+}
+
+.judul h1 {
+  font-size: 2rem;
+}
+
+.judul p {
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .judul h1 {
+    font-size: 1.5rem;
+  }
+
+  .judul p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 650px) {
+  .judul h1 {
+    font-size: 1.25rem;
+    
+  }
+
+  .judul p {
+    font-size: 0.85rem;
+    width: 77%;
+  }
 }
 
 .judul h1 {
@@ -244,7 +285,7 @@ body {
 
 .data {
   width: 100%;
-  margin-top: 140px;
+  margin-top: 125px;
   background-color: #fff;
   padding: 10px 20px;
 }

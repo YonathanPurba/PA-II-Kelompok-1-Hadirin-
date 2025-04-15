@@ -85,49 +85,50 @@ if (barCanvas) {
     });
 }
 
-$(document).ready(function () {
-    $('#guruTable').DataTable({
-        paging: true,
-        searching: true,
-        ordering: true,
-        responsive: true,
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ entri",
-            info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
-            infoEmpty: "Tidak ada data tersedia",
-            zeroRecords: "Tidak ditemukan data yang cocok",
-            paginate: {
-                previous: "Sebelumnya",
-                next: "Berikutnya"
-            }
-        }
-    });
-});
-
-$(document).ready(function () {
-    $('#kelasTable').DataTable({
-        paging: true,
-        searching: true,
-        ordering: true,
-        responsive: true,
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ entri",
-            info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
-            infoEmpty: "Tidak ada data tersedia",
-            zeroRecords: "Tidak ditemukan data yang cocok",
-            paginate: {
-                previous: "Sebelumnya",
-                next: "Berikutnya"
-            }
-        }
-    });
-});
+// $(document).ready(function () {
+//     $('#guruTable').DataTable({
+//         paging: true,
+//         searching: true,
+//         ordering: true,
+//         responsive: true,
+//         language: {
+//             search: "Cari:",
+//             lengthMenu: "Tampilkan _MENU_ entri",
+//             info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
+//             infoEmpty: "Tidak ada data tersedia",
+//             zeroRecords: "Tidak ditemukan data yang cocok",
+//             paginate: {
+//                 previous: "Sebelumnya",
+//                 next: "Berikutnya"
+//             }
+//         }
+//     });
+// });
 
 
+// $(document).ready(function () {
+//     $('#kelasTable').DataTable({
+//         paging: true,
+//         searching: true,
+//         ordering: true,
+//         responsive: true,
+//         language: {
+//             search: "Cari:",
+//             lengthMenu: "Tampilkan _MENU_ entri",
+//             info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
+//             infoEmpty: "Tidak ada data tersedia",
+//             zeroRecords: "Tidak ditemukan data yang cocok",
+//             paginate: {
+//                 previous: "Sebelumnya",
+//                 next: "Berikutnya"
+//             }
+//         }
+//     });
+// });
+
+// Data Table 
 $(document).ready(function () {
-    $('#tabel-guru').DataTable({
+    $('#siswaTable, #guruTable, #orangtuaTable').DataTable({
         language: {
             search: "Cari:",
             lengthMenu: "Tampilkan _MENU_ entri",
@@ -144,6 +145,26 @@ $(document).ready(function () {
     });
 });
 
+// $(document).ready(function () {
+//     $('#orangtuaTable').DataTable({
+//         paging: true,
+//         searching: true,
+//         ordering: true,
+//         responsive: true,
+//         language: {
+//             search: "Cari:",
+//             lengthMenu: "Tampilkan _MENU_ entri",
+//             info: "Menampilkan _START_ - _END_ dari _TOTAL_ entri",
+//             infoEmpty: "Tidak ada data tersedia",
+//             zeroRecords: "Tidak ditemukan data yang cocok",
+//             paginate: {
+//                 previous: "Sebelumnya",
+//                 next: "Berikutnya"
+//             }
+//         }
+//     });
+// });
+
 // Tooltip
 document.addEventListener('DOMContentLoaded', function () {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -151,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
 });
+
 $(document).ready(function () {
     $('.btn-view-guru').on('click', function () {
         const idGuru = $(this).data('id');
@@ -212,4 +234,43 @@ $(document).ready(function () {
             }
         });
     });
+});
+
+// Modal Orang Tua 
+document.addEventListener('DOMContentLoaded', function () {
+    // Ambil semua tombol "Lihat"
+    const viewButtons = document.querySelectorAll('.btn-view-orangtua');
+
+    // Setiap kali tombol "Lihat" diklik
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Ambil data dari data-attributes
+            const nama = this.getAttribute('data-nama');
+            const alamat = this.getAttribute('data-alamat');
+            const pekerjaan = this.getAttribute('data-pekerjaan');
+            const nomor = this.getAttribute('data-nomor');
+            const anak = this.getAttribute('data-anak');
+
+            // Isi modal dengan data
+            document.getElementById('modal-nama').textContent = nama;
+            document.getElementById('modal-alamat').textContent = alamat;
+            document.getElementById('modal-pekerjaan').textContent = pekerjaan;
+            document.getElementById('modal-nomor').textContent = nomor;
+            document.getElementById('modal-anak').innerHTML = anak.split(', ').map(anak => `<li>${anak}</li>`).join('');
+        });
+    }); 
+});
+
+// Modal Siswa
+$(document).on('click', '.btn-view-siswa', function () {
+    const siswa = $(this).data('siswa');
+
+    $('#viewNama').text(siswa.nama ?? '-');
+    $('#viewGender').text(siswa.jenis_kelamin ?? '-');
+    $('#viewNisn').text(siswa.nis ?? '-');
+    $('#viewAlamat').text(siswa.alamat ?? '-');
+
+    // Jika relasi kelas kosong, hindari error
+    const namaKelas = siswa.kelas && siswa.kelas.nama_kelas ? siswa.kelas.nama_kelas : '-';
+    $('#viewKelas').text(namaKelas);
 });

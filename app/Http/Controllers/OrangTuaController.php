@@ -10,18 +10,28 @@ use Illuminate\Support\Facades\Validator;
 
 class OrangTuaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kelasList = Kelas::withCount('siswa')->with('guru')->get();
+        $kelasId = $request->input('kelas');
 
-        return view('admin.pages.orang_tua.data-orang-tua', compact('kelasList'));
-    }
+        $kelasList = Kelas::all();
 
-    public function showByKelas($id_kelas)
-    {
-        $kelas = Kelas::with(['guru', 'siswa.orangtua'])->findOrFail($id_kelas);
+        $orangTuaList = OrangTua::with(['siswa.kelas', 'user'])
+            ->when($kelasId, function ($query) use ($kelasId) {
+                $query->whereHas('siswa', function ($siswaQuery) use ($kelasId) {
+                    $siswaQuery->where('id_kelas', $kelasId);
+                });
+            })
+            ->get();
 
-        return view('admin.pages.orang_tua.detail-orang-tua', compact('kelas'));
+        // Jika ada filter kelas, kita filter ulang anak-anak yang bukan dari kelas itu
+        if ($kelasId) {
+            foreach ($orangTuaList as $orangTua) {
+                $orangTua->setRelation('siswa', $orangTua->siswa->where('id_kelas', $kelasId));
+            }
+        }
+
+        return view('admin.pages.orang_tua.manajemen_data_orang_tua', compact('orangTuaList', 'kelasList'));
     }
 
     public function show($id)
@@ -41,31 +51,13 @@ class OrangTuaController extends Controller
         ], 200);
     }
 
-    public function store(Request $request)
+    public function edit($id)
     {
-        $validator = Validator::make($request->all(), [
-            'id_user' => 'required|exists:users,id_user',
-            'nama_lengkap' => 'required|string|max:255',
-            'no_telepon' => 'nullable|string|max:15',
-            'alamat' => 'nullable|string',
-        ]);
+        $orangTua = OrangTua::with('user')->findOrFail($id);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $orangTua = OrangTua::create($request->all());
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Orang tua berhasil ditambahkan',
-            'data' => $orangTua,
-        ], 201);
+        return view('admin.pages.orang_tua.edit_orang_tua', compact('orangTua'));
     }
+
 
     public function update(Request $request, $id)
     {
