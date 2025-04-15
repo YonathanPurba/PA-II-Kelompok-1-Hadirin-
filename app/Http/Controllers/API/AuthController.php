@@ -1,58 +1,24 @@
 <?php
 
-namespace App\Http\API;
+namespace App\Http\Controllers\API;
 
-use App\Models\User;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Traits\ApiResponser;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    /**
-     * Register a new user.
-     */
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'username' => 'required|string|max:255|unique:users',
-            'password' => 'required|string|min:6',
-            'id_role' => 'required|exists:role,id_role',
-            'nomor_telepon' => 'nullable|string|max:15',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $user = User::create([
-            'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'id_role' => $request->id_role,
-            'nomor_telepon' => $request->nomor_telepon,
-            'dibuat_pada' => now(),
-            'dibuat_oleh' => 'API',
-        ]);
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Registrasi berhasil',
-            'data' => $user,
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ], 201);
-    }
+    use ApiResponser;
 
     /**
-     * Login user and create token.
+     * Login user and create token
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
     {
@@ -62,115 +28,124 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->errorResponse('Validation error', 422, $validator->errors());
         }
 
-        if (!Auth::attempt($request->only('username', 'password'))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Username atau password salah',
-            ], 401);
+        $user = User::where('username', $request->username)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return $this->errorResponse('Username atau password salah', 401);
         }
 
-        $user = User::where('username', $request->username)->firstOrFail();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        // Update last login
+        // Update last login time
         $user->last_login_at = now();
         $user->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Login berhasil',
-            'data' => $user,
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ], 200);
+        // Get user role
+        $role = $user->role ? $user->role->role : null;
+
+        // Create token
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Get additional user info based on role
+        $userInfo = null;
+        if ($role === 'guru') {
+            $userInfo = $user->guru()->with('mataPelajaran')->first();
+        } elseif ($role === 'orangtua') {
+            $userInfo = $user->orangtua()->with('siswa.kelas')->first();
+        } elseif ($role === 'staf') {
+            $userInfo = $user->staf;
+        }
+
+        $userData = [
+            'id_user' => $user->id_user,
+            'username' => $user->username,
+            'id_role' => $user->id_role,
+            'role' => $role,
+            'nomor_telepon' => $user->nomor_telepon,
+            'last_login_at' => $user->last_login_at,
+            'info' => $userInfo
+        ];
+
+        return $this->successResponse([
+            'user' => $userData,
+            'token' => $token
+        ], 'Login berhasil');
     }
 
     /**
-     * Logout user (revoke the token).
+     * Logout user (revoke token)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout berhasil',
-        ], 200);
+        return $this->successResponse(null, 'Logout berhasil');
     }
 
     /**
-     * Get the authenticated user.
+     * Get authenticated user info
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function profile(Request $request)
+    public function me(Request $request)
     {
         $user = $request->user();
+        $role = $user->role ? $user->role->role : null;
 
-        $data = [
-            'user' => $user,
-        ];
-
-        // Load related data based on role
-        if ($user->id_role == 2) { // Guru
-            $data['guru'] = $user->guru()->with('mataPelajaran')->first();
-        } elseif ($user->id_role == 3) { // Orang Tua
-            $data['orang_tua'] = $user->orangTua()->with('siswa')->first();
-        } elseif ($user->id_role == 1) { // Staf
-            $data['staf'] = $user->staf()->first();
+        // Get additional user info based on role
+        $userInfo = null;
+        if ($role === 'guru') {
+            $userInfo = $user->guru()->with('mataPelajaran')->first();
+        } elseif ($role === 'orangtua') {
+            $userInfo = $user->orangtua()->with('siswa.kelas')->first();
+        } elseif ($role === 'staf') {
+            $userInfo = $user->staf;
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $data,
-        ], 200);
+        $userData = [
+            'id_user' => $user->id_user,
+            'username' => $user->username,
+            'id_role' => $user->id_role,
+            'role' => $role,
+            'nomor_telepon' => $user->nomor_telepon,
+            'last_login_at' => $user->last_login_at,
+            'info' => $userInfo
+        ];
+
+        return $this->successResponse($userData, 'Data user berhasil diambil');
     }
-
+    
     /**
-     * Update user profile.
+     * Change password
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function updateProfile(Request $request)
+    public function changePassword(Request $request)
     {
-        $user = $request->user();
-
         $validator = Validator::make($request->all(), [
-            'nomor_telepon' => 'nullable|string|max:15',
-            'password' => 'nullable|string|min:6',
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->errorResponse('Validation error', 422, $validator->errors());
         }
 
-        $userData = [];
+        $user = $request->user();
 
-        if ($request->has('nomor_telepon')) {
-            $userData['nomor_telepon'] = $request->nomor_telepon;
+        if (!Hash::check($request->current_password, $user->password)) {
+            return $this->errorResponse('Password saat ini tidak sesuai', 422);
         }
 
-        if ($request->has('password')) {
-            $userData['password'] = Hash::make($request->password);
-        }
+        $user->password = Hash::make($request->new_password);
+        $user->save();
 
-        if (!empty($userData)) {
-            $userData['diperbarui_pada'] = now();
-            $userData['diperbarui_oleh'] = 'API';
-            $user->update($userData);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Profil berhasil diperbarui',
-            'data' => $user,
-        ], 200);
+        return $this->successResponse(null, 'Password berhasil diubah');
     }
 }

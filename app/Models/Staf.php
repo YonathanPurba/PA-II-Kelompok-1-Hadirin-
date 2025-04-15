@@ -1,13 +1,31 @@
-<?php 
+<?php
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Staf extends Model
 {
+    use HasFactory;
+    
     protected $table = 'staf';
     protected $primaryKey = 'id_staf';
-    public $timestamps = false;
-
-    protected $fillable = ['nama', 'jabatan', 'email', 'id_user'];
+    
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = 'diperbarui_pada';
+    
+    protected $fillable = [
+        'id_user',
+        'nama_lengkap',
+        'nip',
+        'jabatan',
+        'dibuat_oleh',
+        'diperbarui_oleh',
+    ];
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user', 'id_user');
+    }
 }

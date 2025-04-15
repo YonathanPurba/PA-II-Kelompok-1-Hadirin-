@@ -5,21 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Orangtua extends Model
+class Notifikasi extends Model
 {
     use HasFactory;
     
-    protected $table = 'orangtua';
-    protected $primaryKey = 'id_orangtua';
+    protected $table = 'notifikasi';
+    protected $primaryKey = 'id_notifikasi';
     
     const CREATED_AT = 'dibuat_pada';
     const UPDATED_AT = 'diperbarui_pada';
     
     protected $fillable = [
         'id_user',
-        'nama_lengkap',
-        'alamat',
-        'pekerjaan',
+        'judul',
+        'pesan',
+        'tipe',
+        'dibaca',
+        'waktu_dibaca',
         'dibuat_oleh',
         'diperbarui_oleh',
     ];
@@ -27,15 +29,5 @@ class Orangtua extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
-    }
-    
-    public function siswa()
-    {
-        return $this->hasMany(Siswa::class, 'id_orangtua', 'id_orangtua');
-    }
-    
-    public function suratIzin()
-    {
-        return $this->hasMany(SuratIzin::class, 'id_orangtua', 'id_orangtua');
     }
 }

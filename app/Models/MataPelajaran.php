@@ -8,27 +8,28 @@ use Illuminate\Database\Eloquent\Model;
 class MataPelajaran extends Model
 {
     use HasFactory;
-
+    
     protected $table = 'mata_pelajaran';
     protected $primaryKey = 'id_mata_pelajaran';
-    public $timestamps = true;
-
+    
     protected $fillable = [
         'nama',
         'kode',
         'deskripsi',
     ];
-
+    
     public function guru()
     {
-        return $this->belongsToMany(Guru::class, 'guru_mata_pelajaran', 'id_mata_pelajaran', 'id_guru')
-            ->using(GuruMataPelajaran::class)
-            ->withPivot('dibuat_pada', 'dibuat_oleh', 'diperbarui_pada', 'diperbarui_oleh');
+        return $this->belongsToMany(
+            Guru::class,
+            'guru_mata_pelajaran',
+            'id_mata_pelajaran',
+            'id_guru'
+        )->withPivot('id_guru_mata_pelajaran');
     }
-
-    // Relasi ke jadwal pelajaran (jika ada foreign key)
-    public function jadwalPelajaran()
+    
+    public function jadwal()
     {
-        return $this->hasMany(Jadwal::class, 'mata_pelajaran_id');
+        return $this->hasMany(Jadwal::class, 'id_mata_pelajaran', 'id_mata_pelajaran');
     }
 }

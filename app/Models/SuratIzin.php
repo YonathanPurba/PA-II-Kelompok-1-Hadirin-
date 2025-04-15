@@ -8,31 +8,33 @@ use Illuminate\Database\Eloquent\Model;
 class SuratIzin extends Model
 {
     use HasFactory;
-
+    
     protected $table = 'surat_izin';
     protected $primaryKey = 'id_surat_izin';
-    public $timestamps = false;
-
+    
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = 'diperbarui_pada';
+    
     protected $fillable = [
         'id_siswa',
-        'tanggal',
-        'isi_surat',
+        'id_orangtua',
+        'jenis',
+        'tanggal_mulai',
+        'tanggal_selesai',
+        'alasan',
+        'file_lampiran',
         'status',
-        'id_guru',
+        'dibuat_oleh',
+        'diperbarui_oleh',
     ];
-
+    
     public function siswa()
     {
-        return $this->belongsTo(Siswa::class, 'id_siswa');
+        return $this->belongsTo(Siswa::class, 'id_siswa', 'id_siswa');
     }
-
-    public function guru()
+    
+    public function orangtua()
     {
-        return $this->belongsTo(Guru::class, 'id_guru');
-    }
-
-    public function absensi()
-    {
-        return $this->hasMany(Absensi::class, 'id_surat_izin');
+        return $this->belongsTo(Orangtua::class, 'id_orangtua', 'id_orangtua');
     }
 }

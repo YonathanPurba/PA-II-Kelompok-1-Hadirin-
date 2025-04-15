@@ -2,91 +2,57 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
+    use HasApiTokens, Notifiable;
+    
+    protected $table = 'users';
     protected $primaryKey = 'id_user';
-
-    public $timestamps = false; // Karena field timestamp kustom digunakan
-
-    /**
-     * Kolom yang bisa diisi secara massal
-     *
-     * @var array
-     */
+    
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = 'diperbarui_pada';
+    
     protected $fillable = [
         'username',
         'password',
         'id_role',
         'nomor_telepon',
-        'remember_token',
-        'dibuat_pada',
+        'last_login_at',
         'dibuat_oleh',
-        'diperbarui_pada',
         'diperbarui_oleh',
     ];
-
-    /**
-     * Kolom yang disembunyikan saat serialisasi (misalnya ke JSON)
-     *
-     * @var array
-     */
+    
     protected $hidden = [
         'password',
         'remember_token',
     ];
-
-    /**
-     * Cast kolom ke tipe data tertentu
-     *
-     * @var array
-     */
-    protected $casts = [
-        'dibuat_pada' => 'datetime',
-        'diperbarui_pada' => 'datetime',
-        'password' => 'hashed', // Laravel 10+ mendukung cast hashed
-    ];
-
-    // RELASI
-
+    
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'id_role', 'id_role');
+    }
+    
     public function guru()
     {
-        return $this->hasOne(Guru::class, 'id_user');
+        return $this->hasOne(Guru::class, 'id_user', 'id_user');
     }
-
-    public function orangTua()
+    
+    public function orangtua()
     {
-        return $this->hasOne(OrangTua::class, 'id_user');
+        return $this->hasOne(Orangtua::class, 'id_user', 'id_user');
     }
-
-    public function siswa()
+    
+    public function staf()
     {
-        return $this->hasOne(Siswa::class, 'id_user');
+        return $this->hasOne(Staf::class, 'id_user', 'id_user');
     }
-
-    public function kelas()
+    
+    public function notifikasi()
     {
-        return $this->hasMany(Kelas::class, 'id_user');
-    }
-
-    public function mataPelajaran()
-    {
-        return $this->hasMany(MataPelajaran::class, 'id_user');
-    }
-
-    public function jadwalPelajaran()
-    {
-        return $this->hasMany(Jadwal::class, 'id_user');
-    }
-
-    public function absensi()
-    {
-        return $this->hasMany(Absensi::class, 'id_user');
+        return $this->hasMany(Notifikasi::class, 'id_user', 'id_user');
     }
 }
