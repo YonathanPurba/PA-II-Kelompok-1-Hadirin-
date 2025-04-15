@@ -8,39 +8,43 @@ use Illuminate\Database\Eloquent\Model;
 class Kelas extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'kelas';
     protected $primaryKey = 'id_kelas';
-    
-    const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = 'diperbarui_pada';
-    
+    public $timestamps = false;
+
     protected $fillable = [
         'nama_kelas',
         'tingkat',
         'id_guru',
         'id_tahun_ajaran',
+        'dibuat_pada',
         'dibuat_oleh',
+        'diperbarui_pada',
         'diperbarui_oleh',
     ];
-    
+
+    // Relasi ke Guru
     public function guru()
     {
         return $this->belongsTo(Guru::class, 'id_guru', 'id_guru');
     }
-    
+
+    // Relasi ke Siswa
+    public function siswa()
+    {
+        return $this->hasMany(Siswa::class, 'id_kelas');
+    }
+
+    // Relasi ke Jadwal Pelajaran
+    public function jadwalPelajaran()
+    {
+        return $this->hasMany(Jadwal::class, 'id_kelas');
+    }
+
+    // Relasi ke Tahun Ajaran
     public function tahunAjaran()
     {
         return $this->belongsTo(TahunAjaran::class, 'id_tahun_ajaran', 'id_tahun_ajaran');
-    }
-    
-    public function siswa()
-    {
-        return $this->hasMany(Siswa::class, 'id_kelas', 'id_kelas');
-    }
-    
-    public function jadwal()
-    {
-        return $this->hasMany(Jadwal::class, 'id_kelas', 'id_kelas');
     }
 }

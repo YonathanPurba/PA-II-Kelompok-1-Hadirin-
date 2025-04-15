@@ -8,29 +8,27 @@ use Illuminate\Database\Eloquent\Model;
 class TahunAjaran extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'tahun_ajaran';
     protected $primaryKey = 'id_tahun_ajaran';
-    
-    const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = 'diperbarui_pada';
-    
+    public $timestamps = false; // karena menggunakan kolom kustom
+
     protected $fillable = [
         'nama_tahun_ajaran',
         'tanggal_mulai',
         'tanggal_selesai',
         'aktif',
+        'dibuat_pada',
         'dibuat_oleh',
+        'diperbarui_pada',
         'diperbarui_oleh',
     ];
-    
-    public function kelas()
+
+    // Relasi ke siswa
+    public function siswa()
     {
-        return $this->hasMany(Kelas::class, 'id_tahun_ajaran', 'id_tahun_ajaran');
+        return $this->hasMany(Siswa::class, 'id_tahun_ajaran');
     }
-    
-    public function jadwal()
-    {
-        return $this->hasMany(Jadwal::class, 'id_tahun_ajaran', 'id_tahun_ajaran');
-    }
+
+    // (Opsional) Kamu bisa tambahkan juga relasi ke entitas lain jika dibutuhkan
 }

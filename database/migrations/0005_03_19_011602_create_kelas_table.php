@@ -15,13 +15,20 @@ return new class extends Migration
             $table->id('id_kelas');
             $table->string('nama_kelas');
             $table->string('tingkat');
+            // Relasi ke tabel guru (optional)
             $table->foreignId('id_guru')->nullable()->constrained('guru', 'id_guru')->onDelete('set null');
+            // Kolom timestamp untuk audit trail
             $table->timestamp('dibuat_pada')->nullable();
             $table->string('dibuat_oleh')->nullable();
             $table->timestamp('diperbarui_pada')->nullable();
             $table->string('diperbarui_oleh')->nullable();
+
+            // Memastikan menggunakan engine InnoDB
+            $table->engine = 'InnoDB';
         });
     }
+
+
 
     /**
      * Reverse the migrations.
@@ -31,4 +38,3 @@ return new class extends Migration
         Schema::dropIfExists('kelas');
     }
 };
-

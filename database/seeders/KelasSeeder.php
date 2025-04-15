@@ -16,6 +16,7 @@ class KelasSeeder extends Seeder
                 'nama_kelas' => 'Kelas 1A',
                 'tingkat' => '1',
                 'id_guru' => 1, // pastikan guru dengan ID 1 ada
+                'id_tahun_ajaran' => 1, // pastikan tahun ajaran dengan ID 1 ada
                 'dibuat_pada' => Carbon::now(),
                 'dibuat_oleh' => 'admin',
                 'diperbarui_pada' => Carbon::now(),
@@ -25,6 +26,7 @@ class KelasSeeder extends Seeder
                 'nama_kelas' => 'Kelas 2A',
                 'tingkat' => '2',
                 'id_guru' => 2,
+                'id_tahun_ajaran' => 1, // pastikan tahun ajaran dengan ID 1 ada
                 'dibuat_pada' => Carbon::now(),
                 'dibuat_oleh' => 'admin',
                 'diperbarui_pada' => Carbon::now(),
@@ -32,8 +34,9 @@ class KelasSeeder extends Seeder
             ],
             // [
             //     'nama_kelas' => 'Kelas 3B',
-            //     'tingkat' => '3',
+            //     'tingkat' => '3',    
             //     'id_guru' => 3,
+            //     'id_tahun_ajaran' => 1, // pastikan tahun ajaran dengan ID 1 ada
             //     'dibuat_pada' => Carbon::now(),
             //     'dibuat_oleh' => 'admin',
             //     'diperbarui_pada' => Carbon::now(),

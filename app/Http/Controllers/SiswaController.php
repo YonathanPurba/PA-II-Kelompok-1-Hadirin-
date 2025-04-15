@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Exports\SiswaExport;
+use App\Imports\SiswaImport;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Controller;
@@ -29,7 +30,18 @@ class SiswaController extends Controller
     {
         return Excel::download(new SiswaExport($request->kelas), 'data_siswa.xlsx');
     }
-    
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new SiswaImport, $request->file('file'));
+
+        return back()->with('success', 'Data siswa berhasil diimport!');
+    }
+
     public function index(Request $request)
     {
         // Ambil semua data kelas untuk dropdown filter

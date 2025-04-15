@@ -17,8 +17,10 @@ return new class extends Migration
             $table->string('nis')->unique();
             $table->foreignId('id_orangtua')->constrained('orangtua', 'id_orangtua')->onDelete('cascade');
             $table->foreignId('id_kelas')->constrained('kelas', 'id_kelas')->onDelete('cascade');
+            $table->string('tempat_lahir')->nullable();            
             $table->date('tanggal_lahir')->nullable();
             $table->enum('jenis_kelamin', ['laki-laki', 'perempuan']);
+            $table->text('alamat')->nullable();
             $table->timestamp('dibuat_pada')->nullable();
             $table->string('dibuat_oleh')->nullable();
             $table->timestamp('diperbarui_pada')->nullable();

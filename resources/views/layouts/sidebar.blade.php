@@ -37,6 +37,14 @@
                 </a>
                 <span class="nav-tooltip">Rekapitulasi</span>
             </li>
+            
+            <li class="nav-item">
+                <a href="{{ url('/admin/users') }}"
+                    class="nav-link {{ Request::is('admin/users*') ? 'active' : '' }}">
+                    <span class="nav-icon material-symbols-rounded">group</span>
+                    <span class="nav-label">Manajemen Data User</span>
+                </a>
+            </li>
 
             <li class="nav-item">
                 <a href="{{ url('/guru') }}" class="nav-link {{ Request::is('guru*') ? 'active' : '' }}">
@@ -48,30 +56,56 @@
 
             <li class="nav-item">
                 <a href="{{ url('/orang-tua') }}"
-                    class="nav-link {{ Request::is('admin/orang_tua*') || Request::is('orang-tua*') ? 'active' : '' }}">
-                    <span class="nav-icon material-symbols-rounded">manage_accounts</span>
-                    <span class="nav-label">Manajemen Data Orang Tua</span>
-                </a>
-                <span class="nav-tooltip">Manajemen Data Orang Tua</span>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ url('/siswa') }}"
-                    class="nav-link {{ Request::is('admin/siswa*') || Request::is('siswa*') ? 'active' : '' }}">
+                class="nav-link {{ Request::is('admin/orang_tua*') || Request::is('orang-tua*') ? 'active' : '' }}">
+                <span class="nav-icon material-symbols-rounded">manage_accounts</span>
+                <span class="nav-label">Manajemen Data Orang Tua</span>
+            </a>
+            <span class="nav-tooltip">Manajemen Data Orang Tua</span>
+        </li>
+        
+        <li class="nav-item">
+            <a href="{{ url('/siswa') }}"
+            class="nav-link {{ Request::is('admin/siswa*') || Request::is('siswa*') ? 'active' : '' }}">
                     <span class="nav-icon material-symbols-rounded">manage_accounts</span>
                     <span class="nav-label">Manajemen Data Siswa</span>
                 </a>
                 <span class="nav-tooltip">Manajemen Data Siswa</span>
+            </li>       
+
+            <li class="nav-item">
+                <a href="{{ url('/admin/kelas') }}"
+                    class="nav-link {{ Request::is('admin/kelas*') ? 'active' : '' }}">
+                    <span class="nav-icon material-symbols-rounded">class</span>
+                    <span class="nav-label">Manajemen Data Kelas</span>
+                </a>
             </li>
 
+            <li class="nav-item">
+                <a href="{{ url('/admin/mata_pelajaran') }}"
+                    class="nav-link {{ Request::is('admin/mata_pelajaran*') ? 'active' : '' }}">
+                    <span class="nav-icon material-symbols-rounded">menu_book</span>
+                    <span class="nav-label">Manajemen Mata Pelajaran</span>
+                </a>
+            </li>
+
+            <!-- Jadwal -->
             <li class="nav-item">
                 <a href="{{ url('/admin/jadwal_pelajaran') }}"
                     class="nav-link {{ Request::is('admin/jadwal_pelajaran*') || Request::is('jadwal-pelajaran*') ? 'active' : '' }}">
                     <span class="nav-icon material-symbols-rounded">event</span>
                     <span class="nav-label">Jadwal Pelajaran</span>
                 </a>
-                <span class="nav-tooltip">Jadwal Pelajaran</span>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ url('tahun-ajaran') }}"
+                    class="nav-link {{ Request::is('tahun-ajaran*') ? 'active' : '' }}">
+                    <span class="nav-icon material-symbols-rounded">date_range</span>
+                    <span class="nav-label">Manajemen Tahun Ajaran</span>
+                </a>
+                <span class="nav-tooltip">Manajemen Tahun Ajaran</span>
+            </li>
+
 
         </ul>
 

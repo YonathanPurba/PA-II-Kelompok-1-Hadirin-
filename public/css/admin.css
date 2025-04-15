@@ -36,6 +36,26 @@ body {
   transition: all 0.4s ease;
   overflow: hidden;
   position: fixed;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nav-list.primary-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 1rem; /* Agar tidak tabrakan dengan secondary-nav */
+}
+
+.nav-list.secondary-nav {
+  padding: 1rem;
+  border-top: 1px solid #ccc; /* opsional */
 }
 
 .sidebar-header {
@@ -211,12 +231,6 @@ body {
   pointer-events: auto;
   transform: translateY(50%);
   transition: all 0.4s ease;
-}
-
-.sidebar-nav .secondary-nav {
-  position: absolute;
-  bottom: 30px;
-  width: 100%;
 }
 
 /* Saat sidebar di-collapse */

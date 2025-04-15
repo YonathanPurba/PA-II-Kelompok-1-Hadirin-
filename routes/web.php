@@ -12,6 +12,7 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\OrangTuaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SuratIzinController;
+use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\JadwalPelajaranController;
 // use App\Http\Controllers\UserController;
@@ -73,6 +74,9 @@ Route::middleware('auth')->group(function () {
 
     // Kelas
     Route::resource('kelas', KelasController::class);
+
+    // Tahun Ajaran
+    Route::resource('tahun-ajaran', TahunAjaranController::class);
 
     // Mata Pelajaran
     Route::resource('mata-pelajaran', MataPelajaranController::class);
