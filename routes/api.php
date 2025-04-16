@@ -9,7 +9,6 @@ use App\Http\Controllers\API\MataPelajaranController;
 use App\Http\Controllers\API\NotifikasiController;
 use App\Http\Controllers\API\OrangtuaController;
 use App\Http\Controllers\API\RekapAbsensiController;
-use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\SiswaController;
 use App\Http\Controllers\API\StafController;
 use App\Http\Controllers\API\SuratIzinController;
@@ -198,15 +197,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}/change-password', [UserController::class, 'changePassword']);
         Route::get('/role/{roleId}', [UserController::class, 'getByRole']);
         Route::get('/search', [UserController::class, 'search']);
-    });
-
-    // Role Routes
-    Route::prefix('role')->group(function () {
-        Route::get('/', [RoleController::class, 'index']);
-        Route::post('/', [RoleController::class, 'store']);
-        Route::get('/{id}', [RoleController::class, 'show']);
-        Route::put('/{id}', [RoleController::class, 'update']);
-        Route::delete('/{id}', [RoleController::class, 'destroy']);
     });
 
     // Staf Routes

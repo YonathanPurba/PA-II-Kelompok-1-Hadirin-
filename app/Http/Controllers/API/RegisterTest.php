@@ -21,7 +21,7 @@ class RegisterTest extends Controller
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'dibuat_pada' => now(),
-            'id_role' => $request->id_role,
+            'role' => $request->role,
             'dibuat_oleh' => 'api_register',
         ]);
 
