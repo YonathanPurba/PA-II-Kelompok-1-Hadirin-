@@ -14,26 +14,36 @@ class TahunAjaranController extends Controller
         return view('admin.pages.tahun_ajaran.manajemen_data_tahun_ajaran', compact('tahunAjaran'));
     }
 
-    // Menampilkan form tambah Tahun Ajaran
+    // Method untuk menampilkan form tambah tahun ajaran
     public function create()
     {
-        return view('tahun_ajaran.create');
+        return view('admin.pages.tahun_ajaran.tambah_tahun_ajaran');
     }
 
-    // Menyimpan data Tahun Ajaran
+    // Method untuk menyimpan data tahun ajaran baru
     public function store(Request $request)
     {
+        // Validasi data yang dimasukkan
         $request->validate([
             'nama_tahun_ajaran' => 'required|string|max:255',
             'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'aktif' => 'required|boolean',
         ]);
 
-        TahunAjaran::create($request->all());
+        // Menyimpan data tahun ajaran baru
+        TahunAjaran::create([
+            'nama_tahun_ajaran' => $request->nama_tahun_ajaran,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_selesai' => $request->tanggal_selesai,
+            'aktif' => $request->aktif,
+            'dibuat_pada' => now(),
+            // 'dibuat_oleh' => auth()->id(), // ID pengguna yang membuat
+        ]);
 
-        return redirect()->route('tahun_ajaran.index')->with('success', 'Tahun ajaran berhasil ditambahkan.');
+        // Redirect ke halaman daftar tahun ajaran dengan pesan sukses
+        return redirect()->route('tahun-ajaran.index')->with('success', 'Tahun Ajaran berhasil ditambahkan.');
     }
-
     // Menampilkan detail Tahun Ajaran
     public function show(TahunAjaran $tahunAjaran)
     {
@@ -41,24 +51,38 @@ class TahunAjaranController extends Controller
     }
 
     // Menampilkan form edit Tahun Ajaran
-    public function edit(TahunAjaran $tahunAjaran)
+    public function edit($id)
     {
-        return view('tahun_ajaran.edit', compact('tahunAjaran'));
+        $tahunAjaran = TahunAjaran::findOrFail($id);
+
+        return view('admin.pages.tahun_ajaran.edit_tahun_ajaran', compact('tahunAjaran'));
     }
 
+
     // Memperbarui data Tahun Ajaran
-    public function update(Request $request, TahunAjaran $tahunAjaran)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'nama_tahun_ajaran' => 'required|string|max:255',
             'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'aktif' => 'required|boolean',
         ]);
 
-        $tahunAjaran->update($request->all());
+        $tahunAjaran = TahunAjaran::findOrFail($id);
 
-        return redirect()->route('tahun_ajaran.index')->with('success', 'Tahun ajaran berhasil diperbarui.');
+        $tahunAjaran->update([
+            'nama_tahun_ajaran' => $request->nama_tahun_ajaran,
+            'tanggal_mulai' => $request->tanggal_mulai,
+            'tanggal_selesai' => $request->tanggal_selesai,
+            'aktif' => $request->aktif,
+            'diperbarui_pada' => now(),
+            // 'diperbarui_oleh' => auth()->user()->id ?? null,
+        ]);
+
+        return redirect()->route('tahun-ajaran.index')->with('success', 'Tahun ajaran berhasil diperbarui.');
     }
+
 
     // Menghapus data Tahun Ajaran
     public function destroy(TahunAjaran $tahunAjaran)

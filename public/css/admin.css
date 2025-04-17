@@ -53,9 +53,9 @@ body {
   padding-bottom: 1rem; /* Agar tidak tabrakan dengan secondary-nav */
 }
 
-.nav-list.secondary-nav {
-  padding: 1rem;
+.nav-list.secondary-nav {  
   border-top: 1px solid #ccc; /* opsional */
+
 }
 
 .sidebar-header {
@@ -151,7 +151,7 @@ body {
   list-style: none;
   display: flex;
   gap: 4px;
-  padding: 0 15px;
+  padding: 10px 15px;
   flex-direction: column;
   transform: translateY(15px);
   transition: 0.4s ease;

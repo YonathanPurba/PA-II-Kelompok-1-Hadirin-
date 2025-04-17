@@ -73,8 +73,8 @@
             </li>       
 
             <li class="nav-item">
-                <a href="{{ url('/admin/kelas') }}"
-                    class="nav-link {{ Request::is('admin/kelas*') ? 'active' : '' }}">
+                <a href="{{ url('kelas') }}"
+                    class="nav-link {{ Request::is('kelas*') ? 'active' : '' }}">
                     <span class="nav-icon material-symbols-rounded">class</span>
                     <span class="nav-label">Manajemen Data Kelas</span>
                 </a>

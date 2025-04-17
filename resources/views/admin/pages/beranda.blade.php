@@ -71,7 +71,7 @@
                                 </div>
                                 <!-- View All -->
                                 <div class="d-flex justify-content-end mt-3 w-100">
-                                    <a href="#" class="fs-7 text-decoration-none text-warning">
+                                    <a href="{{ url('/kelas') }}" class="fs-7 text-decoration-none text-warning">
                                         View All <i class="bi bi-arrow-right-short"></i>
                                     </a>
                                 </div>

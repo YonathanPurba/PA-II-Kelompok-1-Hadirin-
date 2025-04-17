@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guru;
 use Illuminate\Http\Request;
 use App\Models\MataPelajaran;
 use App\Models\GuruMataPelajaran;
@@ -37,7 +38,7 @@ class MataPelajaranController extends Controller
     public function getGuruPengampu($id)
     {
         $guruIDs = GuruMataPelajaran::where('id_mata_pelajaran', $id)->pluck('id_guru');
-        $guruList = Guru::whereIn('id_guru', $guruIDs)->get(['id_guru', 'nama']);
+        $guruList = Guru::whereIn('id_guru', $guruIDs)->get(['id_guru', 'nama_lengkap']);
 
         return response()->json([
             'jumlah' => $guruList->count(),
@@ -62,63 +63,61 @@ class MataPelajaranController extends Controller
         ], 200);
     }
 
+    // Method untuk menampilkan form tambah mata pelajaran
+    public function create()
+    {
+        return view('admin.pages.mata_pelajaran.tambah_mata_pelajaran');
+    }
+
+    // Method untuk menyimpan data mata pelajaran baru
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'nama_mata_pelajaran' => 'required|string|max:255',
-            'deskripsi_mata_pelajaran' => 'nullable|string',
-            'id_user' => 'nullable|exists:users,id_user',
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'kode' => 'required|string|max:10',
+            'deskripsi' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        MataPelajaran::create([
+            'nama' => $request->nama,
+            'kode' => $request->kode,
+            'deskripsi' => $request->deskripsi,
+            'dibuat_pada' => now(),
+            // 'dibuat_oleh' => auth()->id(), // Menyimpan ID pengguna yang membuat
+        ]);
 
-        $mataPelajaran = MataPelajaran::create($request->all());
+        return redirect()->route('mata-pelajaran.index')->with('success', 'Mata Pelajaran berhasil ditambahkan.');
+    }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Mata pelajaran berhasil ditambahkan',
-            'data' => $mataPelajaran,
-        ], 201);
+    public function edit($id)
+    {
+        $mataPelajaran = MataPelajaran::findOrFail($id);
+        $semuaGuru = Guru::all(); // jika ingin ditampilkan dalam form
+        return view('admin.pages.mata_pelajaran.edit_mata_pelajaran', compact('mataPelajaran', 'semuaGuru'));
     }
 
     public function update(Request $request, $id)
     {
-        $mataPelajaran = MataPelajaran::find($id);
-
-        if (!$mataPelajaran) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Mata pelajaran tidak ditemukan',
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'nama_mata_pelajaran' => 'string|max:255',
-            'deskripsi_mata_pelajaran' => 'nullable|string',
-            'id_user' => 'nullable|exists:users,id_user',
+        // Validasi data input
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'kode' => 'required|string|max:50',
+            'deskripsi' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        // Temukan mata pelajaran berdasarkan ID
+        $mataPelajaran = MataPelajaran::findOrFail($id);
 
-        $mataPelajaran->update($request->all());
+        // Update data
+        $mataPelajaran->update([
+            'nama' => $request->nama,
+            'kode' => $request->kode,
+            'deskripsi' => $request->deskripsi,
+        ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Mata pelajaran berhasil diperbarui',
-            'data' => $mataPelajaran,
-        ], 200);
+        // Redirect kembali ke halaman manajemen mata pelajaran dengan pesan sukses
+        return redirect()->route('mata-pelajaran.index')
+            ->with('success', 'Data mata pelajaran berhasil diperbarui.');
     }
 
     public function destroy($id)

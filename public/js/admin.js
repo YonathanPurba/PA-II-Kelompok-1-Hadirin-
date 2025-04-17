@@ -128,7 +128,7 @@ if (barCanvas) {
 
 // Data Table 
 $(document).ready(function () {
-    $('#siswaTable, #guruTable, #orangtuaTable, #mataPelajaranTable, #tahunAjaranTable').DataTable({
+    $('#siswaTable, #guruTable, #orangtuaTable, #mataPelajaranTable, #tahunAjaranTable, #kelasTable').DataTable({
         language: {
             search: "Cari:",
             lengthMenu: "Tampilkan _MENU_ entri",
@@ -298,18 +298,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // Modal Mata Pelajaran 
-
 document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('modalViewMapel');
 
     document.querySelectorAll('.btn-view-mapel').forEach(button => {
         button.addEventListener('click', function () {
             const id = this.dataset.id;
+
+            // Isi info dasar dari data attribute
             document.getElementById('view-nama').textContent = this.dataset.nama;
             document.getElementById('view-kode').textContent = this.dataset.kode;
             document.getElementById('view-deskripsi').textContent = this.dataset.deskripsi;
+            document.getElementById('guruPengampuList').innerHTML = ''; // Kosongkan dulu
 
-            // Ambil jumlah guru via fetch AJAX
+            // Ambil jumlah guru (endpoint khusus jumlah saja)
             fetch(`/mata-pelajaran/${id}/jumlah-guru`)
                 .then(res => res.json())
                 .then(data => {
@@ -319,6 +321,53 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error(err);
                     document.getElementById('view-jumlah-guru').textContent = 'Gagal memuat';
                 });
+
+            // Ambil daftar guru pengampu lengkap
+            fetch(`/mata-pelajaran/${id}/guru-pengampu`)
+                .then(res => res.json())
+                .then(data => {
+                    const listContainer = document.getElementById('guruPengampuList');
+                    if (data.jumlah === 0) {
+                        listContainer.innerHTML = '<li class="list-group-item">Belum ada guru pengampu.</li>';
+                    } else {
+                        data.data.forEach(guru => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item';
+                            li.textContent = guru.nama_lengkap;
+                            listContainer.appendChild(li);
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('guruPengampuList').innerHTML = '<li class="list-group-item text-danger">Gagal memuat guru.</li>';
+                });
+        });
+    });
+});
+
+
+// Modal Kelas
+document.addEventListener('DOMContentLoaded', function () {
+    // Event listener untuk tombol lihat kelas
+    const btnViewKelas = document.querySelectorAll('.btn-view-kelas');
+    
+    btnViewKelas.forEach(button => {
+        button.addEventListener('click', function () {
+            // Ambil data dari tombol yang diklik
+            const idKelas = button.getAttribute('data-id');
+            const namaKelas = button.getAttribute('data-nama');
+            const tingkat = button.getAttribute('data-tingkat');
+            const guru = button.getAttribute('data-guru');
+
+            // Set data ke dalam modal
+            document.getElementById('view-nama-kelas').innerText = namaKelas;
+            document.getElementById('view-tingkat').innerText = tingkat;
+            document.getElementById('view-guru').innerText = guru;
+
+            // Jika modal belum terbuka, buka modal
+            const modal = new bootstrap.Modal(document.getElementById('modalViewKelas'));
+            modal.show();   
         });
     });
 });
