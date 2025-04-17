@@ -90,8 +90,8 @@
 
             <!-- Jadwal -->
             <li class="nav-item">
-                <a href="{{ url('/admin/jadwal_pelajaran') }}"
-                    class="nav-link {{ Request::is('admin/jadwal_pelajaran*') || Request::is('jadwal-pelajaran*') ? 'active' : '' }}">
+                <a href="{{ url('/jadwal-pelajaran') }}"
+                    class="nav-link {{ Request::is('jadwal-pelajaran*') || Request::is('jadwal-pelajaran*') ? 'active' : '' }}">
                     <span class="nav-icon material-symbols-rounded">event</span>
                     <span class="nav-label">Jadwal Pelajaran</span>
                 </a>
