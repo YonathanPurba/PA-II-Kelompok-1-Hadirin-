@@ -81,8 +81,8 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ url('/admin/mata_pelajaran') }}"
-                    class="nav-link {{ Request::is('admin/mata_pelajaran*') ? 'active' : '' }}">
+                <a href="{{ url('/mata-pelajaran') }}"
+                    class="nav-link {{ Request::is('mata-pelajaran*') ? 'active' : '' }}">
                     <span class="nav-icon material-symbols-rounded">menu_book</span>
                     <span class="nav-label">Manajemen Mata Pelajaran</span>
                 </a>

@@ -128,7 +128,7 @@ if (barCanvas) {
 
 // Data Table 
 $(document).ready(function () {
-    $('#siswaTable, #guruTable, #orangtuaTable').DataTable({
+    $('#siswaTable, #guruTable, #orangtuaTable, #mataPelajaranTable, #tahunAjaranTable').DataTable({
         language: {
             search: "Cari:",
             lengthMenu: "Tampilkan _MENU_ entri",
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-nomor').textContent = nomor;
             document.getElementById('modal-anak').innerHTML = anak.split(', ').map(anak => `<li>${anak}</li>`).join('');
         });
-    }); 
+    });
 });
 
 // Modal Siswa
@@ -273,4 +273,52 @@ $(document).on('click', '.btn-view-siswa', function () {
     // Jika relasi kelas kosong, hindari error
     const namaKelas = siswa.kelas && siswa.kelas.nama_kelas ? siswa.kelas.nama_kelas : '-';
     $('#viewKelas').text(namaKelas);
+});
+
+// Modal Tahun Ajaran
+document.addEventListener('DOMContentLoaded', function () {
+    const viewButtons = document.querySelectorAll('.btn-view-tahun');
+
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const tahunId = this.getAttribute('data-id');
+            const tahunNama = this.getAttribute('data-nama');
+            const tahunMulai = this.getAttribute('data-mulai');
+            const tahunSelesai = this.getAttribute('data-selesai');
+            const status = this.getAttribute('data-status');
+
+            // Masukkan data ke dalam modal
+            document.getElementById('view-nama-tahun').innerText = tahunNama;
+            document.getElementById('view-tanggal-mulai').innerText = tahunMulai;
+            document.getElementById('view-tanggal-selesai').innerText = tahunSelesai;
+            document.getElementById('view-status').innerText = status;
+        });
+    });
+});
+
+
+// Modal Mata Pelajaran 
+
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('modalViewMapel');
+
+    document.querySelectorAll('.btn-view-mapel').forEach(button => {
+        button.addEventListener('click', function () {
+            const id = this.dataset.id;
+            document.getElementById('view-nama').textContent = this.dataset.nama;
+            document.getElementById('view-kode').textContent = this.dataset.kode;
+            document.getElementById('view-deskripsi').textContent = this.dataset.deskripsi;
+
+            // Ambil jumlah guru via fetch AJAX
+            fetch(`/mata-pelajaran/${id}/jumlah-guru`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('view-jumlah-guru').textContent = data.jumlah_guru + ' guru';
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('view-jumlah-guru').textContent = 'Gagal memuat';
+                });
+        });
+    });
 });

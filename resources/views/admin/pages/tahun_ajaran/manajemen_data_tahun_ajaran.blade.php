@@ -9,33 +9,26 @@
                 <!-- Header Judul -->
                 <header class="judul">
                     <h1 class="mb-3">Manajemen Tahun Ajaran</h1>
-                    <p class="mb-2">Kelola data tahun ajaran di sini. Anda dapat menambah, mengedit, atau melihat detail tahun ajaran.</p>
+                    <p class="mb-2">Staff dapat menambah, melihat, dan mengubah data tahun ajaran</p>
                 </header>
 
-                <!-- Tabel Tahun Ajaran -->
                 <div class="data">
-                    <a href="{{ route('tahun-ajaran.create') }}" class="btn btn-primary mb-3">Tambah Tahun Ajaran</a>
-                    
                     <!-- Tabel Tahun Ajaran -->
                     <div class="table-responsive">
                         <table id="tahunAjaranTable" class="table table-striped table-bordered table-sm">
                             <thead class="bg-success text-white">
                                 <tr>
                                     <th>No</th>
-                                    <th>Nama Tahun Ajaran</th>
-                                    <th>Tanggal Mulai</th>
-                                    <th>Tanggal Selesai</th>
+                                    <th>Nama Tahun Ajaran</th>                                  
                                     <th>Status</th>
                                     <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($tahunAjaran as $tahun)
+                                @foreach ($tahunAjaran as $index => $tahun)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $tahun->nama_tahun_ajaran }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($tahun->tanggal_mulai)->format('d-m-Y') }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($tahun->tanggal_selesai)->format('d-m-Y') }}</td>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $tahun->nama_tahun_ajaran }}</td>                                            
                                         <td>
                                             @if ($tahun->aktif)
                                                 <span class="badge bg-success">Aktif</span>
@@ -45,17 +38,21 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-4">
-                                                <a href="{{ route('tahun-ajaran.show', $tahun->id_tahun_ajaran) }}" class="text-primary" title="Lihat">
+                                                <a href="javascript:void(0);" class="text-primary btn-view-tahun"
+                                                    data-id="{{ $tahun->id_tahun_ajaran }}"
+                                                    data-nama="{{ $tahun->nama_tahun_ajaran }}"
+                                                    data-mulai="{{ \Carbon\Carbon::parse($tahun->tanggal_mulai)->format('d-m-Y') }}"
+                                                    data-selesai="{{ \Carbon\Carbon::parse($tahun->tanggal_selesai)->format('d-m-Y') }}"
+                                                    data-status="{{ $tahun->aktif ? 'Aktif' : 'Tidak Aktif' }}"
+                                                    data-bs-toggle="modal" data-bs-target="#modalViewTahun" title="Lihat">
                                                     <i class="bi bi-eye-fill fs-5"></i>
                                                 </a>
-                                                <a href="{{ route('tahun-ajaran.edit', $tahun->id_tahun_ajaran) }}" class="text-warning" title="Edit">
+
+
+                                                <a href="{{ route('tahun-ajaran.edit', $tahun->id_tahun_ajaran) }}"
+                                                    class="text-warning" title="Edit">
                                                     <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
-                                                <form action="{{ route('tahun-ajaran.destroy', $tahun->id_tahun_ajaran) }}" method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -63,9 +60,43 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Tombol Tambah -->
+                    <div class="mt-4 text-end">
+                        <a href="{{ route('tahun-ajaran.create') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i>Tambah Tahun Ajaran
+                        </a>
+                    </div>
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Modal View Tahun Ajaran -->
+    <div class="modal fade" id="modalViewTahun" tabindex="-1" aria-labelledby="modalViewTahunLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalViewTahunLabel">Detail Tahun Ajaran</h5>
+                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4">Nama Tahun Ajaran</dt>
+                        <dd class="col-sm-8" id="view-nama-tahun">-</dd>
+
+                        <dt class="col-sm-4">Tanggal Mulai</dt>
+                        <dd class="col-sm-8" id="view-tanggal-mulai">-</dd>
+
+                        <dt class="col-sm-4">Tanggal Selesai</dt>
+                        <dd class="col-sm-8" id="view-tanggal-selesai">-</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8" id="view-status">-</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
     </div>
 
 @endsection

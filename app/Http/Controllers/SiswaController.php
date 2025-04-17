@@ -39,7 +39,7 @@ class SiswaController extends Controller
 
         Excel::import(new SiswaImport, $request->file('file'));
 
-        return back()->with('success', 'Data siswa berhasil diimport!');
+        return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil diimport!');
     }
 
     public function index(Request $request)

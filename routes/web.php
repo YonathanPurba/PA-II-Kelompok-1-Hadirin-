@@ -50,6 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/siswa/export/pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
     Route::get('/siswa/export/excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
 
+    // Import Siswa
+    Route::post('/siswa/import', [SiswaController::class, 'import'])->name('siswa.import.excel');
 
     // Orang Tua
     Route::resource('orang-tua', OrangTuaController::class);
@@ -80,6 +82,8 @@ Route::middleware('auth')->group(function () {
 
     // Mata Pelajaran
     Route::resource('mata-pelajaran', MataPelajaranController::class);
+    Route::get('/mata-pelajaran/{id}/jumlah-guru', [MataPelajaranController::class, 'getJumlahGuru']);
+    Route::get('/mata-pelajaran/{id}/guru-pengampu', [MataPelajaranController::class, 'getGuruPengampu']);
 
     // Jadwal Pelajaran
     Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
