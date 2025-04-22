@@ -351,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
     // Event listener untuk tombol lihat kelas
     const btnViewKelas = document.querySelectorAll('.btn-view-kelas');
-    
+
     btnViewKelas.forEach(button => {
         button.addEventListener('click', function () {
             // Ambil data dari tombol yang diklik
@@ -367,7 +367,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Jika modal belum terbuka, buka modal
             const modal = new bootstrap.Modal(document.getElementById('modalViewKelas'));
-            modal.show();   
+            modal.show();
         });
     });
 });
+
+
+// Loading Script
+window.addEventListener('load', function () {
+    const loading = document.getElementById('loading');
+    setTimeout(() => {
+      loading.style.opacity = 0;
+      setTimeout(() => {
+        loading.style.display = 'none';
+      }, 200); // match dengan durasi transition CSS
+    }, 200); // durasi loading bisa disesuaikan
+  });

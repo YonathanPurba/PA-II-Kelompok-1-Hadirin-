@@ -9,6 +9,7 @@ class JadwalSeeder extends Seeder
 {
     public function run()
     {
+<<<<<<< Updated upstream
         $hari = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'];
         $waktu = [
             ['07:30:00', '09:00:00'],
@@ -50,5 +51,53 @@ class JadwalSeeder extends Seeder
                 }
             }
         }
+=======
+        // Daftar hari, kelas, guru, dan mata pelajaran
+        $hariList = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'];
+        $idKelas = [1, 2];
+        $idGuru = [1, 2, 3, 4]; // Menambahkan ID guru baru
+        $idMapel = [1, 2, 3]; // Misalnya 3 mata pelajaran
+
+        // Waktu mulai untuk jadwal
+        $waktuMulai = Carbon::createFromTime(7, 30);
+        $durasi = 90; // Durasi setiap pelajaran dalam menit
+
+        $data = [];
+
+        // Loop untuk setiap hari, kelas, dan mata pelajaran
+        foreach ($hariList as $hari) {
+            foreach ($idKelas as $kelas) {
+                foreach ($idMapel as $mapel) {
+                    // Pilih secara acak guru untuk setiap mata pelajaran
+                    $guru = $idGuru[array_rand($idGuru)];
+                    $mulai = $waktuMulai->copy();
+                    $selesai = $mulai->copy()->addMinutes($durasi);
+
+                    // Tambahkan data jadwal ke array
+                    $data[] = [
+                        'id_kelas' => $kelas,
+                        'id_mata_pelajaran' => $mapel,
+                        'id_guru' => $guru,
+                        'hari' => $hari,
+                        'waktu_mulai' => $mulai->format('H:i:s'),
+                        'waktu_selesai' => $selesai->format('H:i:s'),
+                        'dibuat_pada' => now(),
+                        'dibuat_oleh' => 'Seeder',
+                        'diperbarui_pada' => null,
+                        'diperbarui_oleh' => null,
+                    ];
+
+                    // Geser waktu mulai ke jam berikutnya untuk jadwal berikutnya
+                    $waktuMulai->addMinutes($durasi);
+                }
+
+                // Reset waktu mulai setelah setiap kelas selesai
+                $waktuMulai = Carbon::createFromTime(7, 30);
+            }
+        }
+
+        // Masukkan data jadwal ke dalam tabel 'jadwal'
+        DB::table('jadwal')->insert($data);
+>>>>>>> Stashed changes
     }
 }

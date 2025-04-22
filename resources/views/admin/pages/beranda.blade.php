@@ -8,7 +8,7 @@
             <div class="isi">
                 <!-- Judul Header -->
                 <header class="judul">
-                    <h1 class="mb-3">Dashboard Admin</h1>
+                    <h1 class="mb-3">Beranda Admin</h1>
                     <p class="mb-2">Selamat datang di halaman utama sistem informasi absensi</p>
                 </header>
 

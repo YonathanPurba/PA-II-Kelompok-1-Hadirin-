@@ -93,7 +93,7 @@
                 <a href="{{ url('/jadwal-pelajaran') }}"
                     class="nav-link {{ Request::is('jadwal-pelajaran*') || Request::is('jadwal-pelajaran*') ? 'active' : '' }}">
                     <span class="nav-icon material-symbols-rounded">event</span>
-                    <span class="nav-label">Jadwal Pelajaran</span>
+                    <span class="nav-label">Manajemen Jadwal</span>
                 </a>
             </li>
 
