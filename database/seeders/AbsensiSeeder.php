@@ -2,46 +2,70 @@
 
 namespace Database\Seeders;
 
+use App\Models\Absensi;
+use App\Models\Jadwal;
+use App\Models\Siswa;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class AbsensiSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        $statusList = ['hadir', 'alpa', 'sakit', 'izin'];
-        $startDate = Carbon::create(2025, 1, 1);
-        $endDate = Carbon::create(2025, 6, 30);
-        $dates = [];
-
-        // Ambil semua tanggal antara Januari - Juni
-        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-            $dates[] = $date->toDateString();
-        }
-
-        $data = [];
-
-        foreach (range(1, 20) as $id_siswa) {
-            foreach (range(1, 25) as $id_jadwal) {
-                // Ambil 2 tanggal unik secara acak per siswa-jadwal
-                $randomDates = collect($dates)->random(2);
-                foreach ($randomDates as $tanggal) {
-                    $data[] = [
-                        'id_siswa' => $id_siswa,
-                        'id_jadwal' => $id_jadwal,
-                        'tanggal' => $tanggal,
-                        'status' => $statusList[array_rand($statusList)],
-                        'catatan' => null,
+        // Ambil semua siswa
+        $siswa = Siswa::all();
+        
+        // Ambil jadwal untuk kelas masing-masing siswa
+        foreach ($siswa as $s) {
+            $jadwal = Jadwal::where('id_kelas', $s->id_kelas)->get();
+            
+            // Buat absensi untuk 2 minggu terakhir
+            $startDate = Carbon::now()->subWeeks(2)->startOfWeek();
+            $endDate = Carbon::now()->subDay();
+            
+            for ($date = $startDate; $date->lte($endDate); $date->addDay()) {
+                $dayName = strtolower($date->format('l'));
+                if ($dayName == 'saturday' || $dayName == 'sunday') {
+                    continue; // Lewati hari Sabtu dan Minggu
+                }
+                
+                // Konversi nama hari ke bahasa Indonesia
+                $hariIndonesia = [
+                    'monday' => 'senin',
+                    'tuesday' => 'selasa',
+                    'wednesday' => 'rabu',
+                    'thursday' => 'kamis',
+                    'friday' => 'jumat'
+                ];
+                
+                $hariId = $hariIndonesia[$dayName];
+                
+                // Ambil jadwal untuk hari ini
+                $jadwalHariIni = $jadwal->where('hari', $hariId);
+                
+                foreach ($jadwalHariIni as $j) {
+                    // Status kehadiran acak
+                    $status = ['hadir', 'hadir', 'hadir', 'hadir', 'hadir', 'sakit', 'izin', 'alpa'];
+                    $randomStatus = $status[array_rand($status)];
+                    
+                    // Catatan jika tidak hadir
+                    $catatan = null;
+                    if ($randomStatus != 'hadir') {
+                        $catatan = $randomStatus == 'sakit' ? 'Siswa sakit' : 
+                                  ($randomStatus == 'izin' ? 'Izin keluarga' : 'Tidak ada keterangan');
+                    }
+                    
+                    Absensi::create([
+                        'id_siswa' => $s->id_siswa,
+                        'id_jadwal' => $j->id_jadwal,
+                        'tanggal' => $date->format('Y-m-d'),
+                        'status' => $randomStatus,
+                        'catatan' => $catatan,
                         'dibuat_pada' => now(),
-                        'dibuat_oleh' => 'Seeder',
-                        'diperbarui_pada' => now(),
-                        'diperbarui_oleh' => 'Seeder',
-                    ];
+                        'dibuat_oleh' => 'system'
+                    ]);
                 }
             }
         }
-
-        DB::table('absensi')->insert($data); // Total: 20 siswa × 25 jadwal × 2 tanggal = 1000 record
     }
 }

@@ -14,8 +14,10 @@ class CreateMataPelajaranTable extends Migration
             $table->string('nama');
             $table->string('kode')->unique();
             $table->text('deskripsi')->nullable();
-            $table->timestamps();
-        });
+            $table->timestamp('dibuat_pada')->nullable();
+            $table->string('dibuat_oleh')->nullable();
+            $table->timestamp('diperbarui_pada')->nullable();
+            $table->string('diperbarui_oleh')->nullable();        });
     }
 
     public function down()

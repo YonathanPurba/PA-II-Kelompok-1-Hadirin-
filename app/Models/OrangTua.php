@@ -11,9 +11,7 @@ class Orangtua extends Model
 
     protected $table = 'orangtua';
     protected $primaryKey = 'id_orangtua';
-    public $incrementing = true;
-    protected $keyType = 'int';
-
+    
     const CREATED_AT = 'dibuat_pada';
     const UPDATED_AT = 'diperbarui_pada';
 
@@ -21,30 +19,22 @@ class Orangtua extends Model
         'id_user',
         'nama_lengkap',
         'alamat',
+        'nomor_telepon',
         'pekerjaan',
         'dibuat_oleh',
-        'diperbarui_oleh',
+        'diperbarui_oleh'
     ];
 
-    /**
-     * Relasi ke user (akun yang digunakan orang tua).
-     */
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
 
-    /**
-     * Relasi ke banyak siswa (anak-anak dari orang tua ini).
-     */
     public function siswa()
     {
         return $this->hasMany(Siswa::class, 'id_orangtua', 'id_orangtua');
     }
 
-    /**
-     * Relasi ke banyak surat izin yang diajukan oleh orang tua ini.
-     */
     public function suratIzin()
     {
         return $this->hasMany(SuratIzin::class, 'id_orangtua', 'id_orangtua');

@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\Api\RegisterTest;
 use App\Http\Controllers\API\AbsensiController;
 use App\Http\Controllers\API\AuthController;
@@ -210,4 +211,3 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/search', [StafController::class, 'search']);
     });
 });
-

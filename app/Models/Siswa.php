@@ -11,7 +11,9 @@ class Siswa extends Model
 
     protected $table = 'siswa';
     protected $primaryKey = 'id_siswa';
-    public $timestamps = false; // karena menggunakan kolom waktu kustom
+    
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
         'nama',
@@ -23,39 +25,41 @@ class Siswa extends Model
         'tanggal_lahir',
         'jenis_kelamin',
         'alamat',
-        'dibuat_pada',
         'dibuat_oleh',
-        'diperbarui_pada',
-        'diperbarui_oleh',
+        'diperbarui_oleh'
     ];
 
-    // Relasi ke orangtua
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+    ];
+
     public function orangtua()
     {
-        return $this->belongsTo(Orangtua::class, 'id_orangtua');
+        return $this->belongsTo(Orangtua::class, 'id_orangtua', 'id_orangtua');
     }
 
-    // Relasi ke kelas
     public function kelas()
     {
-        return $this->belongsTo(Kelas::class, 'id_kelas');
+        return $this->belongsTo(Kelas::class, 'id_kelas', 'id_kelas');
     }
 
-    // Relasi ke tahun ajaran
     public function tahunAjaran()
     {
-        return $this->belongsTo(TahunAjaran::class, 'id_tahun_ajaran');
+        return $this->belongsTo(TahunAjaran::class, 'id_tahun_ajaran', 'id_tahun_ajaran');
     }
 
-    // Relasi ke absensi
     public function absensi()
     {
-        return $this->hasMany(Absensi::class, 'id_siswa');
+        return $this->hasMany(Absensi::class, 'id_siswa', 'id_siswa');
     }
 
-    // Relasi ke rekap absensi
+    public function suratIzin()
+    {
+        return $this->hasMany(SuratIzin::class, 'id_siswa', 'id_siswa');
+    }
+
     public function rekapAbsensi()
     {
-        return $this->hasMany(RekapAbsensi::class, 'id_siswa');
+        return $this->hasMany(RekapAbsensi::class, 'id_siswa', 'id_siswa');
     }
 }

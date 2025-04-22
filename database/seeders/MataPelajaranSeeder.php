@@ -2,35 +2,74 @@
 
 namespace Database\Seeders;
 
+use App\Models\MataPelajaran;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class MataPelajaranSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        DB::table('mata_pelajaran')->insert([
+        $mataPelajaran = [
             [
                 'nama' => 'Matematika',
-                'kode' => 'MAT101',
-                'deskripsi' => 'Pelajaran Matematika dasar',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'kode' => 'MTK',
+                'deskripsi' => 'Pelajaran Matematika',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'system'
             ],
             [
                 'nama' => 'Bahasa Indonesia',
-                'kode' => 'BIN102',
+                'kode' => 'BIN',
                 'deskripsi' => 'Pelajaran Bahasa Indonesia',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'system'
             ],
             [
-                'nama' => 'Fisika',
-                'kode' => 'FIS103',
-                'deskripsi' => 'Pelajaran Fisika dasar',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'nama' => 'Bahasa Inggris',
+                'kode' => 'BIG',
+                'deskripsi' => 'Pelajaran Bahasa Inggris',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'system'
             ],
-        ]);
+            [
+                'nama' => 'Ilmu Pengetahuan Alam',
+                'kode' => 'IPA',
+                'deskripsi' => 'Pelajaran IPA',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'system'
+            ],
+            [
+                'nama' => 'Ilmu Pengetahuan Sosial',
+                'kode' => 'IPS',
+                'deskripsi' => 'Pelajaran IPS',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'system'
+            ],
+            [
+                'nama' => 'Pendidikan Agama',
+                'kode' => 'PAI',
+                'deskripsi' => 'Pelajaran Pendidikan Agama',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'system'
+            ],
+            [
+                'nama' => 'Pendidikan Kewarganegaraan',
+                'kode' => 'PKN',
+                'deskripsi' => 'Pelajaran PKN',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'system'
+            ],
+            [
+                'nama' => 'Pendidikan Jasmani',
+                'kode' => 'PJK',
+                'deskripsi' => 'Pelajaran Pendidikan Jasmani',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'system'
+            ]
+        ];
+
+        foreach ($mataPelajaran as $mp) {
+            MataPelajaran::create($mp);
+        }
     }
 }

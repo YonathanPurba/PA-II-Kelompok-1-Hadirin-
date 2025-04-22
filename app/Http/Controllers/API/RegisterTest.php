@@ -3,32 +3,40 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class RegisterTest extends Controller
 {
-    // Register API - username, password, password_confirmation
     public function register(Request $request)
     {
-        $request->validate([
-            "username" => "required|string|unique:users,username",
-            "password" => "required|confirmed|min:6",
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string|unique:users,username',
+            'password' => 'required|string|min:6',
+            'id_role'  => 'required|integer|exists:role,id_role' // Perhatikan nama tabel 'roles'
         ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()
+            ], 422);
+        }
+
         $user = User::create([
-            'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'dibuat_pada' => now(),
-            'role' => $request->role,
-            'dibuat_oleh' => 'api_register',
+            'username'     => $request->username,
+            'password'     => Hash::make($request->password),
+            'id_role'      => $request->id_role,
+            'dibuat_pada'  => now(),
+            'dibuat_oleh'  => 'system'
         ]);
 
         return response()->json([
-            "status" => true,
-            "message" => "User registered successfully",
-            "data" => $user
-        ]);
+            'success' => true,
+            'data'    => $user,
+            'message' => 'User registered successfully'
+        ], 201);
     }
-};
+}

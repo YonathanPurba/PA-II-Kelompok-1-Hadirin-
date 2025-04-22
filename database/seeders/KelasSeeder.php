@@ -2,46 +2,33 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Kelas;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class KelasSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        DB::table('kelas')->insert([
-            [
-                'nama_kelas' => 'Kelas 1A',
-                'tingkat' => '1',
-                'id_guru' => 1, // pastikan guru dengan ID 1 ada
-                'id_tahun_ajaran' => 1, // pastikan tahun ajaran dengan ID 1 ada
-                'dibuat_pada' => Carbon::now(),
-                'dibuat_oleh' => 'admin',
-                'diperbarui_pada' => Carbon::now(),
-                'diperbarui_oleh' => 'admin'
-            ],
-            [
-                'nama_kelas' => 'Kelas 2A',
-                'tingkat' => '2',
-                'id_guru' => 2,
-                'id_tahun_ajaran' => 1, // pastikan tahun ajaran dengan ID 1 ada
-                'dibuat_pada' => Carbon::now(),
-                'dibuat_oleh' => 'admin',
-                'diperbarui_pada' => Carbon::now(),
-                'diperbarui_oleh' => 'admin'
-            ],
-            // [
-            //     'nama_kelas' => 'Kelas 3B',
-            //     'tingkat' => '3',    
-            //     'id_guru' => 3,
-            //     'id_tahun_ajaran' => 1, // pastikan tahun ajaran dengan ID 1 ada
-            //     'dibuat_pada' => Carbon::now(),
-            //     'dibuat_oleh' => 'admin',
-            //     'diperbarui_pada' => Carbon::now(),
-            //     'diperbarui_oleh' => 'admin'
-            // ],
-        ]);
+        $tingkat = ['1', '2', '3', '4', '5', '6'];
+        $kelas = ['A', 'B'];
+
+        $id_guru = 1;
+        foreach ($tingkat as $t) {
+            foreach ($kelas as $k) {
+                Kelas::create([
+                    'nama_kelas' => $t . ' ' . $k,
+                    'tingkat' => $t,
+                    'id_guru' => $id_guru,
+                    'id_tahun_ajaran' => 1,
+                    'dibuat_pada' => now(),
+                    'dibuat_oleh' => 'system'
+                ]);
+                
+                $id_guru++;
+                if ($id_guru > 10) {
+                    $id_guru = 1; // Reset jika melebihi jumlah guru
+                }
+            }
+        }
     }
 }

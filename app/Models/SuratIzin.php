@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class SuratIzin extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'surat_izin';
     protected $primaryKey = 'id_surat_izin';
     
     const CREATED_AT = 'dibuat_pada';
     const UPDATED_AT = 'diperbarui_pada';
-    
+
     protected $fillable = [
         'id_siswa',
         'id_orangtua',
@@ -25,14 +25,19 @@ class SuratIzin extends Model
         'file_lampiran',
         'status',
         'dibuat_oleh',
-        'diperbarui_oleh',
+        'diperbarui_oleh'
     ];
-    
+
+    protected $casts = [
+        'tanggal_mulai' => 'date',
+        'tanggal_selesai' => 'date',
+    ];
+
     public function siswa()
     {
         return $this->belongsTo(Siswa::class, 'id_siswa', 'id_siswa');
     }
-    
+
     public function orangtua()
     {
         return $this->belongsTo(Orangtua::class, 'id_orangtua', 'id_orangtua');

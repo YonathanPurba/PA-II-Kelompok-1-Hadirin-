@@ -2,25 +2,36 @@
 
 namespace Database\Seeders;
 
+use App\Models\Orangtua;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Carbon;
 
 class OrangtuaSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        DB::table('orangtua')->insert([
-            [
-                'id_user' => 2,
-                'nama_lengkap' => 'Budi Santoso',
-                'alamat' => 'Jl. Merpati No.12',
-                'pekerjaan' => 'Pegawai Negeri',
-                'dibuat_pada' => Carbon::now(),
-                'dibuat_oleh' => 'Seeder',
-                'diperbarui_pada' => Carbon::now(),
-                'diperbarui_oleh' => 'Seeder',
-            ],
-        ]);
+        $pekerjaan = [
+            'Pegawai Negeri Sipil',
+            'Karyawan Swasta',
+            'Wiraswasta',
+            'Dokter',
+            'Guru',
+            'Petani',
+            'Pedagang',
+            'TNI/Polri',
+            'Buruh',
+            'Ibu Rumah Tangga'
+        ];
+
+        for ($i = 1; $i <= 20; $i++) {
+            Orangtua::create([
+                'id_user' => $i + 11, // User ID mulai dari 12 (setelah guru)
+                'nama_lengkap' => 'Orangtua ' . $i,
+                'alamat' => 'Jl. Contoh No. ' . $i . ', Kota Contoh',
+                'nomor_telepon' => '08567890' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'pekerjaan' => $pekerjaan[array_rand($pekerjaan)],
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'system'
+            ]);
+        }
     }
 }

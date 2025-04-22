@@ -11,40 +11,41 @@ class Kelas extends Model
 
     protected $table = 'kelas';
     protected $primaryKey = 'id_kelas';
-    public $timestamps = false;
+    
+    const CREATED_AT = 'dibuat_pada';
+    const UPDATED_AT = 'diperbarui_pada';
 
     protected $fillable = [
         'nama_kelas',
         'tingkat',
         'id_guru',
         'id_tahun_ajaran',
-        'dibuat_pada',
         'dibuat_oleh',
-        'diperbarui_pada',
-        'diperbarui_oleh',
+        'diperbarui_oleh'
     ];
 
-    // Relasi ke Guru
     public function guru()
     {
         return $this->belongsTo(Guru::class, 'id_guru', 'id_guru');
     }
 
-    // Relasi ke Siswa
-    public function siswa()
-    {
-        return $this->hasMany(Siswa::class, 'id_kelas');
-    }
-
-    // Relasi ke Jadwal Pelajaran
-    public function jadwalPelajaran()
-    {
-        return $this->hasMany(Jadwal::class, 'id_kelas');
-    }
-
-    // Relasi ke Tahun Ajaran
     public function tahunAjaran()
     {
         return $this->belongsTo(TahunAjaran::class, 'id_tahun_ajaran', 'id_tahun_ajaran');
+    }
+
+    public function siswa()
+    {
+        return $this->hasMany(Siswa::class, 'id_kelas', 'id_kelas');
+    }
+
+    public function jadwal()
+    {
+        return $this->hasMany(Jadwal::class, 'id_kelas', 'id_kelas');
+    }
+
+    public function rekapAbsensi()
+    {
+        return $this->hasMany(RekapAbsensi::class, 'id_kelas', 'id_kelas');
     }
 }

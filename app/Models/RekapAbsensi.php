@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class RekapAbsensi extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'rekap_absensi';
     protected $primaryKey = 'id_rekap';
     
     const CREATED_AT = 'dibuat_pada';
     const UPDATED_AT = 'diperbarui_pada';
-    
+
     protected $fillable = [
         'id_siswa',
         'id_kelas',
@@ -25,14 +25,14 @@ class RekapAbsensi extends Model
         'jumlah_izin',
         'jumlah_alpa',
         'dibuat_oleh',
-        'diperbarui_oleh',
+        'diperbarui_oleh'
     ];
-    
+
     public function siswa()
     {
         return $this->belongsTo(Siswa::class, 'id_siswa', 'id_siswa');
     }
-    
+
     public function kelas()
     {
         return $this->belongsTo(Kelas::class, 'id_kelas', 'id_kelas');

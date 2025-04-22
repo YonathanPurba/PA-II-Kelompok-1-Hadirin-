@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_user');
             $table->string('username')->unique(); 
             $table->string('password');
-            $table->enum(column: 'role', allowed: ['staf', 'guru', 'ortu'])->default('staf');
+            $table->foreignId('id_role')->constrained('role', 'id_role');
             $table->rememberToken();
             $table->timestamp('last_login_at')->nullable();
             $table->timestamp('dibuat_pada')->nullable();

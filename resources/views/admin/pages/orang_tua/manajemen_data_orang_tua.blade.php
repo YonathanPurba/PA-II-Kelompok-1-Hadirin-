@@ -58,7 +58,7 @@
                                                     data-nama="{{ $orangTua->nama_lengkap }}"
                                                     data-alamat="{{ $orangTua->alamat }}"
                                                     data-pekerjaan="{{ $orangTua->pekerjaan }}"
-                                                    data-nomor="{{ $orangTua->user->nomor_telepon }}"
+                                                    data-nomor="{{ $orangTua->nomor_telepon }}"
                                                     data-anak="{{ $orangTua->siswa->pluck('nama')->join(', ') }}"
                                                     data-bs-toggle="modal" data-bs-target="#modalViewOrangtua"
                                                     title="Lihat">

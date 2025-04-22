@@ -32,7 +32,6 @@ class UserController extends Controller
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:6',
             'id_role' => 'required|exists:role,id_role',
-            'nomor_telepon' => 'nullable|string|max:15',
         ]);
 
         if ($validator->fails()) {
@@ -47,7 +46,6 @@ class UserController extends Controller
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'id_role' => $request->id_role,
-            'nomor_telepon' => $request->nomor_telepon,
             'dibuat_pada' => now(),
             'dibuat_oleh' => 'API',
         ]);
@@ -97,7 +95,6 @@ class UserController extends Controller
             'username' => 'string|max:255|unique:users,username,' . $id . ',id_user',
             'password' => 'nullable|string|min:6',
             'id_role' => 'exists:role,id_role',
-            'nomor_telepon' => 'nullable|string|max:15',
         ]);
 
         if ($validator->fails()) {

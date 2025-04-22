@@ -2,34 +2,48 @@
 
 namespace Database\Seeders;
 
+use App\Models\RekapAbsensi;
+use App\Models\Siswa;
+use App\Models\Absensi;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class RekapAbsensiSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        $bulanSekarang = Carbon::now()->format('m');
-        $tahunSekarang = Carbon::now()->format('Y');
-
-        for ($siswa = 1; $siswa <= 5; $siswa++) {
-            for ($kelas = 1; $kelas <= 2; $kelas++) {
-                DB::table('rekap_absensi')->insert([
-                    'id_siswa' => $siswa,
-                    'id_kelas' => $kelas,
-                    'bulan' => $bulanSekarang,
-                    'tahun' => $tahunSekarang,
-                    'jumlah_hadir' => rand(10, 20),
-                    'jumlah_sakit' => rand(0, 3),
-                    'jumlah_izin' => rand(0, 3),
-                    'jumlah_alpa' => rand(0, 5),
-                    'dibuat_pada' => now(),
-                    'dibuat_oleh' => 'Seeder',
-                    'diperbarui_pada' => now(),
-                    'diperbarui_oleh' => 'Seeder',
-                ]);
-            }
+        // Ambil semua siswa
+        $siswa = Siswa::all();
+        
+        // Buat rekap untuk bulan lalu
+        $bulanLalu = Carbon::now()->subMonth();
+        $bulan = $bulanLalu->format('m');
+        $tahun = $bulanLalu->format('Y');
+        
+        foreach ($siswa as $s) {
+            // Hitung jumlah kehadiran dari data absensi
+            $absensi = Absensi::where('id_siswa', $s->id_siswa)
+                ->whereMonth('tanggal', $bulan)
+                ->whereYear('tanggal', $tahun)
+                ->get();
+            
+            $jumlahHadir = $absensi->where('status', 'hadir')->count();
+            $jumlahSakit = $absensi->where('status', 'sakit')->count();
+            $jumlahIzin = $absensi->where('status', 'izin')->count();
+            $jumlahAlpa = $absensi->where('status', 'alpa')->count();
+            
+            RekapAbsensi::create([
+                'id_siswa' => $s->id_siswa,
+                'id_kelas' => $s->id_kelas,
+                'bulan' => $bulan,
+                'tahun' => $tahun,
+                'jumlah_hadir' => $jumlahHadir,
+                'jumlah_sakit' => $jumlahSakit,
+                'jumlah_izin' => $jumlahIzin,
+                'jumlah_alpa' => $jumlahAlpa,
+                'dibuat_pada' => Carbon::now()->startOfMonth(),
+                'dibuat_oleh' => 'system'
+            ]);
         }
     }
 }
