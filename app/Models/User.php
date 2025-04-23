@@ -30,6 +30,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+<<<<<<< Updated upstream
 
     protected $casts = [
         'last_login_at' => 'datetime',
@@ -41,6 +42,14 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'id_role', 'id_role');
     }
 
+=======
+    
+    // public function role()
+    // {
+    //     return $this->belongsTo(Role::class, 'id_role', 'id_role');
+    // }
+    
+>>>>>>> Stashed changes
     public function guru()
     {
         return $this->hasOne(Guru::class, 'id_user', 'id_user');
