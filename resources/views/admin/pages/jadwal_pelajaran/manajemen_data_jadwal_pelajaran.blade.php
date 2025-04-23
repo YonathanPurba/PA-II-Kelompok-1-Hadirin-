@@ -56,8 +56,8 @@
                                         @foreach ($groupedJadwal[$day]->sortBy('waktu_mulai') as $index => $item)
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
-                                                <td>{{ $item->mataPelajaran->nama_mata_pelajaran ?? '-' }}</td>
-                                                <td>{{ $item->guru->nama_guru ?? '-' }}</td>
+                                                <td>{{ $item->mataPelajaran->nama ?? '-' }}</td>
+                                                <td>{{ $item->guru->nama_lengkap ?? '-' }}</td>
                                                 <td>{{ $item->kelas->nama_kelas ?? '-' }}</td>
                                                 <td>
                                                     {{ \Carbon\Carbon::parse($item->waktu_mulai)->format('H:i') }} -
