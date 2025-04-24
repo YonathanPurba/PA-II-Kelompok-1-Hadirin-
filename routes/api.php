@@ -30,6 +30,12 @@ Route::post("/register", [RegisterTest::class, "register"]);
 // Login
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/test-connection', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'API connection is successful!',
+    ]);
+});
 
 // Protected routes - menggunakan middleware 
 Route::middleware('auth:sanctum')->group(function () {

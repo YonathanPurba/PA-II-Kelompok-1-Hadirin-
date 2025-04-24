@@ -173,7 +173,17 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 });
 
+// Modal Guru
 $(document).ready(function () {
+
+    // Fungsi bantu untuk format waktu dari ISO string ke HH:MM
+    function formatTime(timeStr) {
+        const date = new Date(timeStr);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
     $('.btn-view-guru').on('click', function () {
         const idGuru = $(this).data('id');
 
@@ -183,7 +193,7 @@ $(document).ready(function () {
             success: function (res) {
                 $('#view-nama-lengkap').text(res.nama_lengkap ?? '-');
                 $('#view-nip').text(res.nip ?? '-');
-                $('#view-telepon').text(res.user?.nomor_telepon ?? '-');
+                $('#view-telepon').text(res.nomor_telepon ?? '-');
                 $('#view-terakhir-login').text(res.user?.last_login ?? '-');
 
                 if (res.mata_pelajaran?.length > 0) {
@@ -212,11 +222,16 @@ $(document).ready(function () {
                         const items = grouped[hari];
                         items.forEach((item, index) => {
                             const row = $('<tr>');
+
+                            const startTime = formatTime(item.waktu_mulai);
+                            const endTime = formatTime(item.waktu_selesai);
+
                             row.append(`<td class="text-center">${rowNumber++}</td>`);
                             row.append(`<td class="text-center">${index === 0 ? hari : ''}</td>`);
-                            row.append(`<td class="text-center">${item.waktu_mulai} - ${item.waktu_selesai}</td>`);
+                            row.append(`<td class="text-center">${startTime} - ${endTime}</td>`);
                             row.append(`<td class="text-center">${item.kelas?.nama_kelas ?? '-'}</td>`);
                             row.append(`<td class="text-center">${item.mata_pelajaran?.nama ?? '-'}</td>`);
+
                             tbody.append(row);
                         });
                     }
@@ -234,6 +249,7 @@ $(document).ready(function () {
             }
         });
     });
+
 });
 
 // Modal Orang Tua 
@@ -377,9 +393,9 @@ document.addEventListener('DOMContentLoaded', function () {
 window.addEventListener('load', function () {
     const loading = document.getElementById('loading');
     setTimeout(() => {
-      loading.style.opacity = 0;
-      setTimeout(() => {
-        loading.style.display = 'none';
-      }, 200); // match dengan durasi transition CSS
+        loading.style.opacity = 0;
+        setTimeout(() => {
+            loading.style.display = 'none';
+        }, 200); // match dengan durasi transition CSS
     }, 200); // durasi loading bisa disesuaikan
-  });
+});

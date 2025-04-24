@@ -124,35 +124,50 @@
                                         </ul>
                                     </div>
 
-                                    <!-- Absensi Berdasarkan Kelas -->
+                                    <!-- Absensi Berdasarkan Kelas -->                                    
                                     <div>
                                         <h4 class="mb-3 text-dark">Absensi Minggu Ini per Kelas</h4>
                                         <table class="table table-bordered table-sm">
                                             <thead class="bg-light">
                                                 <tr>
-                                                    <th class="p-2 text-start">Kelas</th>
-                                                    <th class="p-2 text-start text-primary">Hadir</th>
-                                                    <th class="p-2 text-start text-danger">Alpa</th>
-                                                    <th class="p-2 text-start text-warning">Sakit</th>
-                                                    <th class="p-2 text-start text-success">Izin</th>
+                                                    <th class="p-2 text-start">Kategori</th>
+                                                    @foreach ($absensiPerKelasMingguIni as $kelas)
+                                                        <th class="p-2 text-center">{{ $kelas->nama_kelas }}</th>
+                                                    @endforeach
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($absensiPerKelasMingguIni as $kelas)
-                                                    <tr>
-                                                        <td class="p-2">{{ $kelas->nama_kelas }}</td>
-                                                        <td class="p-2">{{ $kelas->hadir }}</td>
-                                                        <td class="p-2">{{ $kelas->alpa }}</td>
-                                                        <td class="p-2">{{ $kelas->sakit }}</td>
-                                                        <td class="p-2">{{ $kelas->izin }}</td>
-                                                    </tr>
-                                                @endforeach
+                                                <tr>
+                                                    <th class="p-2 text-start text-primary">Hadir</th>
+                                                    @foreach ($absensiPerKelasMingguIni as $kelas)
+                                                        <td class="p-2 text-center">{{ $kelas->hadir }}</td>
+                                                    @endforeach
+                                                </tr>
+                                                <tr>
+                                                    <th class="p-2 text-start text-danger">Alpa</th>
+                                                    @foreach ($absensiPerKelasMingguIni as $kelas)
+                                                        <td class="p-2 text-center">{{ $kelas->alpa }}</td>
+                                                    @endforeach
+                                                </tr>
+                                                <tr>
+                                                    <th class="p-2 text-start text-warning">Sakit</th>
+                                                    @foreach ($absensiPerKelasMingguIni as $kelas)
+                                                        <td class="p-2 text-center">{{ $kelas->sakit }}</td>
+                                                    @endforeach
+                                                </tr>
+                                                <tr>
+                                                    <th class="p-2 text-start text-success">Izin</th>
+                                                    @foreach ($absensiPerKelasMingguIni as $kelas)
+                                                        <td class="p-2 text-center">{{ $kelas->izin }}</td>
+                                                    @endforeach
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
+
                                 </div>
 
-                                <!-- Penjelasan Grafik -->
+                                {{-- <!-- Penjelasan Grafik -->
                                 <div class="mt-4">
                                     <h4 class="mb-3 text-dark">Penjelasan Grafik Absensi</h4>
                                     <ul class="fs-5 text-dark">
@@ -167,7 +182,7 @@
                                         Data ini membantu memantau konsistensi kehadiran siswa dan mendeteksi tren yang
                                         perlu perhatian khusus.
                                     </p>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>
@@ -206,12 +221,13 @@
                         </div>
                     </div>
 
-                    <div class="detail-kelas mt-5">
+                    <div class="container-fluid mt-5">
                         <!-- Detail Kelas -->
                         <div class="header-data d-flex justify-content-between align-items-center mb-5">
-                            <h2>Detail Kelas</h2>
+                            <h2>Informasi Kelas</h2>
                         </div>
-                        <div class="daftar-kelas" style="display: flex; flex-wrap: wrap; gap: 20px;">
+                        <div class="daftar-kelas"
+                            style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
                             @forelse ($detailKelas as $kelases)
                                 <div class="card"
                                     style="width: 240px; height: auto; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); background-color: #fff; display: flex; flex-direction: column; align-items: center;">

@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Guru;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Models\MataPelajaran;
 use App\Services\UserService;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 
 class GuruController extends Controller
@@ -58,12 +59,18 @@ class GuruController extends Controller
         return response()->json($guru);
     }
 
-
     public function edit($id)
     {
-        $guru = Guru::with('user')->findOrFail($id);
-        return view('admin.pages.guru.edit_guru', compact('guru'));
+        // Mengambil data guru beserta mata pelajaran yang terkait melalui pivot table
+        $guru = Guru::with('mataPelajaran')->findOrFail($id);
+
+        // Mengambil semua mata pelajaran untuk dropdown
+        $allMataPelajaran = MataPelajaran::all();
+
+        // Mengirimkan data guru dan mata pelajaran ke view edit
+        return view('admin.pages.guru.edit_guru', compact('guru', 'allMataPelajaran'));
     }
+
 
     public function store(Request $request)
     {
@@ -111,33 +118,61 @@ class GuruController extends Controller
         }
     }
 
+    // public function update(Request $request, $id)
+    // {
+    //     $validated = $request->validate([
+    //         'nama_lengkap'    => 'required|string|max:255',
+    //         'nama'            => 'required|string|max:255',
+    //         'nip'             => 'nullable|string|max:100',
+    //         'nomor_telepon'   => 'nullable|string|max:20',
+    //     ]);
+
+    //     // Siapkan data user & guru
+    //     $userData = [
+    //         'username'       => $validated['nama'],
+    //         'nomor_telepon'  => $validated['nomor_telepon'],
+    //     ];
+
+    //     $guruData = [
+    //         'nama_lengkap' => $validated['nama_lengkap'],
+    //         'nip'          => $validated['nip'],
+    //     ];
+
+    //     try {
+    //         UserService::updateGuruWithUser($id, $guruData, $userData);
+    //         return redirect()->route('guru.index')->with('success', 'Data guru berhasil diperbarui.');
+    //     } catch (\Exception $e) {
+    //         return back()->withErrors(['error' => 'Gagal memperbarui data: ' . $e->getMessage()])->withInput();
+    //     }
+    // }
+
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'nama_lengkap'    => 'required|string|max:255',
-            'nama'            => 'required|string|max:255',
-            'nip'             => 'nullable|string|max:100',            
-            'nomor_telepon'   => 'nullable|string|max:20',
+        // Validasi input
+        $request->validate([
+            'nama_lengkap' => 'required|string|max:255',
+            'nip' => 'nullable|string|max:50',
+            'nomor_telepon' => 'nullable|string|max:20',
+            'mata_pelajaran' => 'required|array',
+            'mata_pelajaran.*' => 'exists:mata_pelajaran,id_mata_pelajaran',
         ]);
 
-        // Siapkan data user & guru
-        $userData = [
-            'username'       => $validated['nama'],
-            'nomor_telepon'  => $validated['nomor_telepon'],
-        ];
+        // Ambil data guru
+        $guru = Guru::findOrFail($id);
 
-        $guruData = [
-            'nama_lengkap' => $validated['nama_lengkap'],
-            'nip'          => $validated['nip'],
-        ];
+        // Update data guru
+        $guru->update([
+            'nama_lengkap' => $request->nama_lengkap,
+            'nip' => $request->nip,
+            'nomor_telepon' => $request->nomor_telepon,
+        ]);
 
-        try {
-            UserService::updateGuruWithUser($id, $guruData, $userData);
-            return redirect()->route('guru.index')->with('success', 'Data guru berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Gagal memperbarui data: ' . $e->getMessage()])->withInput();
-        }
+        // Sinkronisasi relasi guru <-> mata pelajaran (pivot table)
+        $guru->mataPelajaran()->sync($request->mata_pelajaran);
+
+        return redirect()->route('guru.index')->with('success', 'Data guru berhasil diperbarui.');
     }
+        
 
     public function destroy($id)
     {

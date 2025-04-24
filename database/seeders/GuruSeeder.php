@@ -9,7 +9,6 @@ class GuruSeeder extends Seeder
 {
     public function run()
     {
-<<<<<<< Updated upstream
         $bidangStudi = [
             'Matematika',
             'Bahasa Indonesia',
@@ -34,55 +33,5 @@ class GuruSeeder extends Seeder
                 'dibuat_oleh' => 'system'
             ]);
         }
-=======
-        // Insert ke tabel guru
-        DB::table('guru')->insert([
-            [
-                'id_user' => 3,
-                'nama_lengkap' => 'Budi Santoso', // ✅ Tambahkan nama_lengkap
-                'nip' => '1987654321',
-                'nomor_telepon' => '1987654321',
-                'bidang_studi' => 'Matematika',
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'Seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'Seeder',
-            ],
-            [
-                'id_user' => 3,
-                'nama_lengkap' => 'Siti Aminah', // ✅ Tambahkan nama_lengkap
-                'nip' => '1987654322',
-                'nomor_telepon' => '1987654321',
-                'bidang_studi' => 'Bahasa Indonesia',
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'Seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'Seeder',
-            ],
-            // Guru tambahan
-            [
-                'id_user' => 3,
-                'nama_lengkap' => 'Rudi Hartono', // Guru tambahan 1
-                'nip' => '1987654323',
-                'nomor_telepon' => '1987654323',
-                'bidang_studi' => 'Fisika',
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'Seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'Seeder',
-            ],
-            [
-                'id_user' => 3,
-                'nama_lengkap' => 'Anisa Fauziyah', // Guru tambahan 2
-                'nip' => '1987654324',
-                'nomor_telepon' => '1987654324',
-                'bidang_studi' => 'Kimia',
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'Seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'Seeder',
-            ],
-        ]);
->>>>>>> Stashed changes
     }
 }

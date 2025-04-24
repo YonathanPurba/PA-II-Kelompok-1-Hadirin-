@@ -34,17 +34,6 @@
                             @enderror
                         </div>
 
-                        <!-- Nama Pengguna -->
-                        <div class="mb-3">
-                            <label for="nama" class="form-label">Nama Pengguna</label>
-                            <input type="text" name="nama" id="nama"
-                                class="form-control @error('nama') is-invalid @enderror"
-                                value="{{ old('nama', $guru->user->username ?? '') }}" required>
-                            @error('nama')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
                         <!-- NIP -->
                         <div class="mb-3">
                             <label for="nip" class="form-label">NIP</label>
@@ -56,23 +45,39 @@
                             @enderror
                         </div>
 
-                        <!-- Email -->
+                        <!-- Mata Pelajaran -->
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" id="email"
-                                class="form-control @error('email') is-invalid @enderror"
-                                value="{{ old('email', $guru->user->email ?? '') }}">
-                            @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                            <label class="form-label">Mata Pelajaran yang Diampu</label>
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2">
+                                @foreach ($allMataPelajaran as $mapel)
+                                    <div class="col">
+                                        <div class="border rounded px-3 py-2 h-100 bg-light d-flex align-items-center">
+                                            <div class="form-check mb-0">
+                                                <input class="form-check-input" type="checkbox" name="mata_pelajaran[]"
+                                                    id="mapel-{{ $mapel->id_mata_pelajaran }}"
+                                                    value="{{ $mapel->id_mata_pelajaran }}"
+                                                    {{ in_array($mapel->id_mata_pelajaran, $guru->mataPelajaran->pluck('id_mata_pelajaran')->toArray()) ? 'checked' : '' }}>
+                                                <label class="form-check-label ms-2"
+                                                    for="mapel-{{ $mapel->id_mata_pelajaran }}">
+                                                    {{ $mapel->nama }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            @error('mata_pelajaran')
+                                <div class="text-danger mt-2">{{ $message }}</div>
                             @enderror
                         </div>
+
 
                         <!-- Nomor Telepon -->
                         <div class="mb-3">
                             <label for="nomor_telepon" class="form-label">Nomor Telepon</label>
                             <input type="text" name="nomor_telepon" id="nomor_telepon"
                                 class="form-control @error('nomor_telepon') is-invalid @enderror"
-                                value="{{ old('nomor_telepon', $guru->user->nomor_telepon ?? '') }}">
+                                value="{{ old('nomor_telepon', $guru->nomor_telepon) }}">
                             @error('nomor_telepon')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -89,3 +94,5 @@
         </main>
     </div>
 @endsection
+
+
