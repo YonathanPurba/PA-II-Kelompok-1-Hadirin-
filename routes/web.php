@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\OrangTua;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuruController;
@@ -32,8 +30,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // Profile
-    Route::get('/profile', [AuthController::class, 'profile']);
-    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    // Route::get('/profile', [AuthController::class, 'profile']);
+    // Route::put('/profile', [AuthController::class, 'updateProfile']);
 
     // Users
     Route::get('/users', [UserController::class, 'index']);
