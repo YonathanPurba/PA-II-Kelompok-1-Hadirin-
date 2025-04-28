@@ -13,11 +13,18 @@ return new class extends Migration
     {
         Schema::create('guru', function (Blueprint $table) {
             $table->id('id_guru');
-            $table->foreignId('id_user')->constrained('users', 'id_user')->onDelete('cascade');
+
+            // Tambahkan unique constraint agar 1 user hanya bisa punya 1 akun guru
+            $table->foreignId('id_user')
+                ->unique()
+                ->constrained('users', 'id_user')
+                ->onDelete('cascade');
+
             $table->string('nama_lengkap');
             $table->string('nip')->unique()->nullable();
-            $table->string(column: 'nomor_telepon')->nullable();
+            $table->string('nomor_telepon')->nullable();
             $table->string('bidang_studi')->nullable();
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamp('dibuat_pada')->nullable();
             $table->string('dibuat_oleh')->nullable();
             $table->timestamp('diperbarui_pada')->nullable();
@@ -33,4 +40,3 @@ return new class extends Migration
         Schema::dropIfExists('guru');
     }
 };
-

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('alamat')->nullable();
             $table->string(column: 'nomor_telepon')->nullable();
             $table->string('pekerjaan')->nullable();
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamp('dibuat_pada')->nullable();
             $table->string('dibuat_oleh')->nullable();
             $table->timestamp('diperbarui_pada')->nullable();

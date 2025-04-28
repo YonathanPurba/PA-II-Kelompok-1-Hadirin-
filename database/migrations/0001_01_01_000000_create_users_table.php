@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('id_user');
+            $table->id('id_user'); // Auto increment & primary key
             $table->string('username')->unique(); 
             $table->string('password');
             $table->foreignId('id_role')->constrained('role', 'id_role');

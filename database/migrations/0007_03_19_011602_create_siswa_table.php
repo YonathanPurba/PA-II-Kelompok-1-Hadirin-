@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('tanggal_lahir')->nullable();
             $table->enum('jenis_kelamin', ['laki-laki', 'perempuan']);
             $table->text('alamat')->nullable();
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamp('dibuat_pada')->nullable();
             $table->string('dibuat_oleh')->nullable();
             $table->timestamp('diperbarui_pada')->nullable();

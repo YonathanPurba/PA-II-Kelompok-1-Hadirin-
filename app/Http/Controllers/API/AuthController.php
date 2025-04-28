@@ -37,7 +37,7 @@ class AuthController extends Controller
         }
 
         $user = User::where('username', $request->username)->with('role')->firstOrFail();
-        
+
         // Update last login time
         $user->update([
             'last_login_at' => now(),
@@ -69,10 +69,15 @@ class AuthController extends Controller
             'message' => 'Login successful',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user,
+            'user' => [
+                'id' => $user->id_user,
+                'username' => $user->username,
+                'role' => $user->role->role,  // Menambahkan role ke dalam response
+            ],
             'profile' => $profile
-        ]);
+    ]);
     }
+
 
     public function logout(Request $request)
     {
