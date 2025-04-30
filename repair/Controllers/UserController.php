@@ -9,8 +9,6 @@ use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -19,10 +17,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Check if we're using the correct table name
-        $roleTableName = (new Role())->getTable();
         $users = User::with('role')->get();
-        return view('admin.pages.users.manajemen_data_users', compact('users'));
+        return view('admin.pages.users.index', compact('users'));
     }
 
     /**
@@ -42,49 +38,17 @@ class UserController extends Controller
         $request->validate([
             'username' => 'required|string|max:255|unique:users,username',
             'password' => 'required|string|min:6|confirmed',
-            'id_role' => 'required', // Removed exists validation temporarily
+            'id_role' => 'required|exists:roles,id_role',
         ]);
-
-        // Check if the role exists manually
-        $roleExists = DB::table((new Role())->getTable())->where('id_role', $request->id_role)->exists();
-        if (!$roleExists) {
-            return redirect()->back()->withErrors(['id_role' => 'The selected role is invalid.'])->withInput();
-        }
 
         $user = User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'id_role' => $request->id_role,
             'dibuat_oleh' => Auth::user()->username,
-            'dibuat_pada' => now(),
         ]);
 
-        return redirect()->route('admin.pages.users.index')->with('success', 'User berhasil ditambahkan');
-    }
-
-    /**
-     * Get the user with related data.
-     */
-    private function getUserWithRelations($id)
-    {
-        // Get the columns that actually exist in the guru table
-        $guruColumns = Schema::getColumnListing('guru');
-        $selectColumns = ['id_guru', 'id_user'];
-        
-        // Add other columns only if they exist
-        foreach (['nama_lengkap', 'nip', 'alamat'] as $column) {
-            if (in_array($column, $guruColumns)) {
-                $selectColumns[] = $column;
-            }
-        }
-        
-        return User::with(['role', 
-            'guru' => function($query) use ($selectColumns) {
-                $query->select($selectColumns);
-            }, 
-            'orangtua', 
-            'staf'
-        ])->findOrFail($id);
+        return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan');
     }
 
     /**
@@ -92,7 +56,7 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $user = $this->getUserWithRelations($id);
+        $user = User::with('role')->findOrFail($id);
         return view('admin.pages.users.show', compact('user'));
     }
 
@@ -120,20 +84,13 @@ class UserController extends Controller
                 'max:255',
                 Rule::unique('users', 'username')->ignore($user->id_user, 'id_user'),
             ],
-            'id_role' => 'required', // Removed exists validation temporarily
+            'id_role' => 'required|exists:roles,id_role',
         ]);
-
-        // Check if the role exists manually
-        $roleExists = DB::table((new Role())->getTable())->where('id_role', $request->id_role)->exists();
-        if (!$roleExists) {
-            return redirect()->back()->withErrors(['id_role' => 'The selected role is invalid.'])->withInput();
-        }
 
         $userData = [
             'username' => $request->username,
             'id_role' => $request->id_role,
             'diperbarui_oleh' => Auth::user()->username,
-            'diperbarui_pada' => now(),
         ];
 
         // Only update password if it's provided
@@ -146,11 +103,22 @@ class UserController extends Controller
 
         $user->update($userData);
 
-        return redirect()->route('admin.pages.users.index')->with('success', 'User berhasil diperbarui');
+        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-
+    public function destroy(string $id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Check if user has related records
+        if ($user->guru()->exists() || $user->orangtua()->exists() || $user->staf()->exists()) {
+            return redirect()->route('users.index')->with('error', 'User tidak dapat dihapus karena memiliki data terkait');
+        }
+        
+        $user->delete();
+        return redirect()->route('users.index')->with('success', 'User berhasil dihapus');
+    }
 }

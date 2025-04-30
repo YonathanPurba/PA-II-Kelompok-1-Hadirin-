@@ -12,7 +12,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-class UserController extends Controller
+class a extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -152,5 +152,16 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-
+    public function destroy(string $id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Check if user has related records
+        if ($user->guru()->exists() || $user->orangtua()->exists() || $user->staf()->exists()) {
+            return redirect()->route('admin.pages.users.manajemen_data_users')->with('error', 'User tidak dapat dihapus karena memiliki data terkait');
+        }
+        
+        $user->delete();
+        return redirect()->route('admin.pages.users.manajemen_data_users')->with('success', 'User berhasil dihapus');
+    }
 }
