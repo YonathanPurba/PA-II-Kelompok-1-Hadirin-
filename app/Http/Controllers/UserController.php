@@ -169,15 +169,11 @@ class UserController extends Controller
                 ->with('error', 'Pengguna tidak ditemukan atau terjadi kesalahan: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         try {
             $user = User::findOrFail($id);
-
+    
             // Validasi dasar
             $rules = [
                 'username' => [
@@ -186,54 +182,41 @@ class UserController extends Controller
                     'max:255',
                     Rule::unique('users', 'username')->ignore($user->id_user, 'id_user'),
                 ],
-                'id_role' => 'required',
             ];
-
+    
             $messages = [
                 'username.required' => 'Username wajib diisi.',
                 'username.unique' => 'Username sudah digunakan oleh pengguna lain.',
                 'username.max' => 'Username maksimal 255 karakter.',
-                'id_role.required' => 'Role wajib dipilih.',
-                'id_role.exists' => 'Role yang dipilih tidak valid.',
             ];
-
+    
             // Tambahkan validasi password jika diisi
             if ($request->filled('password')) {
                 $rules['password'] = 'string|min:8|confirmed';
                 $messages['password.min'] = 'Password minimal 8 karakter.';
                 $messages['password.confirmed'] = 'Konfirmasi password tidak cocok.';
             }
-
+    
             $validated = $request->validate($rules, $messages);
-            
-            // Check if the role exists manually
-            $roleTableName = (new Role())->getTable();
-            $roleExists = DB::table($roleTableName)->where('id_role', $request->id_role)->exists();
-            if (!$roleExists) {
-                return redirect()->back()
-                    ->withErrors(['id_role' => 'Role yang dipilih tidak valid.'])
-                    ->withInput();
-            }
-
+    
             $userData = [
                 'username' => $validated['username'],
-                'id_role' => $validated['id_role'],
                 'diperbarui_oleh' => Auth::user()->username,
                 'diperbarui_pada' => now(),
             ];
-
+    
             // Update password jika diisi
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);
             }
-
+    
             $user->update($userData);
-
+    
             $message = "User '{$user->username}' berhasil diperbarui";
             if ($request->filled('password')) {
                 $message .= " dengan password baru";
             }
-
+    
             return redirect()->route('users.index')
                 ->with('success', $message);
         } catch (ValidationException $e) {
@@ -247,6 +230,7 @@ class UserController extends Controller
                 ->with('error', 'Terjadi kesalahan saat memperbarui pengguna: ' . $e->getMessage());
         }
     }
+    
 
     /**
      * Remove the specified resource from storage.

@@ -74,11 +74,11 @@
                         </table>
                     </div>
 
-                    <div class="mt-4 text-end">
+                    <!-- <div class="mt-4 text-end">
                         <a href="{{ route('users.create') }}" class="btn btn-success">
                             <i class="bi bi-plus-circle me-1"></i>Tambah Pengguna
                         </a>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </main>

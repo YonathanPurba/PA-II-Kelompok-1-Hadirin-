@@ -80,7 +80,7 @@
                         </div>
 
                         <!-- Role -->
-                        <div class="mb-3">
+                        <!-- <div class="mb-3">
                             <label for="id_role" class="form-label">Role <span class="text-danger">*</span></label>
                             <select name="id_role" id="id_role" class="form-select @error('id_role') is-invalid @enderror" required>
                                 <option value="">-- Pilih Role --</option>
@@ -93,7 +93,7 @@
                             @error('id_role')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> -->
 
                         <!-- Informasi Update -->
                         <div class="mb-3 mt-4 border-top pt-3">

@@ -91,7 +91,7 @@ class SiswaController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama_lengkap' => 'required|string|max:255',
-            'nisn' => 'required|string|max:10|unique:siswa',
+            'nis' => 'required|string|max:10|unique:siswa',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'kelas_id' => 'nullable|exists:kelas,id_kelas',
             'id_user' => 'nullable|exists:users,id_user',

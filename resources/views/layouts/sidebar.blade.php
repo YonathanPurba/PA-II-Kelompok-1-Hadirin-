@@ -19,13 +19,13 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a href="{{ url('/admin/dokumen') }}" class="nav-link {{ Request::is('admin/dokumen*') ? 'active' : '' }}">
                     <span class="nav-icon material-symbols-rounded">description</span>
                     <span class="nav-label">Dokumen</span>
                     <span class="nav-tooltip">Dokumen</span>
                 </a>
-            </li>
+            </li> -->
 
             <li class="nav-item">
                 <a href="{{ url('/admin/rekapitulasi') }}" class="nav-link {{ Request::is('admin/rekapitulasi*') ? 'active' : '' }}">
