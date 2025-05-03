@@ -37,6 +37,32 @@ Route::get('/test-connection', function () {
     ]);
 });
 
+ // Notifikasi
+ Route::prefix('notifikasi')->group(function () {
+    Route::get('/', [NotifikasiController::class, 'index']);
+    Route::post('/', [NotifikasiController::class, 'store']);
+    Route::get('/{id}', [NotifikasiController::class, 'show']);
+    Route::put('/{id}/read', [NotifikasiController::class, 'markAsRead']);
+    Route::put('/read-all', [NotifikasiController::class, 'markAllAsRead']);
+    Route::get('/unread-count', [NotifikasiController::class, 'getUnreadCount']);
+    Route::delete('/{id}', [NotifikasiController::class, 'destroy']);
+    Route::get('/user/{userId}', [NotifikasiController::class, 'getByUser']);
+});
+
+
+// dummy data notifikasi
+Route::post('/notifikasi', [NotifikasiController::class, 'store']);
+
+
+// dummy data guru get jadwal|
+Route::get('guru/{id}/jadwal', [GuruController::class, 'getJadwal']);
+
+// save fcm token
+Route::post('/save_fcm_token', [AuthController::class, 'saveFcmToken']);
+
+// get fcm token
+Route::post('/get_fcm_token_by_id', [NotifikasiController::class, 'getFcmTokenById']);
+
 // Protected routes - menggunakan middleware 
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
@@ -105,17 +131,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/export', [RekapAbsensiController::class, 'exportRekap']);
     });
     
-    // Notifikasi
-    Route::prefix('notifikasi')->group(function () {
-        Route::get('/', [NotifikasiController::class, 'index']);
-        Route::post('/', [NotifikasiController::class, 'store']);
-        Route::get('/{id}', [NotifikasiController::class, 'show']);
-        Route::put('/{id}/read', [NotifikasiController::class, 'markAsRead']);
-        Route::put('/read-all', [NotifikasiController::class, 'markAllAsRead']);
-        Route::get('/unread-count', [NotifikasiController::class, 'getUnreadCount']);
-        Route::delete('/{id}', [NotifikasiController::class, 'destroy']);
-        Route::get('/user/{userId}', [NotifikasiController::class, 'getByUser']);
-    });
+   
+    
     
     // Kelas Routes
     Route::prefix('kelas')->group(function () {
@@ -143,7 +160,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [GuruController::class, 'destroy']);
         
         // Additional useful routes
-        Route::get('/{id}/jadwal', [GuruController::class, 'getJadwal']);
+        // Route::get('/{id}/jadwal', [GuruController::class, 'getJadwal']);
         Route::get('/{id}/mata-pelajaran', [GuruController::class, 'getMataPelajaran']);
         Route::get('/{id}/kelas-wali', [GuruController::class, 'getKelasWali']);
         Route::get('/search', [GuruController::class, 'search']);
