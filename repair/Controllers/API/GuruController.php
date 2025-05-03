@@ -18,7 +18,7 @@ class GuruController extends Controller
     public function index()
     {
         $guru = Guru::with(['user', 'mataPelajaran', 'kelas'])->get();
-        
+
         return response()->json([
             'success' => true,
             'data' => $guru,
@@ -109,14 +109,14 @@ class GuruController extends Controller
     public function show($id)
     {
         $guru = Guru::with(['user', 'mataPelajaran', 'jadwal.kelas', 'jadwal.mataPelajaran'])->find($id);
-        
+
         if (!$guru) {
             return response()->json([
                 'success' => false,
                 'message' => 'Guru tidak ditemukan',
             ], 404);
         }
-        
+
         return response()->json([
             'success' => true,
             'data' => $guru,
@@ -129,14 +129,14 @@ class GuruController extends Controller
     public function update(Request $request, $id)
     {
         $guru = Guru::with('user')->find($id);
-        
+
         if (!$guru) {
             return response()->json([
                 'success' => false,
                 'message' => 'Guru tidak ditemukan',
             ], 404);
         }
-        
+
         $validator = Validator::make($request->all(), [
             'nama_lengkap' => 'string|max:255',
             'nip' => 'nullable|string|max:50|unique:guru,nip,' . $id . ',id_guru',
@@ -160,19 +160,19 @@ class GuruController extends Controller
         try {
             // Update user data
             $userData = [];
-            
+
             if ($request->has('username')) {
                 $userData['username'] = $request->username;
             }
-            
+
             if ($request->has('password')) {
                 $userData['password'] = Hash::make($request->password);
             }
-            
+
             if ($request->has('nomor_telepon')) {
                 $userData['nomor_telepon'] = $request->nomor_telepon;
             }
-            
+
             if (!empty($userData)) {
                 $userData['diperbarui_pada'] = now();
                 $userData['diperbarui_oleh'] = 'API';
@@ -181,19 +181,19 @@ class GuruController extends Controller
 
             // Update guru data
             $guruData = [];
-            
+
             if ($request->has('nama_lengkap')) {
                 $guruData['nama_lengkap'] = $request->nama_lengkap;
             }
-            
+
             if ($request->has('nip')) {
                 $guruData['nip'] = $request->nip;
             }
-            
+
             if ($request->has('bidang_studi')) {
                 $guruData['bidang_studi'] = $request->bidang_studi;
             }
-            
+
             if (!empty($guruData)) {
                 $guruData['diperbarui_pada'] = now();
                 $guruData['diperbarui_oleh'] = 'API';
@@ -238,27 +238,27 @@ class GuruController extends Controller
     public function destroy($id)
     {
         $guru = Guru::find($id);
-        
+
         if (!$guru) {
             return response()->json([
                 'success' => false,
                 'message' => 'Guru tidak ditemukan',
             ], 404);
         }
-        
+
         DB::beginTransaction();
         try {
             // Simpan id_user untuk menghapus user setelah guru dihapus
             $idUser = $guru->id_user;
-            
+
             // Hapus guru
             $guru->delete();
-            
+
             // Hapus user terkait
             User::where('id_user', $idUser)->delete();
-            
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Guru berhasil dihapus',
@@ -279,19 +279,20 @@ class GuruController extends Controller
     public function getJadwal($id)
     {
         $guru = Guru::find($id);
-        
+
         if (!$guru) {
             return response()->json([
                 'success' => false,
                 'message' => 'Guru tidak ditemukan',
             ], 404);
         }
-        
+
         $jadwal = $guru->jadwal()->with(['kelas', 'mataPelajaran'])->get();
-        
+
         return response()->json([
             'success' => true,
             'data' => $jadwal,
         ], 200);
     }
+   
 }
