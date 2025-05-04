@@ -70,13 +70,36 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => [
-                'id' => $user->id_user,
+                'id_user' => $user->id_user,
                 'username' => $user->username,
                 'role' => $user->role->role,  // Menambahkan role ke dalam response
             ],
             'profile' => $profile
     ]);
     }
+    
+    public function saveFcmToken(Request $request)
+    {
+        // Validasi token dan id_user
+        $request->validate([
+            'fcm_token' => 'required|string',
+            'id_user' => 'required|integer', // Validasi id_user
+        ]);
+
+        // Ambil user berdasarkan id_user yang dikirim dalam body request
+        $user = User::find($request->id_user);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        // Simpan FCM token
+        $user->fcm_token = $request->fcm_token;
+        $user->save();
+
+        return response()->json(['message' => 'FCM Token saved successfully!'], 200);
+    }
+
 
 
     public function logout(Request $request)
@@ -93,7 +116,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = $request->user()->load('role');
-        
+
         // Get user profile based on role
         $profile = null;
         if ($user->role) {
