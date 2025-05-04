@@ -167,7 +167,7 @@
 
                                 </div>
 
-                                {{-- <!-- Penjelasan Grafik -->
+                                <!-- Penjelasan Grafik -->
                                 <div class="mt-4">
                                     <h4 class="mb-3 text-dark">Penjelasan Grafik Absensi</h4>
                                     <ul class="fs-5 text-dark">
@@ -182,7 +182,7 @@
                                         Data ini membantu memantau konsistensi kehadiran siswa dan mendeteksi tren yang
                                         perlu perhatian khusus.
                                     </p>
-                                </div> --}}
+                                </div>
                             </div>
                         </div>
                     </div>

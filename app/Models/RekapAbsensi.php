@@ -11,9 +11,7 @@ class RekapAbsensi extends Model
 
     protected $table = 'rekap_absensi';
     protected $primaryKey = 'id_rekap';
-    
-    const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = 'diperbarui_pada';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_siswa',
@@ -24,7 +22,9 @@ class RekapAbsensi extends Model
         'jumlah_sakit',
         'jumlah_izin',
         'jumlah_alpa',
+        'dibuat_pada',
         'dibuat_oleh',
+        'diperbarui_pada',
         'diperbarui_oleh'
     ];
 
