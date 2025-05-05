@@ -444,4 +444,62 @@ class GuruController extends Controller
             'data' => ['data' => $notifikasi]
         ]);
     }
+
+    public function jadwalMingguan($id)
+    {
+        try {
+            // Ambil user berdasarkan ID
+            $user = User::find($id);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pengguna tidak ditemukan.',
+                    'data' => []
+                ], 404);
+            }
+
+            // Ambil guru dari relasi user
+            $guru = $user->guru;
+            if (!$guru) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Guru tidak ditemukan.',
+                    'data' => []
+                ], 404);
+            }
+
+            // Ambil jadwal guru berdasarkan id_guru
+            $jadwal = Jadwal::where('id_guru', $guru->id_guru)
+                ->with(['kelas', 'mataPelajaran'])
+                ->orderBy('hari')
+                ->orderBy('waktu_mulai')
+                ->get();
+
+            // Format jadwal
+            $formattedJadwal = $jadwal->map(function ($item) {
+                $status = $this->getStatusJadwal($item->waktu_mulai, $item->waktu_selesai);
+
+                return [
+                    'hari' => $item->hari,
+                    'kelas' => $item->kelas->nama_kelas ?? '-',
+                    'mata_pelajaran' => $item->mataPelajaran->nama ?? '-',
+                    'waktu' => $item->waktu_mulai->format('H:i') . ' - ' . $item->waktu_selesai->format('H:i'),
+                    'status' => $status,
+                    'color' => $this->getStatusColor($status),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Jadwal berhasil diambil.',
+                'data' => $formattedJadwal
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
+    }
 }

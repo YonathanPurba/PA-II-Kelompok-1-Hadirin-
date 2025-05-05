@@ -162,6 +162,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile/{id}', [GuruController::class, 'getProfile']);
         Route::get('{id_user}/notifikasi-surat-izin', [GuruController::class, 'getNotifikasiSuratIzin']);
 
+        Route::get('/{id_user}/jadwal-mingguan', [GuruController::class, 'jadwalMingguan']);
+
         // Additional useful routes
         // Route::get('/{id}/jadwal', [GuruController::class, 'getJadwal']);
         Route::get('/{id}/mata-pelajaran', [GuruController::class, 'getMataPelajaran']);
