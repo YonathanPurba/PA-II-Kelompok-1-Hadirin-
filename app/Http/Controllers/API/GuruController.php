@@ -317,17 +317,21 @@ class GuruController extends Controller
             ->with('kelas', 'mataPelajaran') // Menambahkan relasi kelas dan mata pelajaran
             ->get();
 
-        // Mengubah data jadwal agar sesuai dengan format yang diinginkan
         $formattedJadwal = $jadwal->map(function ($item) {
             $status = $this->getStatusJadwal($item->waktu_mulai, $item->waktu_selesai);
 
             return [
-                'kelas' => $item->kelas->nama_kelas, // Misalkan nama kelas berada di model Kelas
+                'kelas' => $item->kelas->nama_kelas,
+                'mata_pelajaran' => $item->mataPelajaran->nama_mapel,
+                'hari' => $item->hari, // jika kamu simpan hari
                 'waktu' => $item->waktu_mulai->format('H:i') . ' - ' . $item->waktu_selesai->format('H:i'),
+                'jam_mulai' => $item->waktu_mulai->format('H:i'), // untuk perbandingan di Flutter
+                'jam_selesai' => $item->waktu_selesai->format('H:i'),
                 'status' => $status,
-                'color' => $this->getStatusColor($status), // Menentukan warna berdasarkan status
+                'color' => $this->getStatusColor($status),
             ];
         });
+
 
         return response()->json(['data' => $formattedJadwal]);
     }

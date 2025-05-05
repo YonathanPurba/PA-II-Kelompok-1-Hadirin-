@@ -273,26 +273,26 @@ class GuruController extends Controller
         }
     }
 
-    /**
-     * Get jadwal mengajar guru.
-     */
-    public function getJadwal($id)
-    {
-        $guru = Guru::find($id);
+    // /**
+    //  * Get jadwal mengajar guru.
+    //  */
+    // public function getJadwal($id)
+    // {
+    //     $guru = Guru::find($id);
 
-        if (!$guru) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Guru tidak ditemukan',
-            ], 404);
-        }
+    //     if (!$guru) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Guru tidak ditemukan',
+    //         ], 404);
+    //     }
 
-        $jadwal = $guru->jadwal()->with(['kelas', 'mataPelajaran'])->get();
+    //     $jadwal = $guru->jadwal()->with(['kelas', 'mataPelajaran'])->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $jadwal,
-        ], 200);
-    }
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $jadwal,
+    //     ], 200);
+    // }
    
 }

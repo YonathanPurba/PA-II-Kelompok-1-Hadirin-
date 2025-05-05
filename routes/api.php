@@ -55,7 +55,7 @@ Route::post('/notifikasi', [NotifikasiController::class, 'store']);
 
 
 // dummy data guru get jadwal|
-Route::get('guru/{id}/jadwal', [GuruController::class, 'getJadwal']);
+// Route::get('guru/{id}/jadwal', [GuruController::class, 'getJadwal']);
 
 // save fcm token
 Route::post('/save_fcm_token', [AuthController::class, 'saveFcmToken']);
@@ -165,7 +165,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id_user}/jadwal-mingguan', [GuruController::class, 'jadwalMingguan']);
 
         // Additional useful routes
-        // Route::get('/{id}/jadwal', [GuruController::class, 'getJadwal']);
+        Route::get('/{id}/jadwal', [GuruController::class, 'getJadwal']);
         Route::get('/{id}/mata-pelajaran', [GuruController::class, 'getMataPelajaran']);
         Route::get('/{id}/kelas-wali', [GuruController::class, 'getKelasWali']);
         Route::get('/search', [GuruController::class, 'search']);
