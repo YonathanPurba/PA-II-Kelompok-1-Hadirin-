@@ -13,6 +13,7 @@ use App\Http\Controllers\SuratIzinController;
 use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\JadwalPelajaranController;
+use App\Http\Controllers\RekapitulasiController;
 
 // Menampilkan formulir login
 Route::get('/', [AuthController::class, 'showLoginForm']);
@@ -80,74 +81,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/surat-izin/guru/{guruId}', [SuratIzinController::class, 'getByGuru']);
     Route::put('/surat-izin/{id}/approve', [SuratIzinController::class, 'approve']);
     Route::put('/surat-izin/{id}/reject', [SuratIzinController::class, 'reject']);
+    
+    // Rekapitulasi
+    Route::get('/rekapitulasi', [RekapitulasiController::class, 'index']);
+    Route::get('/rekapitulasi/kelas/{id_kelas}', [RekapitulasiController::class, 'showByKelas']);
+    Route::get('/rekapitulasi/export/pdf', [RekapitulasiController::class, 'exportPdf'])->name('rekapitulasi.export.pdf');
+    Route::get('/rekapitulasi/export/excel', [RekapitulasiController::class, 'exportExcel'])->name('rekapitulasi.export.excel');
 });
-
-
-// Route::get('/api/login', function () {
-//     return view('admin.pages.dokumen');
-// });
-
-// Route::get('/admin/jadwal_pelajaran', function () {
-//     return view('admin.pages.jadwal_pelajaran');
-// });
-
-
-// Route::get('/admin/dokumen', function () {
-//     return view('admin.pages.dokumen');
-// });
-
-// Route::get('/admin/guru/manajemen_data_guru', function () {
-//     return view('admin.pages.guru.manajemen_data_guru');
-// });
-
-// Route::get('/admin/guru/tambah_guru', function () {
-//     return view('admin.pages.guru.tambah_guru');
-// });
-
-// Route::get('/admin/orang_tua/manajemen_data_orang_tua', function () {
-//     return view('admin.pages.orang_tua.manajemen_data_orang_tua');
-// });
-
-// Route::get('/admin/orang_tua/data-orang-tua', function () {
-//     return view('admin.pages.orang_tua.data-orang-tua');
-// });
-
-// Route::get('/admin/orang_tua/tambah-orang-tua', function () {
-//     return view('admin.pages.orang_tua.tambah-orang-tua');
-// });
-
-// Route::get('/admin/siswa/manajemen_data_siswa', function () {
-//     return view('admin.pages.siswa.manajemen_data_siswa');
-// });
-
-// Route::get('/admin/siswa/data-siswa', function () {
-//     return view('admin.pages.siswa.data-siswa');
-// });
-
-// Route::get('/admin/rekapitulasi/rekapitulasi', function () {
-//     return view('admin.pages.rekapitulasi.rekapitulasi');
-// });
-
-// Route::get('/admin/rekapitulasi/kelas-rekapitulasi', function () {
-//     return view('admin.pages.rekapitulasi.kelas-rekapitulasi');
-// });
-
-    // Profile
-    // Route::get('/profile', [AuthController::class, 'profile']);
-    // Route::put('/profile', [AuthController::class, 'updateProfile']);
-
-    // Route::get('/orang-tua/{id}', function ($id) {
-    //     $orangTua = OrangTua::with(['user', 'siswa.kelas'])->findOrFail($id);
-
-    //     return response()->json([
-    //         'nama_lengkap' => $orangTua->nama_lengkap,
-    //         'alamat' => $orangTua->alamat,
-    //         'pekerjaan' => $orangTua->pekerjaan,
-    //         'nomor_telepon' => $orangTua->user->nomor_telepon ?? '-',
-    //         'email' => $orangTua->user->email ?? '-',
-    //         'anak' => $orangTua->siswa->map(fn($s) => [
-    //             'nama' => $s->nama,
-    //             'kelas' => $s->kelas->nama_kelas ?? '-',
-    //         ])
-    //     ]);
-    // });

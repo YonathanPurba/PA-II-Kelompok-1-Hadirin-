@@ -1,77 +1,39 @@
 @extends('layouts.admin-layout')
 
-@section('title', 'rekapitulasi')
+@section('title', 'Rekapitulasi Absensi')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/konten.css') }}">
-
-
-<div class="container">
-    <div class="main-content">
+<div class="container-fluid">
+    <main class="main-content">
         <div class="isi">
             <header class="judul">
-                <h1>Manajemen Data Siswa</h1>
-                <p>Staff Dapat menambah, Melihat, dan Mengubah Data Siswa</p>
+                <h1 class="mb-3">Rekapitulasi Absensi</h1>
+                <p class="mb-2">Lihat dan unduh rekapitulasi kehadiran siswa berdasarkan kelas</p>
             </header>
             <div class="data">
-                <center>
-                    <h2>Daftar Kelas</h2>
-                </center>
-                <div class="daftar-kelas">
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>7-A</h2>
-                        </div>
-                    </a>
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>7-B</h2>
-                        </div>
-                    </a>
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>7-C</h2>
-                        </div>
-                    </a>
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>7-D</h2>
-                        </div>
-                    </a>
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>8-A</h2>
-                        </div>
-                    </a>
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>8-B</h2>
-                        </div>
-                    </a>
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>8-C</h2>
-                        </div>
-                    </a>
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>8-D</h2>
-                        </div>
-                    </a>
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>9-A</h2>
-                        </div>
-                    </a>
-                    <a href="{{ url('admin/rekapitulasi/kelas-rekapitulasi') }}">
-                        <div class="card">
-                            <h2>9-B</h2>
-                        </div>
-                    </a>
+                <div class="mb-4">
+                    <h2 class="text-center mb-4">Pilih Kelas</h2>
+                    <div class="daftar-kelas d-flex flex-wrap justify-content-center gap-4">
+                        @forelse ($kelasList as $kelas)
+                            <a href="{{ url('rekapitulasi/kelas/' . $kelas->id_kelas) }}" class="text-decoration-none">
+                                <div class="card shadow-sm" style="width: 180px; height: 120px;">
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                        <div class="fs-1 text-success mb-2">
+                                            <i class="bi bi-door-open-fill"></i>
+                                        </div>
+                                        <h3 class="card-title fs-4 text-center mb-0">{{ $kelas->nama_kelas }}</h3>
+                                    </div>
+                                </div>
+                            </a>
+                        @empty
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>Belum ada data kelas
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 </div>
-
 @endsection
