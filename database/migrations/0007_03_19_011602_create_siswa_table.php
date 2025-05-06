@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('id_siswa');
             $table->string('nama');
             $table->string('nis')->unique();
-            $table->foreignId('id_orangtua')->constrained('orangtua', 'id_orangtua')->onDelete('cascade');
+            $table->foreignId('id_orangtua')->nullable()->constrained('orangtua', 'id_orangtua')->onDelete('cascade');
             $table->foreignId('id_kelas')->constrained('kelas', 'id_kelas')->onDelete('cascade');
             $table->string('tempat_lahir')->nullable();            
             $table->date('tanggal_lahir')->nullable();

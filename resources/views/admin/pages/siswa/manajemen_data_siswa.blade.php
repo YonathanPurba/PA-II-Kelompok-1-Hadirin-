@@ -9,48 +9,69 @@
                 <!-- Header Judul -->
                 <header class="judul">
                     <h1 class="mb-3">Manajemen Data Siswa</h1>
-                    <p class="mb-2">Pilih kelas untuk memfilter data siswa berdasarkan kelas</p>
+                    <p class="mb-2">Filter data siswa berdasarkan kelas dan status</p>
                 </header>
 
                 <div class="data">
-
                     <!-- Filter & Export Bar -->
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-2">
-                            <label for="kelas" class="me-2 mb-0">Filter Kelas:</label>
-                            <select name="kelas" id="kelas" class="form-select w-auto" onchange="this.form.submit()">
-                                <option value="">Semua Kelas</option>
-                                @foreach ($kelasList as $kelas)
-                                    <option value="{{ $kelas->id_kelas }}"
-                                        {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
-                                        {{ $kelas->nama_kelas }}
-                                    </option>
-                                @endforeach
-                            </select>
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                        <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="kelas" class="me-2 mb-0">Kelas:</label>
+                                <select name="kelas" id="kelas" class="form-select">
+                                    <option value="">Semua Kelas</option>
+                                    @foreach ($kelasList as $kelas)
+                                        <option value="{{ $kelas->id_kelas }}"
+                                            {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
+                                            {{ $kelas->nama_kelas }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="status" class="me-2 mb-0">Status:</label>
+                                <select name="status" id="status" class="form-select">
+                                    <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
+                                    <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status'))) ? 'selected' : '' }}>Aktif</option>
+                                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="bi bi-filter me-1"></i> Filter
+                            </button>
+                            
+                            @if(request()->has('kelas') || request()->has('status'))
+                                <a href="{{ route('siswa.index') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle me-1"></i> Reset
+                                </a>
+                            @endif
                         </form>
 
-                        <div>
-                            <a href="{{ route('siswa.export.pdf', ['kelas' => request('kelas')]) }}"
-                                class="btn btn-danger me-2">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ route('siswa.export.pdf', ['kelas' => request('kelas'), 'status' => request('status')]) }}"
+                                class="btn btn-danger">
                                 <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export PDF
                             </a>
-                            <a href="{{ route('siswa.export.excel', ['kelas' => request('kelas')]) }}"
+                            <a href="{{ route('siswa.export.excel', ['kelas' => request('kelas'), 'status' => request('status')]) }}"
                                 class="btn btn-success">
                                 <i class="bi bi-file-earmark-excel-fill me-1"></i> Export Excel
                             </a>
                         </div>
                     </div>
 
-
                     <!-- Tabel Siswa -->
                     <div class="table-responsive">
                         <table id="siswaTable" class="table table-striped table-bordered table-sm">
                             <thead class="bg-success text-white">
                                 <tr>
-                                    <th>No</th>
-                                    <th>Nama Siswa</th>
-                                    <th>Jenis Kelamin</th>
-                                    <th class="text-center">Aksi</th>
+                                    <th width="5%">No</th>
+                                    <th width="30%">Nama Siswa</th>
+                                    <th width="20%">Kelas</th>
+                                    <th width="15%">Jenis Kelamin</th>
+                                    <th width="15%">Status</th>
+                                    <th width="15%" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -58,9 +79,17 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $siswa->nama ?? '-' }}</td>
+                                        <td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
                                         <td>{{ $siswa->jenis_kelamin ?? '-' }}</td>
+                                        <td>
+                                            @if($siswa->status == 'aktif')
+                                                <span class="badge bg-success">Aktif</span>
+                                            @else
+                                                <span class="badge bg-secondary">Non-Aktif</span>
+                                            @endif
+                                        </td>
                                         <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-4">
+                                            <div class="d-flex justify-content-center gap-2">
                                                 {{-- Tombol View --}}
                                                 <a href="javascript:void(0);" class="text-primary btn-view-siswa"
                                                     data-siswa='@json($siswa)' data-bs-toggle="modal"
@@ -70,8 +99,7 @@
 
                                                 <!-- Edit Button -->
                                                 <a href="{{ url('siswa/' . $siswa->id_siswa . '/edit') }}"
-                                                    class="text-warning" data-bs-toggle="tooltip" data-bs-placement="top"
-                                                    title="Edit">
+                                                    class="text-warning" title="Edit">
                                                     <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
                                             </div>
@@ -79,13 +107,12 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">Tidak ada data siswa.</td>
+                                        <td colspan="6" class="text-center py-3">Tidak ada data siswa.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
-
 
                     <!-- Tombol Tambah -->
                     <div class="mt-4 text-end">
@@ -118,7 +145,7 @@
                             <p id="viewGender" class="mb-2"></p>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <strong>NISN:</strong>
                             <p id="viewNisn" class="mb-2"></p>
@@ -128,6 +155,12 @@
                             <p id="viewKelas" class="mb-2"></p>
                         </div>
                     </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Status:</strong>
+                            <p id="viewStatus" class="mb-2"></p>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <strong>Alamat:</strong>
@@ -135,8 +168,80 @@
                         </div>
                     </div>
                 </div>
+                <div class="modal-footer">
+                    <a id="btn-edit-siswa" href="#" class="btn btn-warning">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </a>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
             </div>
         </div>
     </div>
+@endsection
 
+@section('js')
+<script>
+    $(document).ready(function() {
+        // DataTable Initialization
+        $('#siswaTable').DataTable({
+            responsive: true,
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json'
+            },
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
+            columnDefs: [
+                { orderable: false, targets: [5] }, // Disable sorting on action column
+                { searchable: false, targets: [0, 5] } // Disable searching on number and action columns
+            ]
+        });
+
+        // Handle View Modal
+        $('.btn-view-siswa').on('click', function() {
+            const siswaData = $(this).data('siswa');
+            
+            // Update edit button href
+            $('#btn-edit-siswa').attr('href', `{{ url('siswa') }}/${siswaData.id_siswa}/edit`);
+            
+            // Set basic info
+            $('#viewNama').text(siswaData.nama || '-');
+            $('#viewGender').text(siswaData.jenis_kelamin || '-');
+            $('#viewNisn').text(siswaData.nisn || '-');
+            $('#viewKelas').text(siswaData.kelas ? siswaData.kelas.nama_kelas : '-');
+            $('#viewAlamat').text(siswaData.alamat || '-');
+            
+            // Set status with badge
+            if (siswaData.status === 'aktif') {
+                $('#viewStatus').html('<span class="badge bg-success">Aktif</span>');
+            } else {
+                $('#viewStatus').html('<span class="badge bg-secondary">Non-Aktif</span>');
+            }
+        });
+        
+        // Form filter responsive behavior
+        $(window).on('resize', function() {
+            adjustFilterFormLayout();
+        });
+        
+        function adjustFilterFormLayout() {
+            const filterForm = $('form[action="{{ route("siswa.index") }}"]');
+            const filterControls = filterForm.find('.d-flex.align-items-center.gap-2');
+            
+            if (window.innerWidth < 768) {
+                filterForm.addClass('flex-column align-items-start').removeClass('align-items-center');
+                filterControls.addClass('w-100');
+                filterForm.find('select').addClass('w-100');
+                filterForm.find('button[type="submit"]').addClass('w-100 mt-2');
+            } else {
+                filterForm.removeClass('flex-column align-items-start').addClass('align-items-center');
+                filterControls.removeClass('w-100');
+                filterForm.find('select').removeClass('w-100');
+                filterForm.find('button[type="submit"]').removeClass('w-100 mt-2');
+            }
+        }
+        
+        // Initialize responsive layout
+        adjustFilterFormLayout();
+    });
+</script>
 @endsection

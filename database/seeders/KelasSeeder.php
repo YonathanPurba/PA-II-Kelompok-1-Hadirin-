@@ -2,33 +2,49 @@
 
 namespace Database\Seeders;
 
-use App\Models\Kelas;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class KelasSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
-        $tingkat = ['1', '2', '3', '4', '5', '6'];
-        $kelas = ['A', 'B'];
+        $kelas = [
+            [
+                'nama_kelas' => '7A',
+                'tingkat' => '7',
+                'id_guru' => 1, // Budi Santoso (wali kelas)
+                'id_tahun_ajaran' => 1, // 2024/2025
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'seeder',
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => 'seeder'
+            ],
+            [
+                'nama_kelas' => '7B',
+                'tingkat' => '7',
+                'id_guru' => 2, // Siti Rahayu (wali kelas)
+                'id_tahun_ajaran' => 1, // 2024/2025
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'seeder',
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => 'seeder'
+            ],
+            [
+                'nama_kelas' => '8A',
+                'tingkat' => '8',
+                'id_guru' => null, // belum ada wali kelas
+                'id_tahun_ajaran' => 1, // 2024/2025
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'seeder',
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => 'seeder'
+            ],
+        ];
 
-        $id_guru = 1;
-        foreach ($tingkat as $t) {
-            foreach ($kelas as $k) {
-                Kelas::create([
-                    'nama_kelas' => $t . ' ' . $k,
-                    'tingkat' => $t,
-                    'id_guru' => $id_guru,
-                    'id_tahun_ajaran' => 1,
-                    'dibuat_pada' => now(),
-                    'dibuat_oleh' => 'system'
-                ]);
-                
-                $id_guru++;
-                if ($id_guru > 10) {
-                    $id_guru = 1; // Reset jika melebihi jumlah guru
-                }
-            }
-        }
+        DB::table('kelas')->insert($kelas);
     }
 }

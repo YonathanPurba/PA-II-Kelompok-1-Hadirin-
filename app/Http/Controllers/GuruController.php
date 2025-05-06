@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\GuruExport;
 use App\Models\Guru;
 use Illuminate\Http\Request;
 use App\Models\MataPelajaran;
@@ -10,10 +11,44 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class GuruController extends Controller
 {
+<<<<<<< HEAD
+/**
+ * Display a listing of the resource.
+ */
+public function index(Request $request)
+{
+    // Get filter parameters
+    $mataPelajaranId = $request->input('mata_pelajaran');
+    $status = $request->input('status');
+    
+    // Get all subjects for the filter dropdown
+    $mataPelajaranList = MataPelajaran::orderBy('nama')->get();
+    
+    // Query teachers with filters
+    $gurus = Guru::with(['user', 'mataPelajaran', 'jadwal'])
+        ->when($mataPelajaranId, function ($query) use ($mataPelajaranId) {
+            return $query->whereHas('mataPelajaran', function ($q) use ($mataPelajaranId) {
+                // Fully qualify the column name to avoid ambiguity
+                $q->where('mata_pelajaran.id_mata_pelajaran', $mataPelajaranId);
+            });
+        })
+        ->when($request->has('status'), function ($query) use ($status) {
+            if ($status !== '' && $status !== 'semua') {
+                return $query->where('guru.status', $status);
+            }
+            // If status is 'semua', don't apply any filter
+        }, function ($query) {
+            // Default to 'aktif' when status parameter is not present
+            return $query->where('guru.status', 'aktif');
+        })
+        ->orderBy('nama_lengkap')
+        ->get();
+=======
     public function index()
     {
         $gurus = Guru::with(['user', 'kelas', 'jadwal'])->get();  // Pastikan juga 'jadwal' di-relasikan
@@ -40,9 +75,47 @@ class GuruController extends Controller
 
             return $guru;
         });
+>>>>>>> 6fa962e721bfa35e872c9ef1a8870ba8cdfd317c
 
-        return view('admin.pages.guru.manajemen_data_guru', compact('gurus'));
-    }
+    return view('admin.pages.guru.manajemen_data_guru', compact('gurus', 'mataPelajaranList'));
+}
+
+/**
+ * Export data guru to PDF.
+ */
+public function exportPdf(Request $request)
+{
+    $mataPelajaranId = $request->input('mata_pelajaran');
+    $status = $request->input('status');
+    
+    $gurus = Guru::with(['user', 'mataPelajaran', 'jadwal'])
+        ->when($mataPelajaranId, function ($query) use ($mataPelajaranId) {
+            return $query->whereHas('mataPelajaran', function ($q) use ($mataPelajaranId) {
+                // Fully qualify the column name to avoid ambiguity
+                $q->where('mata_pelajaran.id_mata_pelajaran', $mataPelajaranId);
+            });
+        })
+        ->when($request->has('status'), function ($query) use ($status) {
+            if ($status !== '' && $status !== 'semua') {
+                return $query->where('guru.status', $status);
+            }
+        }, function ($query) {
+            return $query->where('guru.status', 'aktif');
+        })
+        ->orderBy('nama_lengkap')
+        ->get();
+
+    $pdf = Pdf::loadView('exports.guru_pdf', compact('gurus'));
+    return $pdf->download('data_guru.pdf');
+}
+
+/**
+ * Export data guru to Excel.
+ */
+public function exportExcel(Request $request)
+{
+    return Excel::download(new GuruExport($request->input('mata_pelajaran'), $request->input('status')), 'data_guru.xlsx');
+}
 
     public function create()
     {

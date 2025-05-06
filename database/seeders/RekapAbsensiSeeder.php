@@ -2,48 +2,55 @@
 
 namespace Database\Seeders;
 
-use App\Models\RekapAbsensi;
-use App\Models\Siswa;
-use App\Models\Absensi;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class RekapAbsensiSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
-        // Ambil semua siswa
-        $siswa = Siswa::all();
+        // Bulan dan tahun saat ini
+        $bulanIni = Carbon::now()->format('m');
+        $tahunIni = Carbon::now()->format('Y');
         
-        // Buat rekap untuk bulan lalu
-        $bulanLalu = Carbon::now()->subMonth();
-        $bulan = $bulanLalu->format('m');
-        $tahun = $bulanLalu->format('Y');
+        // Siswa dan kelas
+        $siswaKelas = [
+            ['id_siswa' => 1, 'id_kelas' => 1], // Andi di kelas 7A
+            ['id_siswa' => 2, 'id_kelas' => 2], // Budi di kelas 7B
+            ['id_siswa' => 3, 'id_kelas' => 1], // Citra di kelas 7A
+        ];
         
-        foreach ($siswa as $s) {
-            // Hitung jumlah kehadiran dari data absensi
-            $absensi = Absensi::where('id_siswa', $s->id_siswa)
-                ->whereMonth('tanggal', $bulan)
-                ->whereYear('tanggal', $tahun)
-                ->get();
+        $rekapAbsensi = [];
+        
+        foreach ($siswaKelas as $sk) {
+            // Hitung jumlah kehadiran dari tabel absensi (ini hanya simulasi, seharusnya query ke DB)
+            // Untuk contoh, kita buat data random
+            $jumlahHadir = rand(15, 20);
+            $jumlahSakit = rand(0, 3);
+            $jumlahIzin = rand(0, 2);
+            $jumlahAlpa = rand(0, 1);
             
-            $jumlahHadir = $absensi->where('status', 'hadir')->count();
-            $jumlahSakit = $absensi->where('status', 'sakit')->count();
-            $jumlahIzin = $absensi->where('status', 'izin')->count();
-            $jumlahAlpa = $absensi->where('status', 'alpa')->count();
-            
-            RekapAbsensi::create([
-                'id_siswa' => $s->id_siswa,
-                'id_kelas' => $s->id_kelas,
-                'bulan' => $bulan,
-                'tahun' => $tahun,
+            $rekapAbsensi[] = [
+                'id_siswa' => $sk['id_siswa'],
+                'id_kelas' => $sk['id_kelas'],
+                'bulan' => $bulanIni,
+                'tahun' => $tahunIni,
                 'jumlah_hadir' => $jumlahHadir,
                 'jumlah_sakit' => $jumlahSakit,
                 'jumlah_izin' => $jumlahIzin,
                 'jumlah_alpa' => $jumlahAlpa,
-                'dibuat_pada' => Carbon::now()->startOfMonth(),
-                'dibuat_oleh' => 'system'
-            ]);
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'seeder',
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => 'seeder'
+            ];
         }
+        
+        // Insert batch rekap absensi
+        DB::table('rekap_absensi')->insert($rekapAbsensi);
     }
 }

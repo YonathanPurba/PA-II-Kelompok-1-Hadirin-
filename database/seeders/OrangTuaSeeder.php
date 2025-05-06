@@ -2,36 +2,43 @@
 
 namespace Database\Seeders;
 
-use App\Models\Orangtua;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class OrangtuaSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
-        $pekerjaan = [
-            'Pegawai Negeri Sipil',
-            'Karyawan Swasta',
-            'Wiraswasta',
-            'Dokter',
-            'Guru',
-            'Petani',
-            'Pedagang',
-            'TNI/Polri',
-            'Buruh',
-            'Ibu Rumah Tangga'
+        $orangtua = [
+            [
+                'id_user' => 4, // orangtua1
+                'nama_lengkap' => 'Ahmad Wijaya',
+                'alamat' => 'Jl. Merdeka No. 123, Jakarta',
+                'nomor_telepon' => '081234567892',
+                'pekerjaan' => 'Wiraswasta',
+                'status' => 'aktif',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'seeder',
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => 'seeder'
+            ],
+            [
+                'id_user' => 5, // orangtua2
+                'nama_lengkap' => 'Dewi Susanti',
+                'alamat' => 'Jl. Pahlawan No. 45, Jakarta',
+                'nomor_telepon' => '081234567893',
+                'pekerjaan' => 'Pegawai Swasta',
+                'status' => 'aktif',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'seeder',
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => 'seeder'
+            ],
         ];
 
-        for ($i = 1; $i <= 20; $i++) {
-            Orangtua::create([
-                'id_user' => $i + 11, // User ID mulai dari 12 (setelah guru)
-                'nama_lengkap' => 'Orangtua ' . $i,
-                'alamat' => 'Jl. Contoh No. ' . $i . ', Kota Contoh',
-                'nomor_telepon' => '08567890' . str_pad($i, 4, '0', STR_PAD_LEFT),
-                'pekerjaan' => $pekerjaan[array_rand($pekerjaan)],
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'system'
-            ]);
-        }
+        DB::table('orangtua')->insert($orangtua);
     }
 }

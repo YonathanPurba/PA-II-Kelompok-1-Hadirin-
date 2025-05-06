@@ -23,69 +23,114 @@
                         @csrf
                         @method('PUT')
 
-                        <!-- Nama Lengkap -->
-                        <div class="mb-3">
-                            <label for="nama" class="form-label">Nama Lengkap</label>
-                            <input type="text" name="nama" id="nama"
-                                class="form-control @error('nama') is-invalid @enderror"
-                                value="{{ old('nama', $siswa->nama) }}" required>
-                            @error('nama')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <div class="row">
+                            <!-- Nama Lengkap -->
+                            <div class="col-md-6 mb-3">
+                                <label for="nama" class="form-label">Nama Lengkap</label>
+                                <input type="text" name="nama" id="nama"
+                                    class="form-control @error('nama') is-invalid @enderror"
+                                    value="{{ old('nama', $siswa->nama) }}" required>
+                                @error('nama')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                        <!-- NISN -->
-                        <div class="mb-3">
-                            <label for="nisn" class="form-label">NISN</label>
-                            <input type="text" name="nisn" id="nisn"
-                                class="form-control @error('nisn') is-invalid @enderror"
-                                value="{{ old('nisn', $siswa->nis) }}" required>
-                            @error('nisn')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                            <!-- NIS -->
+                            <div class="col-md-6 mb-3">
+                                <label for="nis" class="form-label">NIS</label>
+                                <input type="text" name="nis" id="nis"
+                                    class="form-control @error('nis') is-invalid @enderror"
+                                    value="{{ old('nis', $siswa->nis) }}" required>
+                                @error('nis')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
 
-                        <!-- Jenis Kelamin -->
-                        <div class="mb-3">
-                            <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
-                            <select name="jenis_kelamin" id="jenis_kelamin"
-                                class="form-select @error('jenis_kelamin') is-invalid @enderror" required>
-                                <option value="">-- Pilih --</option>
-                                <option value="Laki-laki" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                                <option value="Perempuan" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
-                            </select>
-                            @error('jenis_kelamin')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                            <!-- Jenis Kelamin -->
+<div class="col-md-6 mb-3">
+    <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
+    <select name="jenis_kelamin" id="jenis_kelamin"
+        class="form-select @error('jenis_kelamin') is-invalid @enderror" required>
+        <option value="" disabled {{ old('jenis_kelamin', $siswa->jenis_kelamin) == '' ? 'selected' : '' }}>
+            -- Pilih --
+        </option>
+        <option value="Laki-laki" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'Laki-laki' ? 'selected' : '' }}>
+            Laki-laki
+        </option>
+        <option value="Perempuan" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'Perempuan' ? 'selected' : '' }}>
+            Perempuan
+        </option>
+    </select>
+    @error('jenis_kelamin')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
 
-                        <!-- Alamat -->
-                        <div class="mb-3">
-                            <label for="alamat" class="form-label">Alamat</label>
-                            <textarea name="alamat" id="alamat" rows="3"
-                                class="form-control @error('alamat') is-invalid @enderror"
-                                required>{{ old('alamat', $siswa->alamat) }}</textarea>
-                            @error('alamat')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
 
-                        <!-- Kelas -->
-                        <div class="mb-4">
-                            <label for="id_kelas" class="form-label">Kelas</label>
-                            <select name="id_kelas" id="id_kelas"
-                                class="form-select @error('id_kelas') is-invalid @enderror" required>
-                                <option value="">-- Pilih Kelas --</option>
-                                @foreach ($kelasList as $kelas)
-                                    <option value="{{ $kelas->id_kelas }}"
-                                        {{ old('id_kelas', $siswa->id_kelas) == $kelas->id_kelas ? 'selected' : '' }}>
-                                        {{ $kelas->nama_kelas }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('id_kelas')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <!-- Kelas -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_kelas" class="form-label">Kelas</label>
+                                <select name="id_kelas" id="id_kelas"
+                                    class="form-select @error('id_kelas') is-invalid @enderror" required>
+                                    <option value="">-- Pilih Kelas --</option>
+                                    @foreach ($kelasList as $kelas)
+                                        <option value="{{ $kelas->id_kelas }}"
+                                            {{ old('id_kelas', $siswa->id_kelas) == $kelas->id_kelas ? 'selected' : '' }}>
+                                            {{ $kelas->nama_kelas }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('id_kelas')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Tanggal Lahir -->
+                            <div class="col-md-6 mb-3">
+                                <label for="tanggal_lahir" class="form-label">Tanggal Lahir</label>
+                                <input type="date" name="tanggal_lahir" id="tanggal_lahir"
+                                    class="form-control @error('tanggal_lahir') is-invalid @enderror" 
+                                    value="{{ old('tanggal_lahir', $siswa->tanggal_lahir) }}">
+                                @error('tanggal_lahir')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Orang Tua -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_orangtua" class="form-label">Orang Tua <span class="text-danger">*</span></label>
+                                <select name="id_orangtua" id="id_orangtua"
+                                    class="form-select @error('id_orangtua') is-invalid @enderror" required>
+                                    <option value="">Pilih Orang Tua</option>
+                                    @foreach ($orangTuaList as $orangTua)
+                                        <option value="{{ $orangTua->id_orangtua }}"
+                                            {{ old('id_orangtua', $siswa->id_orangtua) == $orangTua->id_orangtua ? 'selected' : '' }}>
+                                            {{ $orangTua->nama_lengkap }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="form-text">
+                                    @if($siswa->id_orangtua)
+                                        Siswa ini saat ini terkait dengan orang tua: {{ $siswa->orangTua->nama_lengkap ?? 'Tidak diketahui' }}
+                                    @else
+                                        <span class="text-danger">Siswa ini belum memiliki orang tua terkait. Silakan pilih orang tua.</span>
+                                    @endif
+                                </div>
+                                @error('id_orangtua')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Alamat -->
+                            <div class="col-md-12 mb-3">
+                                <label for="alamat" class="form-label">Alamat</label>
+                                <textarea name="alamat" id="alamat" rows="3"
+                                    class="form-control @error('alamat') is-invalid @enderror"
+                                    >{{ old('alamat', $siswa->alamat) }}</textarea>
+                                @error('alamat')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <!-- Tombol Aksi -->
@@ -100,4 +145,16 @@
             </div>
         </main>
     </div>
+@endsection
+
+@section('js')
+<script>
+    $(document).ready(function() {
+        // Initialize select2 for better dropdown experience
+        $('#id_kelas, #id_orangtua').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
+    });
+</script>
 @endsection
