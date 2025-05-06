@@ -45,7 +45,6 @@ Route::middleware('auth')->group(function () {
     // Export Siswa
     Route::get('/siswa/export/pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
     Route::get('/siswa/export/excel', [SiswaController::class, 'exportExcel'])->name('siswa.export.excel');
-
     // Import Siswa
     Route::post('/siswa/import', [SiswaController::class, 'import'])->name('siswa.import.excel');
 
