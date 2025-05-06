@@ -326,6 +326,7 @@ class GuruController extends Controller
 
             return [
                 'kelas' => $item->kelas->nama_kelas,
+                'id_kelas'=>$item->kelas->id_kelas,
                 'mata_pelajaran' => $item->mataPelajaran->nama,
                 'hari' => $item->hari,
                 'waktu' => $waktuMulai->format('H:i') . ' - ' . $waktuSelesai->format('H:i'),
