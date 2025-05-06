@@ -24,12 +24,13 @@ public function index(Request $request)
     // Get filter parameters
     $mataPelajaranId = $request->input('mata_pelajaran');
     $status = $request->input('status');
+    $search = $request->input('search');
     
     // Get all subjects for the filter dropdown
     $mataPelajaranList = MataPelajaran::orderBy('nama')->get();
     
     // Query teachers with filters
-    $gurus = Guru::with(['user', 'mataPelajaran', 'jadwal'])
+    $gurusQuery = Guru::with(['user', 'mataPelajaran', 'jadwal'])
         ->when($mataPelajaranId, function ($query) use ($mataPelajaranId) {
             return $query->whereHas('mataPelajaran', function ($q) use ($mataPelajaranId) {
                 // Fully qualify the column name to avoid ambiguity
@@ -45,8 +46,17 @@ public function index(Request $request)
             // Default to 'aktif' when status parameter is not present
             return $query->where('guru.status', 'aktif');
         })
-        ->orderBy('nama_lengkap')
-        ->get();
+        ->when($search, function ($query) use ($search) {
+            return $query->where(function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%")
+                  ->orWhere('nomor_telepon', 'like', "%{$search}%");
+            });
+        })
+        ->orderBy('nama_lengkap');
+            
+    // Get paginated results
+    $gurus = $gurusQuery->paginate(10)->withQueryString();
 
     return view('admin.pages.guru.manajemen_data_guru', compact('gurus', 'mataPelajaranList'));
 }
@@ -58,6 +68,7 @@ public function exportPdf(Request $request)
 {
     $mataPelajaranId = $request->input('mata_pelajaran');
     $status = $request->input('status');
+    $search = $request->input('search');
     
     $gurus = Guru::with(['user', 'mataPelajaran', 'jadwal'])
         ->when($mataPelajaranId, function ($query) use ($mataPelajaranId) {
@@ -73,6 +84,13 @@ public function exportPdf(Request $request)
         }, function ($query) {
             return $query->where('guru.status', 'aktif');
         })
+        ->when($search, function ($query) use ($search) {
+            return $query->where(function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%")
+                  ->orWhere('nomor_telepon', 'like', "%{$search}%");
+            });
+        })
         ->orderBy('nama_lengkap')
         ->get();
 
@@ -85,7 +103,14 @@ public function exportPdf(Request $request)
  */
 public function exportExcel(Request $request)
 {
-    return Excel::download(new GuruExport($request->input('mata_pelajaran'), $request->input('status')), 'data_guru.xlsx');
+    return Excel::download(
+        new GuruExport(
+            $request->input('mata_pelajaran'), 
+            $request->input('status'),
+            $request->input('search')
+        ), 
+        'data_guru.xlsx'
+    );
 }
 
     public function create()
@@ -115,15 +140,36 @@ public function exportExcel(Request $request)
         $guru = Guru::with([
             'user',
             'mataPelajaran',
+            'jadwal' => function($query) {
+                $query->orderBy('hari', 'asc')
+                      ->orderBy('waktu_mulai', 'asc');
+            },
             'jadwal.kelas',
             'jadwal.mataPelajaran',
-        ])->find($id);
+        ])->findOrFail($id);
 
-        if (!$guru) {
-            return response()->json(['message' => 'Guru tidak ditemukan'], 404);
-        }
+        // Format data for better display
+        $formattedGuru = [
+            'id_guru' => $guru->id_guru,
+            'nama_lengkap' => $guru->nama_lengkap,
+            'nip' => $guru->nip ?? '-',
+            'nomor_telepon' => $guru->nomor_telepon ?? '-',
+            'status' => $guru->status,
+            'mata_pelajaran' => $guru->mataPelajaran->pluck('nama')->join(', ') ?: '-',
+            'jumlah_jadwal' => $guru->jadwal->count(),
+            'jadwal' => $guru->jadwal->map(function($jadwal) {
+                return [
+                    'id_jadwal' => $jadwal->id_jadwal,
+                    'hari' => ucfirst($jadwal->hari),
+                    'waktu_mulai' => date('H:i', strtotime($jadwal->waktu_mulai)),
+                    'waktu_selesai' => date('H:i', strtotime($jadwal->waktu_selesai)),
+                    'kelas' => $jadwal->kelas->nama_kelas ?? '-',
+                    'mata_pelajaran' => $jadwal->mataPelajaran->nama ?? '-'
+                ];
+            })
+        ];
 
-        return response()->json($guru);
+        return response()->json($formattedGuru);
     }
 
     public function edit($id)
