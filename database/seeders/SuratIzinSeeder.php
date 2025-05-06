@@ -2,54 +2,62 @@
 
 namespace Database\Seeders;
 
-use App\Models\SuratIzin;
-use App\Models\Siswa;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class SuratIzinSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
-        // Ambil 10 siswa secara acak
-        $siswa = Siswa::inRandomOrder()->limit(10)->get();
-        
-        $jenis = ['sakit', 'izin'];
-        $alasan_sakit = [
-            'Demam', 'Flu', 'Batuk', 'Sakit perut', 'Sakit kepala', 'Diare'
+        $suratIzin = [
+            [
+                'id_siswa' => 1, // Andi
+                'id_orangtua' => 1, // Ahmad Wijaya
+                'jenis' => 'sakit',
+                'tanggal_mulai' => Carbon::now()->subDays(5),
+                'tanggal_selesai' => Carbon::now()->subDays(3),
+                'alasan' => 'Sakit demam dan flu',
+                'file_lampiran' => null,
+                'status' => 'disetujui',
+                'dibuat_pada' => Carbon::now()->subDays(6),
+                'dibuat_oleh' => 'orangtua1',
+                'diperbarui_pada' => Carbon::now()->subDays(5),
+                'diperbarui_oleh' => 'admin'
+            ],
+            [
+                'id_siswa' => 3, // Citra
+                'id_orangtua' => 2, // Dewi Susanti
+                'jenis' => 'izin',
+                'tanggal_mulai' => Carbon::now()->subDays(2),
+                'tanggal_selesai' => Carbon::now()->subDays(2),
+                'alasan' => 'Acara keluarga',
+                'file_lampiran' => null,
+                'status' => 'disetujui',
+                'dibuat_pada' => Carbon::now()->subDays(3),
+                'dibuat_oleh' => 'orangtua2',
+                'diperbarui_pada' => Carbon::now()->subDays(3),
+                'diperbarui_oleh' => 'admin'
+            ],
+            [
+                'id_siswa' => 2, // Budi
+                'id_orangtua' => 1, // Ahmad Wijaya
+                'jenis' => 'sakit',
+                'tanggal_mulai' => Carbon::now(),
+                'tanggal_selesai' => Carbon::now()->addDays(2),
+                'alasan' => 'Sakit perut',
+                'file_lampiran' => null,
+                'status' => 'menunggu',
+                'dibuat_pada' => Carbon::now(),
+                'dibuat_oleh' => 'orangtua1',
+                'diperbarui_pada' => Carbon::now(),
+                'diperbarui_oleh' => 'orangtua1'
+            ],
         ];
-        $alasan_izin = [
-            'Acara keluarga', 'Pernikahan saudara', 'Kematian kerabat', 'Perjalanan keluarga', 'Urusan penting'
-        ];
-        $status = ['menunggu', 'disetujui', 'ditolak'];
-        
-        foreach ($siswa as $s) {
-            // Buat 1-3 surat izin per siswa
-            $count = rand(1, 3);
-            
-            for ($i = 0; $i < $count; $i++) {
-                $jenisIzin = $jenis[array_rand($jenis)];
-                $alasan = $jenisIzin == 'sakit' ? 
-                          $alasan_sakit[array_rand($alasan_sakit)] : 
-                          $alasan_izin[array_rand($alasan_izin)];
-                
-                $tanggalMulai = Carbon::now()->subDays(rand(1, 30));
-                $durasi = rand(1, 3); // 1-3 hari
-                $tanggalSelesai = (clone $tanggalMulai)->addDays($durasi - 1);
-                
-                SuratIzin::create([
-                    'id_siswa' => $s->id_siswa,
-                    'id_orangtua' => $s->id_orangtua,
-                    'jenis' => $jenisIzin,
-                    'tanggal_mulai' => $tanggalMulai->format('Y-m-d'),
-                    'tanggal_selesai' => $tanggalSelesai->format('Y-m-d'),
-                    'alasan' => $alasan,
-                    'file_lampiran' => null,
-                    'status' => $status[array_rand($status)],
-                    'dibuat_pada' => $tanggalMulai->subDays(1),
-                    'dibuat_oleh' => 'orangtua' . $s->id_orangtua
-                ]);
-            }
-        }
+
+        DB::table('surat_izin')->insert($suratIzin);
     }
 }

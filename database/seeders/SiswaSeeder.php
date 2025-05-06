@@ -2,41 +2,67 @@
 
 namespace Database\Seeders;
 
-use App\Models\Siswa;
 use Illuminate\Database\Seeder;
-use Faker\Factory as Faker;
+use Illuminate\Support\Facades\DB;
 
 class SiswaSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
-        $faker = Faker::create('id_ID');
-        
-        $kelas_ids = range(1, 12); // 12 kelas (6 tingkat x 2 kelas)
-        $orangtua_ids = range(1, 20); // 20 orangtua
-        
-        $jenis_kelamin = ['laki-laki', 'perempuan'];
-        $kota_lahir = ['Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Semarang', 'Medan', 'Makassar', 'Palembang'];
-        
-        // Buat 60 siswa (rata-rata 5 siswa per kelas)
-        for ($i = 1; $i <= 60; $i++) {
-            $jk = $jenis_kelamin[array_rand($jenis_kelamin)];
-            $kelas_id = $kelas_ids[array_rand($kelas_ids)];
-            $orangtua_id = $orangtua_ids[array_rand($orangtua_ids)];
-            
-            Siswa::create([
-                'nama' => $faker->name($jk == 'laki-laki' ? 'male' : 'female'),
-                'nis' => '2023' . str_pad($i, 4, '0', STR_PAD_LEFT),
-                'id_orangtua' => $orangtua_id,
-                'id_kelas' => $kelas_id,
-                'id_tahun_ajaran' => 1,
-                'tempat_lahir' => $kota_lahir[array_rand($kota_lahir)],
-                'tanggal_lahir' => $faker->dateTimeBetween('-15 years', '-6 years')->format('Y-m-d'),
-                'jenis_kelamin' => $jk,
-                'alamat' => $faker->address,
+        $siswa = [
+            [
+                'nama' => 'Andi Wijaya',
+                'nis' => '2024001',
+                'id_orangtua' => 1, // Ahmad Wijaya
+                'id_kelas' => 1, // 7A
+                'id_tahun_ajaran' => 1, // 2024/2025
+                'tempat_lahir' => 'Jakarta',
+                'tanggal_lahir' => '2011-05-15',
+                'jenis_kelamin' => 'laki-laki',
+                'alamat' => 'Jl. Merdeka No. 123, Jakarta',
+                'status' => 'aktif',
                 'dibuat_pada' => now(),
-                'dibuat_oleh' => 'system'
-            ]);
-        }
+                'dibuat_oleh' => 'seeder',
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => 'seeder'
+            ],
+            [
+                'nama' => 'Budi Wijaya',
+                'nis' => '2024002',
+                'id_orangtua' => 1, // Ahmad Wijaya
+                'id_kelas' => 2, // 7B
+                'id_tahun_ajaran' => 1, // 2024/2025
+                'tempat_lahir' => 'Jakarta',
+                'tanggal_lahir' => '2012-08-20',
+                'jenis_kelamin' => 'laki-laki',
+                'alamat' => 'Jl. Merdeka No. 123, Jakarta',
+                'status' => 'aktif',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'seeder',
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => 'seeder'
+            ],
+            [
+                'nama' => 'Citra Susanti',
+                'nis' => '2024003',
+                'id_orangtua' => 2, // Dewi Susanti
+                'id_kelas' => 1, // 7A
+                'id_tahun_ajaran' => 1, // 2024/2025
+                'tempat_lahir' => 'Bandung',
+                'tanggal_lahir' => '2011-03-10',
+                'jenis_kelamin' => 'perempuan',
+                'alamat' => 'Jl. Pahlawan No. 45, Jakarta',
+                'status' => 'aktif',
+                'dibuat_pada' => now(),
+                'dibuat_oleh' => 'seeder',
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => 'seeder'
+            ],
+        ];
+
+        DB::table('siswa')->insert($siswa);
     }
 }

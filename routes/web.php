@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
 
     // Guru
     Route::resource('guru', GuruController::class);
+    Route::get('guru/export/pdf', [GuruController::class, 'exportPdf'])->name('guru.export.pdf');
+    Route::get('guru/export/excel', [GuruController::class, 'exportExcel'])->name('guru.export.excel');
 
     // Siswa
     Route::resource('siswa', SiswaController::class);
@@ -49,9 +51,11 @@ Route::middleware('auth')->group(function () {
 
     // Orang Tua
     Route::resource('orang-tua', OrangTuaController::class);
+    Route::get('orang-tua/export/pdf', [OrangTuaController::class, 'exportPdf'])->name('orang-tua.export.pdf');
+    Route::get('orang-tua/export/excel', [OrangTuaController::class, 'exportExcel'])->name('orang-tua.export.excel');
 
     // Halaman detail berdasarkan kelas yang dipilih
-    Route::get('/orang-tua/kelas/{id_kelas}', [OrangTuaController::class, 'showByKelas'])->name('orangtua.kelas');
+    Route::get('/orang-tua/kelas/{id_kelas}', [OrangTuaController::class, 'showByKelas'])->name('orang-tua.kelas');
 
     // Kelas
     Route::resource('kelas', KelasController::class);

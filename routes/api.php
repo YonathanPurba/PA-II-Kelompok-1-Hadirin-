@@ -131,9 +131,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/export', [RekapAbsensiController::class, 'exportRekap']);
     });
     
-   
-    
-    
+
     // Kelas Routes
     Route::prefix('kelas')->group(function () {
         Route::get('/', [KelasController::class, 'index']);
