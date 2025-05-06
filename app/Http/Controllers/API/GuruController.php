@@ -289,10 +289,9 @@ class GuruController extends Controller
             ], 500);
         }
     }
-
     /**
      * Get jadwal mengajar guru.
-     */    
+     */
     public function getJadwal($id)
     {
         $user = User::find($id);
@@ -306,7 +305,7 @@ class GuruController extends Controller
         }
 
         // Ambil hari sekarang dalam format lowercase: senin, selasa, dll.
-        $hariIni = strtolower(Carbon::now()->locale('id')->translatedFormat('l'));
+        $hariIni = strtolower(Carbon::now('Asia/Jakarta')->locale('id')->translatedFormat('l')); // Gunakan zona waktu Jakarta
 
         // Ambil hanya jadwal hari ini
         $jadwal = Jadwal::where('id_guru', $guru->id_guru)
@@ -314,29 +313,38 @@ class GuruController extends Controller
             ->with('kelas', 'mataPelajaran')
             ->get();
 
-        $formattedJadwal = $jadwal->map(function ($item) {
-            $status = $this->getStatusJadwal($item->waktu_mulai, $item->waktu_selesai);
+        $now = now('Asia/Jakarta'); // Waktu sekarang untuk pengujian
+        $now->addHour(); // Menambahkan satu jam ke waktu sekarang
+
+        $formattedJadwal = $jadwal->map(function ($item) use ($now) {
+            // Pastikan waktu mulai dan selesai adalah objek Carbon
+            $waktuMulai = Carbon::parse($item->waktu_mulai);
+            $waktuSelesai = Carbon::parse($item->waktu_selesai);
+
+            // Menentukan status jadwal berdasarkan waktu sekarang
+            $status = $this->getStatusJadwal($waktuMulai, $waktuSelesai);
 
             return [
                 'kelas' => $item->kelas->nama_kelas,
                 'mata_pelajaran' => $item->mataPelajaran->nama_mapel,
                 'hari' => $item->hari,
-                'waktu' => $item->waktu_mulai->format('H:i') . ' - ' . $item->waktu_selesai->format('H:i'),
-                'jam_mulai' => $item->waktu_mulai->format('H:i'),
-                'jam_selesai' => $item->waktu_selesai->format('H:i'),
+                'waktu' => $waktuMulai->format('H:i') . ' - ' . $waktuSelesai->format('H:i'),
+                'jam_mulai' => $waktuMulai->format('H:i'),
+                'jam_selesai' => $waktuSelesai->format('H:i'),
                 'status' => $status,
                 'color' => $this->getStatusColor($status),
+                'waktu_sekarang' => $now->format('Y-m-d H:i:s') // Menambahkan waktu sekarang ke data
             ];
         });
 
         return response()->json(['data' => $formattedJadwal]);
     }
 
-
     // Metode untuk menentukan status jadwal berdasarkan waktu sekarang
     private function getStatusJadwal($waktuMulai, $waktuSelesai)
     {
-        $now = now(); // Waktu sekarang
+        $now = now('Asia/Jakarta'); // Menggunakan waktu Indonesia
+        $now->addHour(); // Menambahkan satu jam ke waktu sekarang
 
         if ($now->isBefore($waktuMulai)) {
             return 'Mendatang';
