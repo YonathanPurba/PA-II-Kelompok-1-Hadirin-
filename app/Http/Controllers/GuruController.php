@@ -149,6 +149,7 @@ public function exportExcel(Request $request)
             'password'          => 'required|string|min:6|confirmed',
             'nomor_telepon'     => 'nullable|string|max:20',
             'id_mata_pelajaran' => 'nullable|exists:mata_pelajaran,id_mata_pelajaran',
+
         ]);
 
         DB::beginTransaction();
@@ -160,6 +161,7 @@ public function exportExcel(Request $request)
                 'id_role'           => 2, // Asumsikan 2 = guru
                 'nomor_telepon'     => $request->nomor_telepon,
                 'dibuat_pada'       => now(),
+                
                 // 'dibuat_oleh'       => auth()->id(),
             ];
 
@@ -222,6 +224,8 @@ public function exportExcel(Request $request)
             'nomor_telepon' => 'nullable|string|max:20',
             'mata_pelajaran' => 'required|array',
             'mata_pelajaran.*' => 'exists:mata_pelajaran,id_mata_pelajaran',
+            'status' => 'required|string|in:aktif,nonaktif',
+
         ]);
 
         // Ambil data guru
@@ -232,6 +236,8 @@ public function exportExcel(Request $request)
             'nama_lengkap' => $request->nama_lengkap,
             'nip' => $request->nip,
             'nomor_telepon' => $request->nomor_telepon,
+            'status' => $request->status,
+
         ]);
 
         // Sinkronisasi relasi guru <-> mata pelajaran (pivot table)
@@ -239,7 +245,7 @@ public function exportExcel(Request $request)
 
         return redirect()->route('guru.index')->with('success', 'Data guru berhasil diperbarui.');
     }
-
+        
 
     public function destroy($id)
     {

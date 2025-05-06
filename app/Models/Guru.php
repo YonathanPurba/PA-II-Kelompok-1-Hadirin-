@@ -22,7 +22,8 @@ class Guru extends Model
         'nomor_telepon',
         'bidang_studi',
         'dibuat_oleh',
-        'diperbarui_oleh'
+        'diperbarui_oleh',
+        'status',
     ];
 
     public function user()
