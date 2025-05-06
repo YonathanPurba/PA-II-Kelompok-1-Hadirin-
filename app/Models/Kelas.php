@@ -48,4 +48,40 @@ class Kelas extends Model
     {
         return $this->hasMany(RekapAbsensi::class, 'id_kelas', 'id_kelas');
     }
+
+    /**
+     * Update all students' status in this class
+     * 
+     * @return void
+     */
+    public function updateStudentsStatus()
+    {
+        foreach ($this->siswa as $siswa) {
+            $siswa->updateStatusBasedOnClass();
+        }
+    }
+    
+    /**
+     * Check if class is active based on academic year
+     * 
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->tahunAjaran && $this->tahunAjaran->aktif;
+    }
+    
+    /**
+     * Get status badge HTML
+     * 
+     * @return string
+     */
+    public function getStatusBadgeHtml()
+    {
+        if ($this->isActive()) {
+            return '<span class="badge bg-success">Aktif</span>';
+        } else {
+            return '<span class="badge bg-secondary">Non-Aktif</span>';
+        }
+    }
 }

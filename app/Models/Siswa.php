@@ -10,6 +10,12 @@ class Siswa extends Model
     use HasFactory;
 
     /**
+     * Status constants
+     */
+    const STATUS_ACTIVE = 'aktif';
+    const STATUS_INACTIVE = 'nonaktif';
+
+    /**
      * The table associated with the model.
      *
      * @var string
@@ -28,7 +34,21 @@ class Siswa extends Model
      *
      * @var bool
      */
-    public $timestamps = false;
+    public $timestamps = true;
+
+    /**
+     * The column name for the created at timestamp.
+     *
+     * @var string
+     */
+    const CREATED_AT = 'dibuat_pada';
+
+    /**
+     * The column name for the updated at timestamp.
+     *
+     * @var string
+     */
+    const UPDATED_AT = 'diperbarui_pada';
 
     /**
      * The attributes that are mass assignable.
@@ -50,6 +70,15 @@ class Siswa extends Model
         'dibuat_oleh',
         'diperbarui_pada',
         'diperbarui_oleh',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'tanggal_lahir' => 'date',
     ];
 
     /**
@@ -90,5 +119,81 @@ class Siswa extends Model
     public function suratIzin()
     {
         return $this->hasMany(SuratIzin::class, 'id_siswa', 'id_siswa');
+    }
+
+    /**
+     * Update status based on class status
+     * 
+     * @return void
+     */
+    public function updateStatusBasedOnClass()
+    {
+        if (!$this->kelas) {
+            return;
+        }
+        
+        // Get the class's academic year
+        $tahunAjaran = $this->kelas->tahunAjaran;
+        
+        // If the academic year is active and the class is in the current academic year, student is active
+        if ($tahunAjaran && $tahunAjaran->aktif) {
+            $this->status = self::STATUS_ACTIVE;
+        } else {
+            $this->status = self::STATUS_INACTIVE;
+        }
+        
+        $this->save();
+        
+        // Update parent status if parent exists
+        if ($this->orangTua) {
+            $this->orangTua->updateStatusBasedOnChildren();
+        }
+    }
+    
+    /**
+     * Get status badge HTML
+     * 
+     * @return string
+     */
+    public function getStatusBadgeHtml()
+    {
+        switch ($this->status) {
+            case self::STATUS_ACTIVE:
+                return '<span class="badge bg-success">Aktif</span>';
+            case self::STATUS_INACTIVE:
+                return '<span class="badge bg-secondary">Non-Aktif</span>';
+            default:
+                return '<span class="badge bg-light text-dark">Unknown</span>';
+        }
+    }
+    
+    /**
+     * Override the save method to update parent status
+     */
+    public function save(array $options = [])
+    {
+        $wasNew = !$this->exists;
+        $oldParentId = $this->getOriginal('id_orangtua');
+        
+        $result = parent::save($options);
+        
+        // If parent ID has changed, update both old and new parent statuses
+        if (!$wasNew && $this->isDirty('id_orangtua') && $oldParentId) {
+            // Update old parent status
+            $oldParent = OrangTua::find($oldParentId);
+            if ($oldParent) {
+                $oldParent->updateStatusBasedOnChildren();
+            }
+        }
+        
+        // Update current parent status
+        if ($this->id_orangtua) {
+            $parent = OrangTua::find($this->id_orangtua);
+            if ($parent) {
+                $parent->updateStatusBasedOnChildren();
+            }
+        }
+        
+        return $result;
     }
 }

@@ -56,7 +56,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="pekerjaan" class="form-label">Pekerjaan</label>
                                 <input type="text" name="pekerjaan" id="pekerjaan"
-                                    class="form-control @error('pekerjaan') is-invalid @enderror"
+                                    class="form-control @error('pekerjaan') is-invalid @enderror" 
                                     value="{{ old('pekerjaan', $orangTua->pekerjaan) }}">
                                 @error('pekerjaan')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -74,7 +74,11 @@
                                     <option value="nonaktif" {{ old('status', $orangTua->status) == 'nonaktif' ? 'selected' : '' }}>
                                         Nonaktif
                                     </option>
+                                    <option value="pending" {{ old('status', $orangTua->status) == 'pending' ? 'selected' : '' }}>
+                                        Pending
+                                    </option>
                                 </select>
+                                <small class="text-muted">Status akan otomatis diperbarui berdasarkan status anak.</small>
                                 @error('status')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -104,6 +108,7 @@
                                                     <th>Nama</th>
                                                     <th>NIS</th>
                                                     <th>Kelas</th>
+                                                    <th>Status</th>
                                                     <th width="100">Aksi</th>
                                                 </tr>
                                             </thead>
@@ -113,6 +118,7 @@
                                                         <td>{{ $siswa->nama }}</td>
                                                         <td>{{ $siswa->nis ?? '-' }}</td>
                                                         <td>{{ $siswa->kelas->nama_kelas ?? 'Belum ada kelas' }}</td>
+                                                        <td>{!! $siswa->getStatusBadgeHtml() !!}</td>
                                                         <td>
                                                             <a href="{{ route('siswa.edit', $siswa->id_siswa) }}" class="btn btn-sm btn-outline-success">
                                                                 <i class="bi bi-pencil"></i>
@@ -130,7 +136,7 @@
                                 @else
                                     <div class="alert alert-info">
                                         <i class="bi bi-info-circle me-2"></i>
-                                        Belum ada siswa yang terkait dengan orang tua ini.
+                                        Belum ada siswa yang terkait dengan orang tua ini. Status orang tua saat ini adalah <strong>Pending</strong>.
                                     </div>
                                 @endif
                             </div>

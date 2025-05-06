@@ -24,6 +24,10 @@
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h5 class="border-bottom pb-2 mb-3">Informasi Orang Tua</h5>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Orang tua baru akan memiliki status <strong>Pending</strong> sampai ada siswa yang ditambahkan sebagai anaknya.
+                                </div>
                             </div>
                             <!-- Nama Lengkap -->
                             <div class="col-md-6 mb-3">

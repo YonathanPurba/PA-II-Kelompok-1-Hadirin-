@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class TahunAjaran extends Model
 {
@@ -38,5 +40,62 @@ class TahunAjaran extends Model
     public function siswa()
     {
         return $this->hasMany(Siswa::class, 'id_tahun_ajaran', 'id_tahun_ajaran');
+    }
+
+    /**
+     * Set this academic year as active and deactivate others
+     * 
+     * @return void
+     */
+    public function setAsActive()
+    {
+        // Begin transaction
+        DB::beginTransaction();
+        
+        try {
+            // Deactivate all academic years
+            self::where('aktif', true)
+                ->update([
+                    'aktif' => false,
+                    'diperbarui_pada' => now(),
+                    'diperbarui_oleh' => Auth::user()->username ?? 'system'
+                ]);
+            
+            // Activate this academic year
+            $this->aktif = true;
+            $this->diperbarui_pada = now();
+            $this->diperbarui_oleh = Auth::user()->username ?? 'system';
+            $this->save();
+            
+            // Update all classes in this academic year
+            foreach ($this->kelas as $kelas) {
+                $kelas->updateStudentsStatus();
+            }
+            
+            DB::commit();
+            
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+    
+    /**
+     * Override the save method to update classes and students when active status changes
+     */
+    public function save(array $options = [])
+    {
+        $wasActive = $this->getOriginal('aktif');
+        $result = parent::save($options);
+        
+        // If active status has changed, update all related classes and students
+        if ($this->isDirty('aktif') && $wasActive != $this->aktif) {
+            foreach ($this->kelas as $kelas) {
+                $kelas->updateStudentsStatus();
+            }
+        }
+        
+        return $result;
     }
 }

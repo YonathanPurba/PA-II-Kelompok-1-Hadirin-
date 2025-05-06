@@ -31,16 +31,23 @@
                                 <label for="status" class="me-2 mb-0">Status:</label>
                                 <select name="status" id="status" class="form-select">
                                     <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
-                                    <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status'))) ? 'selected' : '' }}>Aktif</option>
+                                    <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
                                     <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                                 </select>
+                            </div>
+                            
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="search" class="me-2 mb-0">Cari:</label>
+                                <input type="text" name="search" id="search" class="form-control" 
+                                    value="{{ request('search') }}" placeholder="Nama, telepon...">
                             </div>
                             
                             <button type="submit" class="btn btn-outline-success">
                                 <i class="bi bi-filter me-1"></i> Filter
                             </button>
                             
-                            @if(request()->has('kelas') || request()->has('status'))
+                            @if(request()->has('kelas') || request()->has('status') || request()->has('search'))
                                 <a href="{{ route('orang-tua.index') }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-x-circle me-1"></i> Reset
                                 </a>
@@ -48,11 +55,11 @@
                         </form>
 
                         <div class="d-flex gap-2 flex-wrap">
-                            <a href="{{ route('orang-tua.export.pdf', ['kelas' => request('kelas'), 'status' => request('status')]) }}" 
+                            <a href="{{ route('orang-tua.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
                                class="btn btn-danger">
                                 <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export PDF
                             </a>
-                            <a href="{{ route('orang-tua.export.excel', ['kelas' => request('kelas'), 'status' => request('status')]) }}" 
+                            <a href="{{ route('orang-tua.export.excel', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
                                class="btn btn-success">
                                 <i class="bi bi-file-earmark-excel-fill me-1"></i> Export Excel
                             </a>
@@ -90,11 +97,7 @@
                                         </td>
                                         <td>{{ $orangTua->nomor_telepon ?? '-' }}</td>
                                         <td>
-                                            @if($orangTua->status == 'aktif')
-                                                <span class="badge bg-success">Aktif</span>
-                                            @else
-                                                <span class="badge bg-secondary">Non-Aktif</span>
-                                            @endif
+                                            {!! $orangTua->getStatusBadgeHtml() !!}
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-2">
@@ -115,7 +118,6 @@
                                                     <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
 
-                                                <!-- Uncomment if delete functionality is needed
                                                 <a href="javascript:void(0);" class="text-danger btn-delete-orangtua" 
                                                     data-id="{{ $orangTua->id_orangtua }}"
                                                     data-nama="{{ $orangTua->nama_lengkap }}"
@@ -124,7 +126,6 @@
                                                     title="Hapus">
                                                     <i class="bi bi-trash-fill fs-5"></i>
                                                 </a>
-                                                -->
                                             </div>
                                         </td>
                                     </tr>
@@ -144,7 +145,7 @@
                         @endif
                     </div>
                     
-                    <!-- Tombol Tambah (Moved to match siswa.index) -->
+                    <!-- Tombol Tambah -->
                     <div class="mt-4 text-end">
                         <a href="{{ route('orang-tua.create') }}" class="btn btn-success px-4">
                             <i class="bi bi-plus-circle me-1"></i> Tambah Orang Tua
@@ -213,9 +214,39 @@
                 </div>
                 <div class="modal-footer">
                     <a id="btn-edit-orangtua" href="#" class="btn btn-warning">
+                        <i class="bi bi-pencil me  href="#" class="btn btn-warning">
                         <i class="bi bi-pencil me-1"></i> Edit
                     </a>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Delete Orang Tua -->
+    <div class="modal fade" id="modalDeleteOrangtua" tabindex="-1" aria-labelledby="modalDeleteOrangtuaLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title" id="modalDeleteOrangtuaLabel">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p>Anda yakin ingin menghapus data orang tua <strong id="delete-nama">-</strong>?</p>
+                    <div id="delete-warning" class="alert alert-warning d-none">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span id="delete-warning-text"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <form id="form-delete-orangtua" action="" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -260,9 +291,13 @@
             // Set status with badge
             const statusBadge = $('#modal-status-badge');
             if (status === 'aktif') {
-                statusBadge.text('Aktif').removeClass('bg-secondary').addClass('bg-success');
+                statusBadge.text('Aktif').removeClass('bg-secondary bg-warning').addClass('bg-success');
+            } else if (status === 'nonaktif') {
+                statusBadge.text('Non-Aktif').removeClass('bg-success bg-warning').addClass('bg-secondary');
+            } else if (status === 'pending') {
+                statusBadge.text('Pending').removeClass('bg-success bg-secondary').addClass('bg-warning text-dark');
             } else {
-                statusBadge.text('Non-Aktif').removeClass('bg-success').addClass('bg-secondary');
+                statusBadge.text('Unknown').removeClass('bg-success bg-secondary bg-warning').addClass('bg-light text-dark');
             }
             
             // Get children data via AJAX for the most up-to-date information
@@ -291,6 +326,24 @@
             });
         });
         
+        // Handle Delete Modal
+        $('.btn-delete-orangtua').on('click', function() {
+            const id = $(this).data('id');
+            const nama = $(this).data('nama');
+            const jumlahAnak = $(this).data('jumlah-anak');
+            
+            $('#delete-nama').text(nama);
+            $('#form-delete-orangtua').attr('action', `{{ url('orang-tua') }}/${id}`);
+            
+            // Show warning if parent has children
+            if (jumlahAnak > 0) {
+                $('#delete-warning').removeClass('d-none');
+                $('#delete-warning-text').text(`Orang tua ini memiliki ${jumlahAnak} anak yang terdaftar. Menghapus data ini akan menghapus relasi dengan anak-anaknya.`);
+            } else {
+                $('#delete-warning').addClass('d-none');
+            }
+        });
+        
         // Form filter responsive behavior
         $(window).on('resize', function() {
             adjustFilterFormLayout();
@@ -301,11 +354,11 @@
             if (window.innerWidth < 768) {
                 filterForm.addClass('flex-column align-items-start').removeClass('align-items-center');
                 filterForm.find('div').addClass('w-100');
-                filterForm.find('select').addClass('w-100');
+                filterForm.find('select, input').addClass('w-100');
             } else {
                 filterForm.removeClass('flex-column align-items-start').addClass('align-items-center');
                 filterForm.find('div').removeClass('w-100');
-                filterForm.find('select').removeClass('w-100');
+                filterForm.find('select, input').removeClass('w-100');
             }
         }
         
