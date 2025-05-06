@@ -16,6 +16,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class GuruController extends Controller
 {
+<<<<<<< HEAD
 /**
  * Display a listing of the resource.
  */
@@ -47,6 +48,34 @@ public function index(Request $request)
         })
         ->orderBy('nama_lengkap')
         ->get();
+=======
+    public function index()
+    {
+        $gurus = Guru::with(['user', 'kelas', 'jadwal'])->get();  // Pastikan juga 'jadwal' di-relasikan
+
+        // Menyusun urutan hari yang diinginkan
+        $dayOrder = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
+
+        // Mengurutkan jadwal untuk setiap guru berdasarkan urutan hari
+        $gurus = $gurus->map(function ($guru) use ($dayOrder) {
+            // Kelompokkan jadwal guru berdasarkan hari
+            $groupedJadwal = $guru->jadwal->groupBy('hari');
+
+            // Urutkan jadwal berdasarkan urutan hari
+            $sortedJadwal = collect();
+
+            foreach ($dayOrder as $hari) {
+                if ($groupedJadwal->has($hari)) {
+                    $sortedJadwal = $sortedJadwal->merge($groupedJadwal->get($hari));
+                }
+            }
+
+            // Tambahkan jadwal yang sudah diurutkan ke dalam data guru
+            $guru->jadwal = $sortedJadwal;
+
+            return $guru;
+        });
+>>>>>>> 6fa962e721bfa35e872c9ef1a8870ba8cdfd317c
 
     return view('admin.pages.guru.manajemen_data_guru', compact('gurus', 'mataPelajaranList'));
 }
@@ -239,7 +268,7 @@ public function exportExcel(Request $request)
 
         return redirect()->route('guru.index')->with('success', 'Data guru berhasil diperbarui.');
     }
-        
+
 
     public function destroy($id)
     {

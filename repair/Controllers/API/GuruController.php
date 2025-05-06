@@ -2,45 +2,28 @@
 
 namespace App\Http\Controllers\API;
 
-use Carbon\Carbon;
 use App\Models\Guru;
 use App\Models\User;
-use App\Models\Jadwal;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class GuruController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $user = $request->user(); // user yang login
-
-        $guru = \App\Models\Guru::with(['user', 'mataPelajaran', 'kelas'])
-            ->where('id_user', $user->id_user)
-            ->first();
-
-        if (!$guru) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Guru tidak ditemukan.',
-            ], 404);
-        }
+        $guru = Guru::with(['user', 'mataPelajaran', 'kelas'])->get();
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'nama' => $guru->nama_lengkap, // ambil dari relasi user
-                'nip' => $guru->nip,          // dari tabel guru
-            ],
+            'data' => $guru,
         ], 200);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -290,216 +273,26 @@ class GuruController extends Controller
         }
     }
 
-    /**
-     * Get jadwal mengajar guru.
-     */    
-    public function getJadwal($id)
-    {
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json(['message' => 'Pengguna tidak ditemukan.'], 404);
-        }
+    // /**
+    //  * Get jadwal mengajar guru.
+    //  */
+    // public function getJadwal($id)
+    // {
+    //     $guru = Guru::find($id);
 
-        $guru = $user->guru;
-        if (!$guru) {
-            return response()->json(['message' => 'Guru tidak ditemukan.'], 404);
-        }
+    //     if (!$guru) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Guru tidak ditemukan',
+    //         ], 404);
+    //     }
 
-        // Ambil hari sekarang dalam format lowercase: senin, selasa, dll.
-        $hariIni = strtolower(Carbon::now()->locale('id')->translatedFormat('l'));
+    //     $jadwal = $guru->jadwal()->with(['kelas', 'mataPelajaran'])->get();
 
-        // Ambil hanya jadwal hari ini
-        $jadwal = Jadwal::where('id_guru', $guru->id_guru)
-            ->whereRaw('LOWER(hari) = ?', [$hariIni]) // cocokkan dengan lowercase
-            ->with('kelas', 'mataPelajaran')
-            ->get();
-
-        $formattedJadwal = $jadwal->map(function ($item) {
-            $status = $this->getStatusJadwal($item->waktu_mulai, $item->waktu_selesai);
-
-            return [
-                'kelas' => $item->kelas->nama_kelas,
-                'mata_pelajaran' => $item->mataPelajaran->nama_mapel,
-                'hari' => $item->hari,
-                'waktu' => $item->waktu_mulai->format('H:i') . ' - ' . $item->waktu_selesai->format('H:i'),
-                'jam_mulai' => $item->waktu_mulai->format('H:i'),
-                'jam_selesai' => $item->waktu_selesai->format('H:i'),
-                'status' => $status,
-                'color' => $this->getStatusColor($status),
-            ];
-        });
-
-        return response()->json(['data' => $formattedJadwal]);
-    }
-
-
-    // Metode untuk menentukan status jadwal berdasarkan waktu sekarang
-    private function getStatusJadwal($waktuMulai, $waktuSelesai)
-    {
-        $now = now(); // Waktu sekarang
-
-        if ($now->isBefore($waktuMulai)) {
-            return 'Mendatang';
-        }
-
-        if ($now->isBetween($waktuMulai, $waktuSelesai)) {
-            return 'Sedang Berjalan';
-        }
-
-        return 'Selesai';
-    }
-
-    // Metode untuk menentukan warna berdasarkan status jadwal
-    private function getStatusColor($status)
-    {
-        switch ($status) {
-            case 'Sedang Berjalan':
-                return '#1976D2'; // Warna biru
-            case 'Mendatang':
-                return '#BDBDBD'; // Warna abu-abu
-            case 'Selesai':
-                return '#1B3C2F'; // Warna hijau
-            default:
-                return '#FFFFFF'; // Default
-        }
-    }
-
-    public function getProfile($id)
-    {
-        // Mencari pengguna berdasarkan ID_user
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json(['message' => 'Pengguna tidak ditemukan.'], 404);
-        }
-
-        // Asumsi bahwa ID_user memiliki relasi dengan Guru
-        $guru = $user->guru; // Pastikan relasi 'guru' didefinisikan di model User
-
-        if (!$guru) {
-            return response()->json(['message' => 'Data guru tidak ditemukan.'], 404);
-        }
-
-        return response()->json([
-            'user' => [
-                'nama_lengkap' => $guru->nama_lengkap,
-                'nip' => $guru->nip,
-                'nomor_telepon' => $guru->nomor_telepon,
-                'bidang_studi' => $guru->bidang_studi,
-            ]
-        ], 200);
-    }
-    public function getNotifikasiSuratIzin($id_user)
-    {
-        // Ambil user dengan relasi guru -> kelas -> siswa -> suratIzin
-        $user = User::with('guru.kelas.siswa.suratIzin')->find($id_user);
-
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Pengguna tidak ditemukan.',
-                'data' => ['data' => []]
-            ], 404);
-        }
-
-        $guru = $user->guru;
-
-        if (!$guru || $guru->kelas->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data guru atau kelas tidak ditemukan.',
-                'data' => ['data' => []]
-            ], 404);
-        }
-
-        $notifikasi = [];
-
-        // Jika guru->kelas adalah koleksi, lakukan iterasi
-        $kelasList = $guru->kelas;
-
-        // Tangani jika 'kelas' adalah satuan (bukan collection)
-        if (!$kelasList instanceof \Illuminate\Support\Collection) {
-            $kelasList = collect([$kelasList]);
-        }
-
-        foreach ($kelasList as $kelas) {
-            foreach ($kelas->siswa as $siswa) {
-                foreach ($siswa->suratIzin as $izin) {
-                    $notifikasi[] = [
-                        'nama_siswa' => $siswa->nama,
-                        'jenis' => $izin->jenis,
-                        'tanggal_mulai' => Carbon::parse($izin->tanggal_mulai)->format('Y-m-d H:i:s'),
-                        'tanggal_selesai' => Carbon::parse($izin->tanggal_selesai)->format('Y-m-d H:i:s'),
-                        'alasan' => $izin->alasan,
-                        'status' => $izin->status,
-                        'dibuat_pada' => Carbon::parse($izin->dibuat_pada)->format('Y-m-d H:i:s'),
-                    ];
-                }
-            }
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Notifikasi surat izin berhasil diambil.',
-            'data' => ['data' => $notifikasi]
-        ]);
-    }
-
-    public function jadwalMingguan($id)
-    {
-        try {
-            // Ambil user berdasarkan ID
-            $user = User::find($id);
-            if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pengguna tidak ditemukan.',
-                    'data' => []
-                ], 404);
-            }
-
-            // Ambil guru dari relasi user
-            $guru = $user->guru;
-            if (!$guru) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Guru tidak ditemukan.',
-                    'data' => []
-                ], 404);
-            }
-
-            // Ambil jadwal guru berdasarkan id_guru
-            $jadwal = Jadwal::where('id_guru', $guru->id_guru)
-                ->with(['kelas', 'mataPelajaran'])
-                ->orderBy('hari')
-                ->orderBy('waktu_mulai')
-                ->get();
-
-            // Format jadwal
-            $formattedJadwal = $jadwal->map(function ($item) {
-                $status = $this->getStatusJadwal($item->waktu_mulai, $item->waktu_selesai);
-
-                return [
-                    'hari' => $item->hari,
-                    'kelas' => $item->kelas->nama_kelas ?? '-',
-                    'mata_pelajaran' => $item->mataPelajaran->nama ?? '-',
-                    'waktu' => $item->waktu_mulai->format('H:i') . ' - ' . $item->waktu_selesai->format('H:i'),
-                    'status' => $status,
-                    'color' => $this->getStatusColor($status),
-                ];
-            });
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Jadwal berhasil diambil.',
-                'data' => $formattedJadwal
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
-                'data' => []
-            ], 500);
-        }
-    }
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $jadwal,
+    //     ], 200);
+    // }
+   
 }

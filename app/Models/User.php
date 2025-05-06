@@ -21,6 +21,7 @@ class User extends Authenticatable
         'username',
         'password',
         'id_role',
+        'fcm_token', // 👉 Tambahkan fcm_token ke fillable
         'last_login_at',
         'dibuat_oleh',
         'diperbarui_oleh'

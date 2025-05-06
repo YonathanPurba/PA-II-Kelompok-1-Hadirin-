@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('username')->unique(); 
             $table->string('password');
             $table->foreignId('id_role')->constrained('role', 'id_role');
+            $table->string('fcm_token')->nullable(); // 👉 Tambahkan kolom fcm_token di sini
             $table->rememberToken();
             $table->timestamp('last_login_at')->nullable();
             $table->timestamp('dibuat_pada')->nullable();

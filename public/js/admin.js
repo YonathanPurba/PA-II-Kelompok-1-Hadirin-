@@ -173,15 +173,121 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 });
 
-// Modal Guru
-$(document).ready(function () {
+// // Modal Guru
+// $(document).ready(function () {
 
-    // Fungsi bantu untuk format waktu dari ISO string ke HH:MM
+//     // Fungsi bantu untuk format waktu dari ISO string ke HH:MM
+//     function formatTime(timeStr) {
+//         const date = new Date(timeStr);
+//         const hours = String(date.getHours()).padStart(2, '0');
+//         const minutes = String(date.getMinutes()).padStart(2, '0');
+//         return `${hours}:${minutes}`;
+//     }
+
+//     $('.btn-view-guru').on('click', function () {
+//         const idGuru = $(this).data('id');
+
+//         $.ajax({
+//             url: `guru/${idGuru}`,
+//             method: 'GET',
+//             success: function (res) {
+//                 $('#view-nama-lengkap').text(res.nama_lengkap ?? '-');
+//                 $('#view-nip').text(res.nip ?? '-');
+//                 $('#view-telepon').text(res.nomor_telepon ?? '-');
+//                 $('#view-terakhir-login').text(res.user?.last_login ?? '-');
+
+//                 if (res.mata_pelajaran?.length > 0) {
+//                     const mapelList = res.mata_pelajaran.map(mp => mp.nama).join(', ');
+//                     $('#view-mapel').text(mapelList);
+//                 } else {
+//                     $('#view-mapel').text('-');
+//                 }
+
+//                 const jadwal = res.jadwal ?? [];
+//                 $('#view-jadwal').text(jadwal.length);
+
+//                 const tbody = $('#table-jadwal-body');
+//                 tbody.empty();
+
+//                 if (jadwal.length > 0) {
+//                     // Kelompokkan berdasarkan hari
+//                     const grouped = {};
+//                     jadwal.forEach(item => {
+//                         if (!grouped[item.hari]) grouped[item.hari] = [];
+//                         grouped[item.hari].push(item);
+//                     });
+
+//                     let rowNumber = 1;
+//                     for (const hari in grouped) {
+//                         const items = grouped[hari];
+//                         items.forEach((item, index) => {
+//                             const row = $('<tr>');
+
+//                             const startTime = formatTime(item.waktu_mulai);
+//                             const endTime = formatTime(item.waktu_selesai);
+
+//                             row.append(`<td class="text-center">${rowNumber++}</td>`);
+//                             row.append(`<td class="text-center">${index === 0 ? hari : ''}</td>`);
+//                             row.append(`<td class="text-center">${startTime} - ${endTime}</td>`);
+//                             row.append(`<td class="text-center">${item.kelas?.nama_kelas ?? '-'}</td>`);
+//                             row.append(`<td class="text-center">${item.mata_pelajaran?.nama ?? '-'}</td>`);
+
+//                             tbody.append(row);
+//                         });
+//                     }
+//                 } else {
+//                     tbody.append('<tr><td colspan="5" class="text-center text-muted">Tidak ada jadwal mengajar.</td></tr>');
+//                 }
+
+//                 $('#modalViewGuru').modal('show');
+//             },
+//             error: function () {
+//                 $('#view-nama-lengkap, #view-nip, #view-telepon, #view-terakhir-login, #view-mapel, #view-jadwal')
+//                     .text('Gagal memuat data.');
+//                 $('#table-jadwal-body').html('<tr><td colspan="5" class="text-center text-danger">Gagal memuat jadwal.</td></tr>');
+//                 $('#modalViewGuru').modal('show');
+//             }
+//         });
+//     });
+
+// });
+
+$(document).ready(function () {
+    // Format waktu "HH:mm" sesuai dengan waktu lokal pengguna dan mengurangi satu jam
     function formatTime(timeStr) {
-        const date = new Date(timeStr);
+        if (!timeStr) return '-';
+
+        const date = new Date(timeStr); // Parsing ISO string (waktu lokal perangkat)
+        
+        // Mengurangi satu jam dari waktu
+        date.setHours(date.getHours() - 1);
+        
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         return `${hours}:${minutes}`;
+    }
+
+    // Format tanggal dan waktu sesuai dengan zona waktu lokal perangkat pengguna, dan mengurangi satu jam
+    function formatDateTime(isoString) {
+        if (!isoString) return '-';
+
+        // Parse ISO string ke objek Date
+        const date = new Date(isoString);
+
+        // Mengurangi satu jam dari waktu
+        date.setHours(date.getHours() - 1);
+
+        // Gunakan toLocaleString untuk menampilkan waktu sesuai zona waktu perangkat pengguna
+        const localDate = date.toLocaleString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false, // Gunakan format 24 jam
+        });
+
+        return localDate;
     }
 
     $('.btn-view-guru').on('click', function () {
@@ -191,50 +297,51 @@ $(document).ready(function () {
             url: `guru/${idGuru}`,
             method: 'GET',
             success: function (res) {
-                $('#view-nama-lengkap').text(res.nama_lengkap ?? '-');
-                $('#view-nip').text(res.nip ?? '-');
-                $('#view-telepon').text(res.nomor_telepon ?? '-');
-                $('#view-terakhir-login').text(res.user?.last_login ?? '-');
+                // Info dasar
+                $('#view-nama-lengkap').text(res.nama_lengkap || '-');
+                $('#view-nip').text(res.nip || '-');
+                $('#view-telepon').text(res.nomor_telepon || '-');
 
-                if (res.mata_pelajaran?.length > 0) {
-                    const mapelList = res.mata_pelajaran.map(mp => mp.nama).join(', ');
-                    $('#view-mapel').text(mapelList);
-                } else {
-                    $('#view-mapel').text('-');
-                }
+                // Last login sesuai dengan waktu lokal perangkat dan dikurangi 1 jam
+                $('#view-terakhir-login').text(formatDateTime(res.user?.last_login_at));
 
+                // Mata Pelajaran
+                const mapelList = (res.mata_pelajaran ?? []).map(mp => mp.nama).join(', ') || '-';
+                $('#view-mapel').text(mapelList);
+
+                // Jadwal
                 const jadwal = res.jadwal ?? [];
                 $('#view-jadwal').text(jadwal.length);
 
-                const tbody = $('#table-jadwal-body');
-                tbody.empty();
+                const tbody = $('#table-jadwal-body').empty();
+                const dayOrder = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
 
-                if (jadwal.length > 0) {
-                    // Kelompokkan berdasarkan hari
-                    const grouped = {};
-                    jadwal.forEach(item => {
-                        if (!grouped[item.hari]) grouped[item.hari] = [];
-                        grouped[item.hari].push(item);
+                // Kelompokkan dan susun jadwal
+                const grouped = {};
+                jadwal.forEach(item => {
+                    if (!grouped[item.hari]) grouped[item.hari] = [];
+                    grouped[item.hari].push(item);
+                });
+
+                let rowNumber = 1;
+
+                if (jadwal.length) {
+                    dayOrder.forEach(hari => {
+                        if (grouped[hari]) {
+                            grouped[hari].sort((a, b) => a.waktu_mulai.localeCompare(b.waktu_mulai));
+                            grouped[hari].forEach((item, index) => {
+                                tbody.append(`
+                                    <tr>
+                                        <td class="text-center">${rowNumber++}</td>
+                                        <td class="text-center">${index === 0 ? hari : ''}</td>
+                                        <td class="text-center">${formatTime(item.waktu_mulai)} - ${formatTime(item.waktu_selesai)}</td>
+                                        <td class="text-center">${item.kelas?.nama_kelas || '-'}</td>
+                                        <td class="text-center">${item.mata_pelajaran?.nama || '-'}</td>
+                                    </tr>
+                                `);
+                            });
+                        }
                     });
-
-                    let rowNumber = 1;
-                    for (const hari in grouped) {
-                        const items = grouped[hari];
-                        items.forEach((item, index) => {
-                            const row = $('<tr>');
-
-                            const startTime = formatTime(item.waktu_mulai);
-                            const endTime = formatTime(item.waktu_selesai);
-
-                            row.append(`<td class="text-center">${rowNumber++}</td>`);
-                            row.append(`<td class="text-center">${index === 0 ? hari : ''}</td>`);
-                            row.append(`<td class="text-center">${startTime} - ${endTime}</td>`);
-                            row.append(`<td class="text-center">${item.kelas?.nama_kelas ?? '-'}</td>`);
-                            row.append(`<td class="text-center">${item.mata_pelajaran?.nama ?? '-'}</td>`);
-
-                            tbody.append(row);
-                        });
-                    }
                 } else {
                     tbody.append('<tr><td colspan="5" class="text-center text-muted">Tidak ada jadwal mengajar.</td></tr>');
                 }
@@ -242,15 +349,16 @@ $(document).ready(function () {
                 $('#modalViewGuru').modal('show');
             },
             error: function () {
+                const fallback = 'Gagal memuat data.';
                 $('#view-nama-lengkap, #view-nip, #view-telepon, #view-terakhir-login, #view-mapel, #view-jadwal')
-                    .text('Gagal memuat data.');
+                    .text(fallback);
                 $('#table-jadwal-body').html('<tr><td colspan="5" class="text-center text-danger">Gagal memuat jadwal.</td></tr>');
                 $('#modalViewGuru').modal('show');
             }
         });
     });
-
 });
+
 
 // Modal Orang Tua 
 document.addEventListener('DOMContentLoaded', function () {
