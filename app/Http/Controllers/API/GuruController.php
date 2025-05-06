@@ -292,29 +292,26 @@ class GuruController extends Controller
 
     /**
      * Get jadwal mengajar guru.
-     */
-    /**
-     * Get jadwal mengajar guru.
-     */
+     */    
     public function getJadwal($id)
     {
-        // Mencari pengguna berdasarkan ID_user
-        $user = User::find($id); // Menyesuaikan pencarian dengan ID_user
-
+        $user = User::find($id);
         if (!$user) {
             return response()->json(['message' => 'Pengguna tidak ditemukan.'], 404);
         }
 
-        // Asumsi bahwa ID_user dapat menghubungkan ke Guru
-        $guru = $user->guru; // Relasi antara User dan Guru
-
+        $guru = $user->guru;
         if (!$guru) {
             return response()->json(['message' => 'Guru tidak ditemukan.'], 404);
         }
 
-        // Mengambil jadwal guru berdasarkan id_guru
+        // Ambil hari sekarang dalam format lowercase: senin, selasa, dll.
+        $hariIni = strtolower(Carbon::now()->locale('id')->translatedFormat('l'));
+
+        // Ambil hanya jadwal hari ini
         $jadwal = Jadwal::where('id_guru', $guru->id_guru)
-            ->with('kelas', 'mataPelajaran') // Menambahkan relasi kelas dan mata pelajaran
+            ->whereRaw('LOWER(hari) = ?', [$hariIni]) // cocokkan dengan lowercase
+            ->with('kelas', 'mataPelajaran')
             ->get();
 
         $formattedJadwal = $jadwal->map(function ($item) {
@@ -323,15 +320,14 @@ class GuruController extends Controller
             return [
                 'kelas' => $item->kelas->nama_kelas,
                 'mata_pelajaran' => $item->mataPelajaran->nama_mapel,
-                'hari' => $item->hari, // jika kamu simpan hari
+                'hari' => $item->hari,
                 'waktu' => $item->waktu_mulai->format('H:i') . ' - ' . $item->waktu_selesai->format('H:i'),
-                'jam_mulai' => $item->waktu_mulai->format('H:i'), // untuk perbandingan di Flutter
+                'jam_mulai' => $item->waktu_mulai->format('H:i'),
                 'jam_selesai' => $item->waktu_selesai->format('H:i'),
                 'status' => $status,
                 'color' => $this->getStatusColor($status),
             ];
         });
-
 
         return response()->json(['data' => $formattedJadwal]);
     }
