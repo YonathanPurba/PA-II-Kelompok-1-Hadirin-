@@ -46,7 +46,7 @@
                         @method('PUT')
 
                         <!-- Username -->
-                        <div class="mb-3">
+                        <!-- <div class="mb-3">
                             <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
                             <input type="text" name="username" id="username"
                                 class="form-control @error('username') is-invalid @enderror"
@@ -55,7 +55,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">Username harus unik dan akan digunakan untuk login.</div>
-                        </div>
+                        </div> -->
 
                         <!-- Password -->
                         <div class="mb-3">

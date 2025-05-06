@@ -143,45 +143,49 @@ class SiswaController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
-    {
-        $siswa = Siswa::findOrFail($id);
+{
+    $siswa = Siswa::findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
-            'nis' => 'required|string|max:20|unique:siswa,nis,' . $id . ',id_siswa',
-            'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-            'id_kelas' => 'required|exists:kelas,id_kelas',
-            'alamat' => 'nullable|string',
-            'tanggal_lahir' => 'nullable|date',
-            'id_orangtua' => 'required|exists:orangtua,id_orangtua',
+    $validator = Validator::make($request->all(), [
+        'nama' => 'required|string|max:255',
+        'nis' => 'required|string|max:20|unique:siswa,nis,' . $id . ',id_siswa',
+        'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
+        'id_kelas' => 'required|exists:kelas,id_kelas',
+        'alamat' => 'nullable|string',
+        'tanggal_lahir' => 'nullable|date',
+        'id_orangtua' => 'required|exists:orangtua,id_orangtua',
+        'status' => 'required|in:aktif,nonaktif',
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    try {
+        $siswa->update([
+            'nama' => $request->nama,
+            'nis' => $request->nis,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'id_kelas' => $request->id_kelas,
+            'alamat' => $request->alamat,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'id_orangtua' => $request->id_orangtua,
+            'status' => $request->status,
+            'diperbarui_pada' => now(),
+            'diperbarui_oleh' => Auth::user()->username ?? 'system',
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        try {
-            $siswa->nama = $request->nama;
-            $siswa->nis = $request->nis;
-            $siswa->jenis_kelamin = $request->jenis_kelamin;
-            $siswa->id_kelas = $request->id_kelas;
-            $siswa->alamat = $request->alamat;
-            $siswa->tanggal_lahir = $request->tanggal_lahir;
-            $siswa->id_orangtua = $request->id_orangtua;
-            $siswa->diperbarui_pada = now();
-            $siswa->diperbarui_oleh = Auth::user()->username ?? 'system';
-            $siswa->save();
-
-            return redirect()->route('siswa.index')
-                ->with('success', 'Data siswa berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal memperbarui data siswa: ' . $e->getMessage())
-                ->withInput();
-        }
+        return redirect()->route('siswa.index')
+            ->with('success', 'Data siswa berhasil diperbarui.');
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->with('error', 'Gagal memperbarui data siswa: ' . $e->getMessage())
+            ->withInput();
     }
+}
+    
 
     /**
      * Remove the specified resource from storage.
