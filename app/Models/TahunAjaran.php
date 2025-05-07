@@ -43,6 +43,12 @@ class TahunAjaran extends Model
     }
 
     /**
+     * Status constants for students
+     */
+    const STATUS_ACTIVE = 'aktif';
+    const STATUS_INACTIVE = 'nonaktif';
+
+    /**
      * Set this academic year as active and deactivate others
      * 
      * @return void
@@ -60,20 +66,30 @@ class TahunAjaran extends Model
                     'diperbarui_pada' => now(),
                     'diperbarui_oleh' => Auth::user()->username ?? 'system'
                 ]);
-            
+        
             // Activate this academic year
             $this->aktif = true;
             $this->diperbarui_pada = now();
             $this->diperbarui_oleh = Auth::user()->username ?? 'system';
             $this->save();
-            
+        
             // Update all classes in this academic year
             foreach ($this->kelas as $kelas) {
                 $kelas->updateStudentsStatus();
             }
-            
+        
+            // Update all students directly associated with this academic year
+            // but not through a class (if any)
+            Siswa::where('id_tahun_ajaran', $this->id_tahun_ajaran)
+                ->whereNull('id_kelas')
+                ->update([
+                    'status' => self::STATUS_ACTIVE,
+                    'diperbarui_pada' => now(),
+                    'diperbarui_oleh' => Auth::user()->username ?? 'system'
+                ]);
+        
             DB::commit();
-            
+        
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -91,9 +107,21 @@ class TahunAjaran extends Model
         
         // If active status has changed, update all related classes and students
         if ($this->isDirty('aktif') && $wasActive != $this->aktif) {
+            // Update all classes in this academic year
             foreach ($this->kelas as $kelas) {
                 $kelas->updateStudentsStatus();
             }
+        
+            // Update all students directly associated with this academic year
+            // but not through a class (if any)
+            $newStatus = $this->aktif ? self::STATUS_ACTIVE : self::STATUS_INACTIVE;
+            Siswa::where('id_tahun_ajaran', $this->id_tahun_ajaran)
+                ->whereNull('id_kelas')
+                ->update([
+                    'status' => $newStatus,
+                    'diperbarui_pada' => now(),
+                    'diperbarui_oleh' => Auth::user()->username ?? 'system'
+                ]);
         }
         
         return $result;

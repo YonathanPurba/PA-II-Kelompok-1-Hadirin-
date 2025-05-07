@@ -13,6 +13,21 @@
                 </header>
 
                 <div class="data">
+                    <!-- Informasi Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Status Siswa:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Status siswa ditentukan oleh status kelas dan tahun ajaran</li>
+                                    <li>Siswa pada kelas dengan tahun ajaran aktif akan memiliki status "Aktif"</li>
+                                    <li>Siswa pada kelas dengan tahun ajaran nonaktif akan memiliki status "Nonaktif"</li>
+                                    <li>Perubahan status tahun ajaran akan otomatis mengubah status siswa</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Filter & Export Bar -->
                     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                         <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
@@ -24,6 +39,12 @@
                                         <option value="{{ $kelas->id_kelas }}"
                                             {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
                                             {{ $kelas->nama_kelas }}
+                                            @if($kelas->tahunAjaran)
+                                                ({{ $kelas->tahunAjaran->nama_tahun_ajaran }})
+                                                @if($kelas->tahunAjaran->aktif)
+                                                    - Aktif
+                                                @endif
+                                            @endif
                                         </option>
                                     @endforeach
                                 </select>
@@ -38,11 +59,16 @@
                                 </select>
                             </div>
                             
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="search" class="me-2 mb-0">Cari:</label>
+                                <input type="text" name="search" id="search" class="form-control" placeholder="Nama atau NIS..." value="{{ request('search') }}">
+                            </div>
+                            
                             <button type="submit" class="btn btn-outline-success">
                                 <i class="bi bi-filter me-1"></i> Filter
                             </button>
                             
-                            @if(request()->has('kelas') || request()->has('status'))
+                            @if(request()->has('kelas') || request()->has('status') || request()->has('search'))
                                 <a href="{{ route('siswa.index') }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-x-circle me-1"></i> Reset
                                 </a>
@@ -50,11 +76,11 @@
                         </form>
 
                         <div class="d-flex gap-2 flex-wrap">
-                            <a href="{{ route('siswa.export.pdf', ['kelas' => request('kelas'), 'status' => request('status')]) }}"
+                            <a href="{{ route('siswa.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}"
                                 class="btn btn-danger">
                                 <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export PDF
                             </a>
-                            <a href="{{ route('siswa.export.excel', ['kelas' => request('kelas'), 'status' => request('status')]) }}"
+                            <a href="{{ route('siswa.export.excel', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}"
                                 class="btn btn-success">
                                 <i class="bi bi-file-earmark-excel-fill me-1"></i> Export Excel
                             </a>
@@ -67,20 +93,38 @@
                             <thead class="bg-success text-white">
                                 <tr>
                                     <th width="5%">No</th>
-                                    <th width="30%">Nama Siswa</th>
+                                    <th width="20%">Nama Siswa</th>
+                                    <th width="10%">NIS</th>
                                     <th width="20%">Kelas</th>
-                                    <th width="15%">Jenis Kelamin</th>
-                                    <th width="15%">Status</th>
-                                    <th width="15%" class="text-center">Aksi</th>
+                                    <th width="15%">Tahun Ajaran</th>
+                                    <th width="10%">Status</th>
+                                    <th width="20%" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($siswaList as $index => $siswa)
-                                    <tr>
+                                    <tr class="{{ $siswa->status == 'aktif' ? 'table-success' : '' }}">
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $siswa->nama ?? '-' }}</td>
-                                        <td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
-                                        <td>{{ $siswa->jenis_kelamin ?? '-' }}</td>
+                                        <td>{{ $siswa->nis ?? '-' }}</td>
+                                        <td>
+                                            @if($siswa->kelas)
+                                                {{ $siswa->kelas->nama_kelas }}
+                                                {!! $siswa->kelas->getStatusBadgeHtml() !!}
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($siswa->tahunAjaran)
+                                                {{ $siswa->tahunAjaran->nama_tahun_ajaran }}
+                                                @if($siswa->tahunAjaran->aktif)
+                                                    <span class="badge bg-success">Aktif</span>
+                                                @endif
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td>
                                             @if($siswa->status == 'aktif')
                                                 <span class="badge bg-success">Aktif</span>
@@ -102,16 +146,33 @@
                                                     class="text-warning" title="Edit">
                                                     <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
+                                                
+                                                <!-- Update Status Button -->
+                                                <a href="javascript:void(0);" class="text-info btn-update-status"
+                                                    data-id="{{ $siswa->id_siswa }}" data-name="{{ $siswa->nama }}" title="Update Status">
+                                                    <i class="bi bi-arrow-repeat fs-5"></i>
+                                                </a>
+                                                
+                                                <!-- Delete Button -->
+                                                <a href="javascript:void(0);" class="text-danger btn-delete-siswa"
+                                                    data-id="{{ $siswa->id_siswa }}" data-name="{{ $siswa->nama }}" title="Hapus">
+                                                    <i class="bi bi-trash-fill fs-5"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center py-3">Tidak ada data siswa.</td>
+                                        <td colspan="7" class="text-center py-3">Tidak ada data siswa.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-4">
+                        {{ $siswaList->links() }}
                     </div>
 
                     <!-- Tombol Tambah -->
@@ -141,24 +202,38 @@
                             <p id="viewNama" class="mb-2"></p>
                         </div>
                         <div class="col-md-6">
-                            <strong>Jenis Kelamin:</strong>
-                            <p id="viewGender" class="mb-2"></p>
+                            <strong>NIS:</strong>
+                            <p id="viewNis" class="mb-2"></p>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <strong>NISN:</strong>
-                            <p id="viewNisn" class="mb-2"></p>
+                            <strong>Jenis Kelamin:</strong>
+                            <p id="viewGender" class="mb-2"></p>
                         </div>
+                        <div class="col-md-6">
+                            <strong>Tanggal Lahir:</strong>
+                            <p id="viewTanggalLahir" class="mb-2"></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <strong>Kelas:</strong>
                             <p id="viewKelas" class="mb-2"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Tahun Ajaran:</strong>
+                            <p id="viewTahunAjaran" class="mb-2"></p>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <strong>Status:</strong>
                             <p id="viewStatus" class="mb-2"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Orang Tua:</strong>
+                            <p id="viewOrangTua" class="mb-2"></p>
                         </div>
                     </div>
                     <div class="row">
@@ -167,10 +242,18 @@
                             <p id="viewAlamat" class="mb-0"></p>
                         </div>
                     </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Status:</strong>
+                        <p class="mb-0">Status siswa ditentukan oleh status kelas dan tahun ajaran. Perubahan status tahun ajaran akan otomatis mengubah status siswa.</p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <a id="btn-edit-siswa" href="#" class="btn btn-warning">
                         <i class="bi bi-pencil me-1"></i> Edit
+                    </a>
+                    <a id="btn-update-status" href="#" class="btn btn-info">
+                        <i class="bi bi-arrow-repeat me-1"></i> Update Status
                     </a>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
@@ -191,9 +274,10 @@
             pageLength: 10,
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
             columnDefs: [
-                { orderable: false, targets: [5] }, // Disable sorting on action column
-                { searchable: false, targets: [0, 5] } // Disable searching on number and action columns
-            ]
+                { orderable: false, targets: [6] }, // Disable sorting on action column
+                { searchable: false, targets: [0, 6] } // Disable searching on number and action columns
+            ],
+            "dom": '<"top"lf>rt<"bottom"ip><"clear">'
         });
 
         // Handle View Modal
@@ -202,13 +286,37 @@
             
             // Update edit button href
             $('#btn-edit-siswa').attr('href', `{{ url('siswa') }}/${siswaData.id_siswa}/edit`);
+            $('#btn-update-status').attr('data-id', siswaData.id_siswa);
+            $('#btn-update-status').attr('data-name', siswaData.nama);
             
             // Set basic info
             $('#viewNama').text(siswaData.nama || '-');
+            $('#viewNis').text(siswaData.nis || '-');
             $('#viewGender').text(siswaData.jenis_kelamin || '-');
-            $('#viewNisn').text(siswaData.nisn || '-');
-            $('#viewKelas').text(siswaData.kelas ? siswaData.kelas.nama_kelas : '-');
+            $('#viewTanggalLahir').text(siswaData.tanggal_lahir || '-');
             $('#viewAlamat').text(siswaData.alamat || '-');
+            
+            // Set kelas info
+            if (siswaData.kelas) {
+                let kelasText = `${siswaData.kelas.nama_kelas}`;
+                if (siswaData.kelas.tahun_ajaran) {
+                    kelasText += ` (${siswaData.kelas.tahun_ajaran.nama_tahun_ajaran})`;
+                }
+                $('#viewKelas').html(kelasText);
+            } else {
+                $('#viewKelas').text('-');
+            }
+            
+            // Set tahun ajaran info
+            if (siswaData.tahun_ajaran) {
+                let tahunAjaranText = siswaData.tahun_ajaran.nama_tahun_ajaran;
+                if (siswaData.tahun_ajaran.aktif) {
+                    tahunAjaranText += ' <span class="badge bg-success">Aktif</span>';
+                }
+                $('#viewTahunAjaran').html(tahunAjaranText);
+            } else {
+                $('#viewTahunAjaran').text('-');
+            }
             
             // Set status with badge
             if (siswaData.status === 'aktif') {
@@ -216,6 +324,133 @@
             } else {
                 $('#viewStatus').html('<span class="badge bg-secondary">Non-Aktif</span>');
             }
+            
+            // Set orang tua info
+            if (siswaData.orang_tua) {
+                $('#viewOrangTua').text(siswaData.orang_tua.nama_lengkap || '-');
+            } else {
+                $('#viewOrangTua').text('-');
+            }
+        });
+        
+        // Handle Update Status
+        $('.btn-update-status, #btn-update-status').on('click', function() {
+            const id = $(this).data('id');
+            const name = $(this).data('name');
+            
+            Swal.fire({
+                title: 'Konfirmasi Update Status',
+                html: `<p>Apakah Anda yakin ingin memperbarui status siswa <strong>${name}</strong>?</p>
+                      <div class="alert alert-info mt-3">
+                        <strong>Informasi:</strong> Tindakan ini akan:
+                        <ul class="mb-0 mt-1 text-left">
+                          <li>Menyesuaikan status siswa berdasarkan status kelas dan tahun ajaran</li>
+                          <li>Mengaktifkan siswa jika kelas berada pada tahun ajaran aktif</li>
+                          <li>Menonaktifkan siswa jika kelas berada pada tahun ajaran nonaktif</li>
+                        </ul>
+                      </div>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Update!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/siswa/${id}/update-status`,
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Berhasil!',
+                                    response.message,
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    response.message,
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr) {
+                            let errorMessage = 'Terjadi kesalahan!';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            }
+                            
+                            Swal.fire(
+                                'Error!',
+                                errorMessage,
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+        
+        // Handle Delete
+        $('.btn-delete-siswa').on('click', function() {
+            const id = $(this).data('id');
+            const name = $(this).data('name');
+            
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                text: `Apakah Anda yakin ingin menghapus siswa ${name}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/siswa/${id}`,
+                        type: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Berhasil!',
+                                    response.message,
+                                    'success'
+                                ).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Gagal!',
+                                    response.message,
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr) {
+                            let errorMessage = 'Terjadi kesalahan!';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            }
+                            
+                            Swal.fire(
+                                'Error!',
+                                errorMessage,
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
         });
         
         // Form filter responsive behavior
@@ -230,12 +465,12 @@
             if (window.innerWidth < 768) {
                 filterForm.addClass('flex-column align-items-start').removeClass('align-items-center');
                 filterControls.addClass('w-100');
-                filterForm.find('select').addClass('w-100');
+                filterForm.find('select, input').addClass('w-100');
                 filterForm.find('button[type="submit"]').addClass('w-100 mt-2');
             } else {
                 filterForm.removeClass('flex-column align-items-start').addClass('align-items-center');
                 filterControls.removeClass('w-100');
-                filterForm.find('select').removeClass('w-100');
+                filterForm.find('select, input').removeClass('w-100');
                 filterForm.find('button[type="submit"]').removeClass('w-100 mt-2');
             }
         }

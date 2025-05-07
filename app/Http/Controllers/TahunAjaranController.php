@@ -231,9 +231,15 @@ class TahunAjaranController extends Controller
         }
         
         // Update all students directly associated with this academic year
-        foreach ($tahunAjaran->siswa as $siswa) {
-            $siswa->updateStatusBasedOnClass();
-        }
+        // but not through a class (if any)
+        $status = $tahunAjaran->aktif ? Siswa::STATUS_ACTIVE : Siswa::STATUS_INACTIVE;
+        Siswa::where('id_tahun_ajaran', $tahunAjaran->id_tahun_ajaran)
+            ->whereNull('id_kelas')
+            ->update([
+                'status' => $status,
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => Auth::user()->username ?? 'system'
+            ]);
     }
     
     /**

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Kelas extends Model
 {
@@ -56,8 +57,30 @@ class Kelas extends Model
      */
     public function updateStudentsStatus()
     {
-        foreach ($this->siswa as $siswa) {
-            $siswa->updateStatusBasedOnClass();
+        // Get the class's academic year
+        $tahunAjaran = $this->tahunAjaran;
+        
+        // Determine the status based on academic year
+        $status = ($tahunAjaran && $tahunAjaran->aktif) ? Siswa::STATUS_ACTIVE : Siswa::STATUS_INACTIVE;
+        
+        // Update all students in this class
+        Siswa::where('id_kelas', $this->id_kelas)
+            ->update([
+                'status' => $status,
+                'id_tahun_ajaran' => $tahunAjaran ? $tahunAjaran->id_tahun_ajaran : null,
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => Auth::user()->username ?? 'system'
+            ]);
+        
+        // If we have the relationship loaded, update each model instance
+        if ($this->relationLoaded('siswa')) {
+            foreach ($this->siswa as $siswa) {
+                $siswa->status = $status;
+                $siswa->id_tahun_ajaran = $tahunAjaran ? $tahunAjaran->id_tahun_ajaran : null;
+                $siswa->diperbarui_pada = now();
+                $siswa->diperbarui_oleh = Auth::user()->username ?? 'system';
+                $siswa->save();
+            }
         }
     }
     
@@ -83,5 +106,21 @@ class Kelas extends Model
         } else {
             return '<span class="badge bg-secondary">Non-Aktif</span>';
         }
+    }
+
+    /**
+     * Override the save method to update students when academic year changes
+     */
+    public function save(array $options = [])
+    {
+        $oldTahunAjaranId = $this->getOriginal('id_tahun_ajaran');
+        $result = parent::save($options);
+        
+        // If academic year has changed, update all students in this class
+        if ($this->isDirty('id_tahun_ajaran') && $oldTahunAjaranId != $this->id_tahun_ajaran) {
+            $this->updateStudentsStatus();
+        }
+        
+        return $result;
     }
 }

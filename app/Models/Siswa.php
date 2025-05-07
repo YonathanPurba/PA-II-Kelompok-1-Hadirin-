@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Siswa extends Model
 {
@@ -129,6 +130,7 @@ class Siswa extends Model
      */
     public function updateStatusBasedOnClass()
     {
+        // If no class is assigned, don't change status
         if (!$this->kelas) {
             return;
         }
@@ -136,13 +138,20 @@ class Siswa extends Model
         // Get the class's academic year
         $tahunAjaran = $this->kelas->tahunAjaran;
         
-        // If the academic year is active and the class is in the current academic year, student is active
+        // If the academic year is active, student is active
         if ($tahunAjaran && $tahunAjaran->aktif) {
             $this->status = self::STATUS_ACTIVE;
         } else {
             $this->status = self::STATUS_INACTIVE;
         }
         
+        // Update the tahun_ajaran_id to match the class's academic year
+        if ($tahunAjaran) {
+            $this->id_tahun_ajaran = $tahunAjaran->id_tahun_ajaran;
+        }
+        
+        $this->diperbarui_pada = now();
+        $this->diperbarui_oleh = Auth::user()->username ?? 'system';
         $this->save();
         
         // Update parent status if parent exists
@@ -169,29 +178,37 @@ class Siswa extends Model
     }
     
     /**
-     * Override the save method to update parent status
+     * Override the save method to update status when class changes
      */
     public function save(array $options = [])
     {
         $wasNew = !$this->exists;
+        $oldKelasId = $this->getOriginal('id_kelas');
         $oldParentId = $this->getOriginal('id_orangtua');
         
         $result = parent::save($options);
         
-        // If parent ID has changed, update both old and new parent statuses
-        if (!$wasNew && $this->isDirty('id_orangtua') && $oldParentId) {
-            // Update old parent status
-            $oldParent = OrangTua::find($oldParentId);
-            if ($oldParent) {
-                $oldParent->updateStatusBasedOnChildren();
-            }
+        // If class has changed, update status based on new class
+        if (($wasNew || $this->isDirty('id_kelas')) && $this->id_kelas) {
+            $this->updateStatusBasedOnClass();
         }
         
-        // Update current parent status
-        if ($this->id_orangtua) {
-            $parent = OrangTua::find($this->id_orangtua);
-            if ($parent) {
-                $parent->updateStatusBasedOnChildren();
+        // If parent ID has changed, update both old and new parent statuses
+        if (!$wasNew && $this->isDirty('id_orangtua')) {
+            // Update old parent status
+            if ($oldParentId) {
+                $oldParent = OrangTua::find($oldParentId);
+                if ($oldParent) {
+                    $oldParent->updateStatusBasedOnChildren();
+                }
+            }
+            
+            // Update new parent status
+            if ($this->id_orangtua) {
+                $parent = OrangTua::find($this->id_orangtua);
+                if ($parent) {
+                    $parent->updateStatusBasedOnChildren();
+                }
             }
         }
         

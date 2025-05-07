@@ -18,6 +18,17 @@
                 </header>
 
                 <div class="data">
+                    <!-- Informasi Status -->
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Status:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Status siswa akan otomatis ditentukan berdasarkan status kelas dan tahun ajaran</li>
+                            <li>Siswa pada kelas dengan tahun ajaran aktif akan memiliki status "Aktif"</li>
+                            <li>Siswa pada kelas dengan tahun ajaran nonaktif akan memiliki status "Nonaktif"</li>
+                            <li>Tahun ajaran siswa akan otomatis diambil dari tahun ajaran kelas</li>
+                        </ul>
+                    </div>
+
                     <form action="{{ route('siswa.store') }}" method="POST" class="p-4 pt-1 rounded-4 bg-white shadow-sm">
                         @csrf
 
@@ -62,17 +73,30 @@
 
                             <!-- Kelas -->
                             <div class="col-md-6 mb-3">
-                                <label for="id_kelas" class="form-label">Kelas</label>
+                                <label for="id_kelas" class="form-label">Kelas <span class="text-danger">*</span></label>
                                 <select name="id_kelas" id="id_kelas"
                                     class="form-select @error('id_kelas') is-invalid @enderror" required>
                                     <option value="">Pilih Kelas</option>
                                     @foreach ($kelasList as $kelas)
                                         <option value="{{ $kelas->id_kelas }}"
-                                            {{ old('id_kelas') == $kelas->id_kelas ? 'selected' : '' }}>
+                                            {{ old('id_kelas') == $kelas->id_kelas ? 'selected' : '' }}
+                                            data-tahun-ajaran="{{ $kelas->tahunAjaran ? $kelas->tahunAjaran->nama_tahun_ajaran : '-' }}"
+                                            data-status="{{ $kelas->isActive() ? 'aktif' : 'nonaktif' }}">
                                             {{ $kelas->nama_kelas }}
+                                            @if($kelas->tahunAjaran)
+                                                ({{ $kelas->tahunAjaran->nama_tahun_ajaran }})
+                                                @if($kelas->tahunAjaran->aktif)
+                                                    - Aktif
+                                                @else
+                                                    - Non-Aktif
+                                                @endif
+                                            @endif
                                         </option>
                                     @endforeach
                                 </select>
+                                <div class="form-text">
+                                    <span class="text-info">Info:</span> Status siswa akan ditentukan berdasarkan status kelas yang dipilih.
+                                </div>
                                 @error('id_kelas')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -99,6 +123,13 @@
                                         <option value="{{ $orangTua->id_orangtua }}"
                                             {{ old('id_orangtua') == $orangTua->id_orangtua ? 'selected' : '' }}>
                                             {{ $orangTua->nama_lengkap }}
+                                            @if($orangTua->status == 'aktif')
+                                                (Aktif)
+                                            @elseif($orangTua->status == 'nonaktif')
+                                                (Non-Aktif)
+                                            @elseif($orangTua->status == 'pending')
+                                                (Pending)
+                                            @endif
                                         </option>
                                     @endforeach
                                 </select>
@@ -117,6 +148,22 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        </div>
+
+                        <!-- Informasi Tahun Ajaran -->
+                        <div class="alert alert-info mb-4">
+                            <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Tahun Ajaran:</strong>
+                            <p class="mb-0">
+                                Tahun ajaran aktif saat ini: 
+                                @if($tahunAjaranAktif)
+                                    <strong>{{ $tahunAjaranAktif->nama_tahun_ajaran }}</strong>
+                                @else
+                                    <span class="text-danger">Tidak ada tahun ajaran aktif</span>
+                                @endif
+                            </p>
+                            <p class="mb-0 mt-2">
+                                Tahun ajaran siswa akan otomatis diambil dari tahun ajaran kelas yang dipilih.
+                            </p>
                         </div>
 
                         <!-- Tombol Aksi -->
@@ -166,6 +213,39 @@
         $('#id_kelas, #id_orangtua').select2({
             theme: 'bootstrap-5',
             width: '100%'
+        });
+        
+        // Highlight active classes in dropdown
+        $('#id_kelas option').each(function() {
+            if ($(this).text().includes('- Aktif')) {
+                $(this).css('background-color', '#d4edda');
+                $(this).css('font-weight', 'bold');
+            } else if ($(this).text().includes('- Non-Aktif')) {
+                $(this).css('background-color', '#f8f9fa');
+            }
+        });
+        
+        // Show status info when class is selected
+        $('#id_kelas').on('change', function() {
+            const selectedOption = $(this).find('option:selected');
+            const kelasStatus = selectedOption.data('status');
+            const tahunAjaran = selectedOption.data('tahun-ajaran');
+            
+            if (kelasStatus && tahunAjaran) {
+                let statusText = kelasStatus === 'aktif' ? 'Aktif' : 'Nonaktif';
+                let statusClass = kelasStatus === 'aktif' ? 'success' : 'secondary';
+                
+                Swal.fire({
+                    title: 'Informasi Status',
+                    html: `<p>Siswa akan memiliki status <span class="badge bg-${statusClass}">${statusText}</span></p>
+                          <p>Tahun ajaran: <strong>${tahunAjaran}</strong></p>
+                          <div class="alert alert-info mt-3">
+                            <small>Status siswa ditentukan oleh status tahun ajaran kelas yang dipilih.</small>
+                          </div>`,
+                    icon: 'info',
+                    confirmButtonText: 'Mengerti'
+                });
+            }
         });
     });
 </script>
