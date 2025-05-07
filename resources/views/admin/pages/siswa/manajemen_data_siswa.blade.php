@@ -147,17 +147,6 @@
                                                     <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
                                                 
-                                                <!-- Update Status Button -->
-                                                <a href="javascript:void(0);" class="text-info btn-update-status"
-                                                    data-id="{{ $siswa->id_siswa }}" data-name="{{ $siswa->nama }}" title="Update Status">
-                                                    <i class="bi bi-arrow-repeat fs-5"></i>
-                                                </a>
-                                                
-                                                <!-- Delete Button -->
-                                                <a href="javascript:void(0);" class="text-danger btn-delete-siswa"
-                                                    data-id="{{ $siswa->id_siswa }}" data-name="{{ $siswa->nama }}" title="Hapus">
-                                                    <i class="bi bi-trash-fill fs-5"></i>
-                                                </a>
                                             </div>
                                         </td>
                                     </tr>

@@ -58,14 +58,6 @@
                                                     <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
 
-                                                <form action="{{ route('users.destroy', $user->id_user) }}" method="POST" class="d-inline" 
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-danger border-0 bg-transparent p-0" title="Hapus">
-                                                        <i class="bi bi-trash-fill fs-5"></i>
-                                                    </button>
-                                                </form>
                                             </div>
                                         </td>
                                     </tr>
