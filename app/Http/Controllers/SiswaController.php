@@ -279,6 +279,10 @@ class SiswaController extends Controller
            // Allow manual status override if provided
            if ($request->has('status') && in_array($request->status, [Siswa::STATUS_ACTIVE, Siswa::STATUS_INACTIVE])) {
                $updateData['status'] = $request->status;
+               // Set a flag to indicate manual status change
+               $manualStatusChange = true;
+           } else {
+               $manualStatusChange = false;
            }
            
            $siswa->update($updateData);
@@ -290,11 +294,13 @@ class SiswaController extends Controller
                    $oldParent->updateStatusBasedOnChildren();
                }
            }
-           
-           // Update new parent status
-           $newParent = OrangTua::find($request->id_orangtua);
-           if ($newParent) {
-               $newParent->updateStatusBasedOnChildren();
+
+           // Update new parent status only if parent changed or if this wasn't a manual status change
+           if (!isset($manualStatusChange) || !$manualStatusChange || $oldParentId != $request->id_orangtua) {
+               $newParent = OrangTua::find($request->id_orangtua);
+               if ($newParent) {
+                   $newParent->updateStatusBasedOnChildren();
+               }
            }
            
            DB::commit();
