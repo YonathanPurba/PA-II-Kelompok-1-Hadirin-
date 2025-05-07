@@ -327,6 +327,7 @@ class GuruController extends Controller
             $status = $this->getStatusJadwal($waktuMulai, $waktuSelesai);
 
             return [
+                'id_jadwal' => $item->id_jadwal,
                 'kelas' => $item->kelas->nama_kelas,
                 'id_kelas' => $item->kelas->id_kelas,
                 'mata_pelajaran' => $item->mataPelajaran->nama,
@@ -579,5 +580,6 @@ class GuruController extends Controller
             ]
         ]);
     }
+
     
 }

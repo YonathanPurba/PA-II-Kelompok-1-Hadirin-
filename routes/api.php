@@ -159,7 +159,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/profile/{id}', [GuruController::class, 'getProfile']);
         Route::get('{id_user}/notifikasi-surat-izin', [GuruController::class, 'getNotifikasiSuratIzin']);
-
         Route::get('/{id_user}/jadwal-mingguan', [GuruController::class, 'jadwalMingguan']);
 
         // Additional useful routes
@@ -175,8 +174,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('siswa', [GuruController::class, 'getSiswaByKelasId']);
         Route::get('siswa/kelas/{id}', [GuruController::class, 'getSiswaKelas']); // fallback
 
-        Route::get('/jadwal/{idJadwal}/absensi/check', [AbsensiController::class, 'checkAbsensiStatus']);
+        Route::get('/jadwal/{idJadwal}/absensi/check', [AbsensiController::class, 'checkAbsensiExist']);
         Route::get('/jadwal/{idJadwal}/absensi', [AbsensiController::class, 'getAbsensiData']);
+
+        // POST: Simpan data absensi
+        Route::post('/jadwal/{idJadwal}/absensi', [AbsensiController::class, 'saveAbsensi']);
     });
 
     // Orangtua Routes

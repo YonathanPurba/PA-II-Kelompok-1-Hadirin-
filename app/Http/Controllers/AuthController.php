@@ -79,7 +79,7 @@ class AuthController extends Controller
                 $user->save();
 
                 // Cek role setelah menyimpan login
-                if ($user->role && $user->role->nama === 'staf') {
+                if ($user->role && $user->role->role === 'staf') {
                     return redirect()->route('admin.beranda')->with('success', 'Selamat datang, Anda berhasil login!');
                 } else {
                     Auth::logout();

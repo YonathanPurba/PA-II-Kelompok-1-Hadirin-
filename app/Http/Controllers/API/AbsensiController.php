@@ -2,18 +2,33 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
-use App\Models\Absensi;
-use App\Models\Jadwal;
-use App\Models\Siswa;
-use App\Traits\ApiResponser;
 use Carbon\Carbon;
+use App\Models\Siswa;
+use App\Models\Jadwal;
+use App\Models\Absensi;
+use App\Models\Notifikasi;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
+use Kreait\Firebase\Factory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
 
 class AbsensiController extends Controller
 {
+    protected $messaging;
+
+    public function __construct()
+    {
+        $factory = (new Factory)
+            ->withServiceAccount(storage_path('app/firebase/firebase-adminsdk.json'));
+
+        $this->messaging = $factory->createMessaging();
+    }
+
     use ApiResponser;
 
     /**
@@ -353,63 +368,214 @@ class AbsensiController extends Controller
 
 
 
-    public function checkAbsensiStatus($idJadwal, $tanggal)
+    // public function checkAbsensiStatus($idJadwal, $tanggal)
+    // {
+    //     try {
+    //         // Cek apakah absensi sudah tercatat pada jadwal dan tanggal tertentu
+    //         $absensi = Absensi::where('id_jadwal', $idJadwal)
+    //             ->whereDate('tanggal', $tanggal)
+    //             ->first();
+
+    //         if (!$absensi) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Absensi belum tercatat',
+    //                 'data' => ['exists' => false]
+    //             ], 200);
+    //         }
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Absensi sudah tercatat',
+    //             'data' => ['exists' => true]
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+    //             'data' => ['exists' => false]
+    //         ], 500);
+    //     }
+    // }
+
+    // public function getAbsensiData($idJadwal, $tanggal)
+    // {
+    //     try {
+    //         // Ambil semua data absensi berdasarkan jadwal dan tanggal tertentu
+    //         $absensiData = Absensi::where('id_jadwal', $idJadwal)
+    //             ->whereDate('tanggal', $tanggal)
+    //             ->get();
+
+    //         if ($absensiData->isEmpty()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'No data returned',
+    //                 'data' => []
+    //             ], 200);
+    //         }
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Success',
+    //             'data' => $absensiData
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+    //             'data' => []
+    //         ], 500);
+    //     }
+    // }
+
+    public function getAbsensiData($idJadwal, Request $request)
     {
-        try {
-            // Cek apakah absensi sudah tercatat pada jadwal dan tanggal tertentu
-            $absensi = Absensi::where('id_jadwal', $idJadwal)
-                ->whereDate('tanggal', $tanggal)
-                ->first();
+        $tanggal = $request->query('tanggal');
 
-            if (!$absensi) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Absensi belum tercatat',
-                    'data' => ['exists' => false]
-                ], 200);
-            }
+        $query = \App\Models\Absensi::with('siswa')
+            ->where('id_jadwal', $idJadwal);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Absensi sudah tercatat',
-                'data' => ['exists' => true]
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
-                'data' => ['exists' => false]
-            ], 500);
+        if ($tanggal) {
+            $query->where('tanggal', $tanggal);
         }
+
+        $data = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data absensi berhasil diambil',
+            'data' => $data,
+        ]);
     }
 
-    public function getAbsensiData($idJadwal, $tanggal)
+    public function checkAbsensiExist($idJadwal, Request $request)
     {
-        try {
-            // Ambil semua data absensi berdasarkan jadwal dan tanggal tertentu
-            $absensiData = Absensi::where('id_jadwal', $idJadwal)
-                ->whereDate('tanggal', $tanggal)
-                ->get();
+        $tanggal = $request->query('tanggal');
 
-            if ($absensiData->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No data returned',
-                    'data' => []
-                ], 200);
+        $exists = \App\Models\Absensi::where('id_jadwal', $idJadwal)
+            ->where('tanggal', $tanggal)
+            ->exists();
+
+        return response()->json([
+            'success' => true,
+            'message' => $exists ? 'Absensi sudah dicatat' : 'Absensi belum ada',
+            'data' => ['exists' => $exists],
+        ]);
+    }
+
+
+    //     public function saveAbsensi($idJadwal, Request $request)
+    //     {
+    //         $request->validate([
+    //             'tanggal' => 'required|date',
+    //             'absensi' => 'required|array',
+    //             'absensi.*.id_siswa' => 'required|integer',
+    //             'absensi.*.status' => 'required|string',
+    //             'absensi.*.catatan' => 'nullable|string',
+    //         ]);
+
+    //         $tanggal = $request->input('tanggal');
+    //         $absensiData = $request->input('absensi');
+
+    //         foreach ($absensiData as $data) {
+    //             \App\Models\Absensi::updateOrCreate(
+    //                 [
+    //                     'id_jadwal' => $idJadwal,
+    //                     'id_siswa' => $data['id_siswa'],
+    //                     'tanggal' => $tanggal,
+    //                 ],
+    //                 [
+    //                     'status' => $data['status'],
+    //                     'catatan' => $data['catatan'] ?? '',
+    //                 ]
+    //             );
+    //         }
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Absensi berhasil disimpan',
+    //             'data' => null,
+    //         ]);
+    //     }
+    // }
+    public function saveAbsensi($idJadwal, Request $request)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'absensi' => 'required|array',
+            'absensi.*.id_siswa' => 'required|integer',
+            'absensi.*.status' => 'required|string',
+            'absensi.*.catatan' => 'nullable|string',
+        ]);
+
+        $tanggal = $request->input('tanggal');
+        $absensiData = $request->input('absensi');
+
+        foreach ($absensiData as $data) {
+            // Simpan atau update absensi
+            Absensi::updateOrCreate(
+                [
+                    'id_jadwal' => $idJadwal,
+                    'id_siswa' => $data['id_siswa'],
+                    'tanggal' => $tanggal,
+                ],
+                [
+                    'status' => $data['status'],
+                    'catatan' => $data['catatan'] ?? '',
+                ]
+            );
+
+            // Kirim dan simpan notifikasi jika siswa tidak hadir (alpa, izin, sakit)
+            if (in_array(strtolower($data['status']), ['alpa', 'izin', 'sakit'])) {
+                $siswa = Siswa::with('orangTua.user')->find($data['id_siswa']);
+
+                if ($siswa && $siswa->orangTua && $siswa->orangTua->user) {
+                    $userOrtu = $siswa->orangTua->user;
+                    $catatan = $data['catatan'] ?? '';
+
+                    $pesan = "{$siswa->nama_lengkap} tidak hadir pada tanggal $tanggal dengan status: " . ucfirst($data['status']) . ".";
+                    if (!empty($catatan)) {
+                        $pesan .= " Catatan dari guru: \"$catatan\".";
+                    }
+
+                    // Simpan ke tabel notifikasi
+                    Notifikasi::create([
+                        'id_user' => $userOrtu->id_user,
+                        'judul' => 'Ketidakhadiran Siswa',
+                        'pesan' => $pesan,
+                        'tipe' => 'absensi',
+                        'dibaca' => false,
+                        // 'dibuat_oleh' => optional(auth()->user())->name ?? 'sistem',
+                        // 'diperbarui_oleh' => optional(auth()->user())->name ?? 'sistem',
+                    ]);
+
+                    // Kirim notifikasi FCM jika ada token
+                    if ($userOrtu->fcm_token) {
+                        $message = CloudMessage::withTarget('token', $userOrtu->fcm_token)
+                            ->withNotification(Notification::create(
+                                'Ketidakhadiran Siswa',
+                                $pesan
+                            ))
+                            ->withData([
+                                'id_siswa' => (string) $siswa->id_siswa,
+                                'tanggal' => $tanggal,
+                                'status' => $data['status'],
+                            ]);
+
+                        try {
+                            $this->messaging->send($message);
+                        } catch (\Exception $e) {
+                            Log::error("Gagal mengirim notifikasi FCM: " . $e->getMessage());
+                        }
+                    }
+                }
             }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Success',
-                'data' => $absensiData
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
-                'data' => []
-            ], 500);
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Absensi berhasil disimpan dan notifikasi dikirim.',
+            'data' => null,
+        ]);
     }
 }

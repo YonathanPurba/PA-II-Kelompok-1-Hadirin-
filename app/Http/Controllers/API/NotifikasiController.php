@@ -55,6 +55,7 @@ class NotifikasiController extends Controller
         return response()->json(['fcm_token' => $fcmToken], 200);
     }
     
+    
     public function index(Request $request)
     {
         $user = $request->user();
