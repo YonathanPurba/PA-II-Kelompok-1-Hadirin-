@@ -533,7 +533,7 @@ class AbsensiController extends Controller
                     $userOrtu = $siswa->orangTua->user;
                     $catatan = $data['catatan'] ?? '';
 
-                    $pesan = "{$siswa->nama_lengkap} tidak hadir pada tanggal $tanggal dengan status: " . ucfirst($data['status']) . ".";
+                    $pesan = "{$siswa->nama} tidak hadir pada tanggal $tanggal dengan status: " . ucfirst($data['status']) . ".";
                     if (!empty($catatan)) {
                         $pesan .= " Catatan dari guru: \"$catatan\".";
                     }
