@@ -118,23 +118,6 @@ public function exportExcel(Request $request)
         return view('admin.pages.guru.tambah_guru');
     }
 
-    // public function show($id)
-    // {
-    //     $guru = Guru::with(['user', 'mataPelajaran', 'jadwalPelajaran'])->find($id);
-
-    //     if (!$guru) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Guru tidak ditemukan',
-    //         ], 404);
-    //     }
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'data' => $guru,
-    //     ], 200);
-    // }
-
     public function show($id)
     {
         $guru = Guru::with([
@@ -207,8 +190,6 @@ public function exportExcel(Request $request)
                 'id_role'           => 2, // Asumsikan 2 = guru
                 'nomor_telepon'     => $request->nomor_telepon,
                 'dibuat_pada'       => now(),
-                
-                // 'dibuat_oleh'       => auth()->id(),
             ];
 
             // Data guru
@@ -233,33 +214,6 @@ public function exportExcel(Request $request)
         }
     }
 
-    // public function update(Request $request, $id)
-    // {
-    //     $validated = $request->validate([
-    //         'nama_lengkap'    => 'required|string|max:255',
-    //         'nama'            => 'required|string|max:255',
-    //         'nip'             => 'nullable|string|max:100',
-    //         'nomor_telepon'   => 'nullable|string|max:20',
-    //     ]);
-
-    //     // Siapkan data user & guru
-    //     $userData = [
-    //         'username'       => $validated['nama'],
-    //         'nomor_telepon'  => $validated['nomor_telepon'],
-    //     ];
-
-    //     $guruData = [
-    //         'nama_lengkap' => $validated['nama_lengkap'],
-    //         'nip'          => $validated['nip'],
-    //     ];
-
-    //     try {
-    //         UserService::updateGuruWithUser($id, $guruData, $userData);
-    //         return redirect()->route('guru.index')->with('success', 'Data guru berhasil diperbarui.');
-    //     } catch (\Exception $e) {
-    //         return back()->withErrors(['error' => 'Gagal memperbarui data: ' . $e->getMessage()])->withInput();
-    //     }
-    // }
 
     public function update(Request $request, $id)
     {

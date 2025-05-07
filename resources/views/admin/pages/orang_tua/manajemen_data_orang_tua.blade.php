@@ -15,10 +15,10 @@
                     <!-- Filter Bar -->
                     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                         <form method="GET" action="{{ route('orang-tua.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="kelas" class="me-2 mb-0">Kelas:</label>
-                                <select name="kelas" id="kelas" class="form-select">
-                                    <option value="">Semua Kelas</option>
+                            <div class="d-flex align-items-center gap-1">
+                                <label for="kelas" class="form-label form-label-sm me-1 mb-0">Kelas:</label>
+                                <select name="kelas" id="kelas" class="form-select form-select-sm">
+                                    <option value="">Semua</option>
                                     @foreach ($kelasList as $kelas)
                                         <option value="{{ $kelas->id_kelas }}" {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
                                             {{ $kelas->nama_kelas }}
@@ -31,16 +31,15 @@
                                 <label for="status" class="me-2 mb-0">Status:</label>
                                 <select name="status" id="status" class="form-select">
                                     <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
-                                    <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                    <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status') && !request()->has('kelas') && !request()->has('search'))) ? 'selected' : '' }}>Aktif</option>
                                     <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
                                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                                 </select>
                             </div>
                             
                             <div class="d-flex align-items-center gap-2">
-                                <label for="search" class="me-2 mb-0">Cari:</label>
-                                <input type="text" name="search" id="search" class="form-control" 
-                                    value="{{ request('search') }}" placeholder="Nama, telepon...">
+                                <input type="text" name="search" class="form-control" placeholder="Cari nama/telepon..." 
+                                       value="{{ request('search') }}">
                             </div>
                             
                             <button type="submit" class="btn btn-outline-success">
@@ -54,7 +53,8 @@
                             @endif
                         </form>
 
-                        <div class="d-flex gap-2 flex-wrap">
+                        <!-- Export Buttons -->
+                        <div class="d-flex gap-2">
                             <a href="{{ route('orang-tua.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
                                class="btn btn-danger">
                                 <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export PDF
@@ -86,18 +86,20 @@
                                         <td>{{ $orangTua->nama_lengkap }}</td>
                                         <td>
                                             @if($orangTua->siswa->count() > 0)
-                                                <ul class="mb-0 ps-3">
-                                                    @foreach ($orangTua->siswa as $anak)
-                                                        <li>{{ $anak->nama }} ({{ $anak->kelas->nama_kelas ?? 'Belum ada kelas' }})</li>
-                                                    @endforeach
-                                                </ul>
+                                                {{ $orangTua->siswa->pluck('nama')->join(', ') }}
                                             @else
                                                 <span class="text-muted">Belum ada data anak</span>
                                             @endif
                                         </td>
                                         <td>{{ $orangTua->nomor_telepon ?? '-' }}</td>
                                         <td>
-                                            {!! $orangTua->getStatusBadgeHtml() !!}
+                                            @if($orangTua->status == 'aktif')
+                                                <span class="badge bg-success">Aktif</span>
+                                            @elseif($orangTua->status == 'nonaktif')
+                                                <span class="badge bg-secondary">Non-Aktif</span>
+                                            @else
+                                                <span class="badge bg-warning">Pending</span>
+                                            @endif
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-2">
@@ -109,22 +111,13 @@
                                                     data-nomor="{{ $orangTua->nomor_telepon ?? '-' }}"
                                                     data-status="{{ $orangTua->status }}"
                                                     data-bs-toggle="modal" data-bs-target="#modalViewOrangtua"
-                                                    title="Lihat Detail">
+                                                    title="Lihat">
                                                     <i class="bi bi-eye-fill fs-5"></i>
                                                 </a>
 
                                                 <a href="{{ route('orang-tua.edit', $orangTua->id_orangtua) }}"
                                                     class="text-warning" title="Edit">
                                                     <i class="bi bi-pencil-square fs-5"></i>
-                                                </a>
-
-                                                <a href="javascript:void(0);" class="text-danger btn-delete-orangtua" 
-                                                    data-id="{{ $orangTua->id_orangtua }}"
-                                                    data-nama="{{ $orangTua->nama_lengkap }}"
-                                                    data-jumlah-anak="{{ $orangTua->siswa->count() }}"
-                                                    data-bs-toggle="modal" data-bs-target="#modalDeleteOrangtua"
-                                                    title="Hapus">
-                                                    <i class="bi bi-trash-fill fs-5"></i>
                                                 </a>
                                             </div>
                                         </td>
@@ -137,7 +130,7 @@
                             </tbody>
                         </table>
                         
-                        <!-- Add pagination if needed -->
+                        <!-- Pagination -->
                         @if($orangTuaList instanceof \Illuminate\Pagination\LengthAwarePaginator)
                             <div class="d-flex justify-content-center mt-3">
                                 {{ $orangTuaList->appends(request()->query())->links() }}
@@ -147,7 +140,7 @@
                     
                     <!-- Tombol Tambah -->
                     <div class="mt-4 text-end">
-                        <a href="{{ route('orang-tua.create') }}" class="btn btn-success px-4">
+                        <a href="{{ route('orang-tua.create') }}" class="btn btn-success">
                             <i class="bi bi-plus-circle me-1"></i> Tambah Orang Tua
                         </a>
                     </div>
@@ -159,211 +152,160 @@
     <!-- Modal View Orang Tua -->
     <div class="modal fade" id="modalViewOrangtua" tabindex="-1" aria-labelledby="modalViewOrangtuaLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content border-0 shadow rounded-4">
                 <div class="modal-header bg-success text-white rounded-top-4">
                     <h5 class="modal-title" id="modalViewOrangtuaLabel">Detail Orang Tua</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Tutup"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <strong class="d-block mb-1">Nama Lengkap:</strong>
-                                <p id="modal-nama" class="mb-0 ps-2">-</p>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <strong class="d-block mb-1">Nomor Telepon:</strong>
-                                <p id="modal-nomor" class="mb-0 ps-2">-</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <strong class="d-block mb-1">Pekerjaan:</strong>
-                                <p id="modal-pekerjaan" class="mb-0 ps-2">-</p>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <strong class="d-block mb-1">Status:</strong>
-                                <p id="modal-status-container" class="mb-0 ps-2">
-                                    <span id="modal-status-badge" class="badge">-</span>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4">Nama Lengkap</dt>
+                        <dd class="col-sm-8" id="view-nama-lengkap">-</dd>
 
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <strong class="d-block mb-1">Alamat:</strong>
-                            <p id="modal-alamat" class="mb-0 ps-2">-</p>
-                        </div>
-                    </div>
+                        <dt class="col-sm-4">Nomor Telepon</dt>
+                        <dd class="col-sm-8" id="view-telepon">-</dd>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <strong class="d-block mb-1">Data Anak:</strong>
-                            <div id="modal-anak-container" class="ps-2">
-                                <ul id="modal-anak" class="mb-0 ps-3">
-                                    <!-- Anak-anak akan diisi via JS -->
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <a id="btn-edit-orangtua" href="#" class="btn btn-warning">
-                        <i class="bi bi-pencil me  href="#" class="btn btn-warning">
-                        <i class="bi bi-pencil me-1"></i> Edit
-                    </a>
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                        <dt class="col-sm-4">Pekerjaan</dt>
+                        <dd class="col-sm-8" id="view-pekerjaan">-</dd>
+                        
+                        <dt class="col-sm-4">Alamat</dt>
+                        <dd class="col-sm-8" id="view-alamat">-</dd>
 
-    <!-- Modal Delete Orang Tua -->
-    <div class="modal fade" id="modalDeleteOrangtua" tabindex="-1" aria-labelledby="modalDeleteOrangtuaLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-header bg-danger text-white rounded-top-4">
-                    <h5 class="modal-title" id="modalDeleteOrangtuaLabel">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Tutup"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <p>Anda yakin ingin menghapus data orang tua <strong id="delete-nama">-</strong>?</p>
-                    <div id="delete-warning" class="alert alert-warning d-none">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <span id="delete-warning-text"></span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="form-delete-orangtua" action="" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">Hapus</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8" id="view-status">-</dd>
+                    </dl>
+
+                    <hr>
+
+                    <h5 class="mb-3">Data Anak</h5>
+<div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle">
+        <thead class="table-light text-center">
+            <tr>
+                <th>No</th>
+                <th>Nama Anak</th>
+                <th>Kelas</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="table-anak-body">
+            <tr>
+                <td colspan="4" class="text-center">Memuat data...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+</div>
+</div>
+</div>
+</div>
 @endsection
 
-@section('js')
+@section('scripts')
 <script>
     $(document).ready(function() {
-        // DataTable Initialization with improved options
-        $('#orangtuaTable').DataTable({
-            responsive: true,
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json'
-            },
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Semua"]],
-            columnDefs: [
-                { orderable: false, targets: [5] }, // Disable sorting on action column
-                { searchable: false, targets: [0, 5] } // Disable searching on number and action columns
-            ]
-        });
+        // Check if DataTable is already initialized
+        if (!$.fn.DataTable.isDataTable('#orangtuaTable')) {
+            // Initialize DataTable only if it's not already initialized
+            $('#orangtuaTable').DataTable({
+                responsive: true,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json',
+                },
+                // Disable sorting on the last column (actions)
+                "columnDefs": [
+                    { "orderable": false, "targets": 5 }
+                ],
+                // Disable pagination since we're using Laravel's pagination
+                "paging": false,
+                // Disable the default search box since we have our own filter
+                "searching": false,
+                // Disable the info display since we're using Laravel's pagination
+                "info": false
+            });
+        }
 
-        // Handle View Modal
+        // Handle view orangtua button click
         $('.btn-view-orangtua').on('click', function() {
             const id = $(this).data('id');
-            const nama = $(this).data('nama') || '-';
-            const alamat = $(this).data('alamat') || '-';
-            const pekerjaan = $(this).data('pekerjaan') || '-';
-            const nomor = $(this).data('nomor') || '-';
-            const status = $(this).data('status') || '-';
             
-            // Update edit button href
-            $('#btn-edit-orangtua').attr('href', `{{ url('orang-tua') }}/${id}/edit`);
+            // Show loading state
+            $('#view-nama-lengkap').text('Memuat...');
+            $('#view-telepon').text('Memuat...');
+            $('#view-pekerjaan').text('Memuat...');
+            $('#view-alamat').text('Memuat...');
+            $('#view-status').text('Memuat...');
+            $('#table-anak-body').html('<tr><td colspan="4" class="text-center">Memuat data...</td></tr>');
             
-            // Set basic info
-            $('#modal-nama').text(nama);
-            $('#modal-alamat').text(alamat);
-            $('#modal-pekerjaan').text(pekerjaan);
-            $('#modal-nomor').text(nomor);
+            // Mengambil data secara langsung dari atribut data
+            // Ini adalah solusi sementara jika endpoint AJAX tidak berfungsi
+            const parentData = {
+                nama_lengkap: $(this).data('nama') || '-',
+                nomor_telepon: $(this).data('nomor') || '-',
+                pekerjaan: $(this).data('pekerjaan') || '-',
+                alamat: $(this).data('alamat') || '-',
+                status: $(this).data('status') || 'pending',
+            };
+
+            // Fill in basic details dari atribut data
+            $('#view-nama-lengkap').text(parentData.nama_lengkap);
+            $('#view-telepon').text(parentData.nomor_telepon);
+            $('#view-pekerjaan').text(parentData.pekerjaan);
+            $('#view-alamat').text(parentData.alamat);
             
             // Set status with badge
-            const statusBadge = $('#modal-status-badge');
-            if (status === 'aktif') {
-                statusBadge.text('Aktif').removeClass('bg-secondary bg-warning').addClass('bg-success');
-            } else if (status === 'nonaktif') {
-                statusBadge.text('Non-Aktif').removeClass('bg-success bg-warning').addClass('bg-secondary');
-            } else if (status === 'pending') {
-                statusBadge.text('Pending').removeClass('bg-success bg-secondary').addClass('bg-warning text-dark');
+            if (parentData.status === 'aktif') {
+                $('#view-status').html('<span class="badge bg-success">Aktif</span>');
+            } else if (parentData.status === 'nonaktif') {
+                $('#view-status').html('<span class="badge bg-secondary">Non-Aktif</span>');
             } else {
-                statusBadge.text('Unknown').removeClass('bg-success bg-secondary bg-warning').addClass('bg-light text-dark');
+                $('#view-status').html('<span class="badge bg-warning">Pending</span>');
             }
             
-            // Get children data via AJAX for the most up-to-date information
-            const anakList = $('#modal-anak');
-            anakList.empty().html('<div class="spinner-border spinner-border-sm text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>');
-            
-            // AJAX request to get children data
+            // Coba ambil data anak via AJAX
             $.ajax({
-                url: `{{ url('api/orang-tua') }}/${id}/anak`,
+                url: `/orang-tua/${id}/anak`,
                 method: 'GET',
                 success: function(response) {
-                    anakList.empty();
-                    
-                    if (response.data && response.data.length > 0) {
-                        response.data.forEach(anak => {
-                            const kelasInfo = anak.kelas ? `(${anak.kelas.nama_kelas})` : '(Belum ada kelas)';
-                            anakList.append(`<li>${anak.nama} ${kelasInfo}</li>`);
+                    // Fill in children table
+                    if (response && response.length > 0) {
+                        let tableContent = '';
+                        response.forEach((anak, index) => {
+                            // Create status badge based on child's status
+                            let statusBadge = '';
+                            if (anak.status === 'aktif') {
+                                statusBadge = '<span class="badge bg-success">Aktif</span>';
+                            } else if (anak.status === 'nonaktif') {
+                                statusBadge = '<span class="badge bg-secondary">Non-Aktif</span>';
+                            } else {
+                                statusBadge = '<span class="badge bg-warning">Pending</span>';
+                            }
+                            
+                            tableContent += `
+                                <tr>
+                                    <td class="text-center">${index + 1}</td>
+                                    <td class="text-center">${anak.nama}</td>
+                                    <td class="text-center">${anak.kelas ? anak.kelas.nama_kelas : 'Belum ada kelas'}</td>
+                                    <td class="text-center">${statusBadge}</td>
+                                </tr>
+                            `;
                         });
+                        $('#table-anak-body').html(tableContent);
                     } else {
-                        anakList.append('<li class="text-muted">Belum ada data anak</li>');
+                        $('#table-anak-body').html('<tr><td colspan="4" class="text-center">Belum ada data anak</td></tr>');
                     }
                 },
-                error: function() {
-                    anakList.empty().append('<li class="text-danger">Gagal memuat data anak</li>');
+                error: function(xhr) {
+                    console.error('Error fetching children data:', xhr);
+                    $('#table-anak-body').html('<tr><td colspan="4" class="text-center">Belum ada data anak</td></tr>');
                 }
             });
         });
-        
-        // Handle Delete Modal
-        $('.btn-delete-orangtua').on('click', function() {
-            const id = $(this).data('id');
-            const nama = $(this).data('nama');
-            const jumlahAnak = $(this).data('jumlah-anak');
-            
-            $('#delete-nama').text(nama);
-            $('#form-delete-orangtua').attr('action', `{{ url('orang-tua') }}/${id}`);
-            
-            // Show warning if parent has children
-            if (jumlahAnak > 0) {
-                $('#delete-warning').removeClass('d-none');
-                $('#delete-warning-text').text(`Orang tua ini memiliki ${jumlahAnak} anak yang terdaftar. Menghapus data ini akan menghapus relasi dengan anak-anaknya.`);
-            } else {
-                $('#delete-warning').addClass('d-none');
-            }
-        });
-        
-        // Form filter responsive behavior
-        $(window).on('resize', function() {
-            adjustFilterFormLayout();
-        });
-        
-        function adjustFilterFormLayout() {
-            const filterForm = $('form[action="{{ route("orang-tua.index") }}"]');
-            if (window.innerWidth < 768) {
-                filterForm.addClass('flex-column align-items-start').removeClass('align-items-center');
-                filterForm.find('div').addClass('w-100');
-                filterForm.find('select, input').addClass('w-100');
-            } else {
-                filterForm.removeClass('flex-column align-items-start').addClass('align-items-center');
-                filterForm.find('div').removeClass('w-100');
-                filterForm.find('select, input').removeClass('w-100');
-            }
-        }
-        
-        // Initialize responsive layout
-        adjustFilterFormLayout();
     });
 </script>
-@endsection
+@endsection 
