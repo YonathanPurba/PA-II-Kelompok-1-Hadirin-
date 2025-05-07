@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use Carbon\Carbon;
 use App\Models\Guru;
 use App\Models\User;
+use App\Models\Kelas;
+use App\Models\Siswa;
 use App\Models\Jadwal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -326,7 +328,7 @@ class GuruController extends Controller
 
             return [
                 'kelas' => $item->kelas->nama_kelas,
-                'id_kelas'=>$item->kelas->id_kelas,
+                'id_kelas' => $item->kelas->id_kelas,
                 'mata_pelajaran' => $item->mataPelajaran->nama,
                 'hari' => $item->hari,
                 'waktu' => $waktuMulai->format('H:i') . ' - ' . $waktuSelesai->format('H:i'),
@@ -511,4 +513,71 @@ class GuruController extends Controller
             ], 500);
         }
     }
+
+    // Get siswa berdasarkan kelas_id dari /guru/kelas/{id}/siswa
+    public function getSiswaKelas($id)
+    {
+        $kelas = Kelas::with('siswa')->find($id);
+
+        if (!$kelas) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kelas tidak ditemukan',
+                'data' => []
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil mengambil data siswa',
+            'data' => $kelas->siswa
+        ]);
+    }
+
+    // Endpoint fallback: /guru/siswa?kelas_id={id}
+    public function getSiswaByKelasId(Request $request)
+    {
+        $kelasId = $request->query('kelas_id');
+        if (!$kelasId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'kelas_id harus diisi',
+                'data' => []
+            ], 400);
+        }
+
+        $siswa = Siswa::where('kelas_id', $kelasId)->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil mengambil data siswa',
+            'data' => $siswa
+        ]);
+    }
+
+    // Optional: Get detail kelas + siswa langsung di /guru/kelas/{id}
+    public function getDetailKelas($id)
+    {
+        $kelas = Kelas::with('siswa')->find($id);
+
+        if (!$kelas) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kelas tidak ditemukan',
+                'data' => []
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil mengambil detail kelas',
+            'data' => [
+                'id' => $kelas->id_kelas,
+                'nama' => $kelas->nama_kelas,
+                'tingkat' => $kelas->tingkat,
+                'siswa' => $kelas->siswa
+            ]
+        ]);
+    }
+    
 }

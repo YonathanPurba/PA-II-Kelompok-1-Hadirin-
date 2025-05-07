@@ -55,7 +55,7 @@ class AuthController extends Controller
         ], 201);
     }
 
-    //Login Done 
+    // Login Done 
     public function processLogin(Request $request)
     {
         // Validasi input
@@ -67,7 +67,7 @@ class AuthController extends Controller
             'password.required' => 'Password wajib diisi.'
         ]);
 
-        // Cek kredensial login berdasarkan username
+        // Cek kredensial login berdasarkan username dan password
         if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
             $request->session()->regenerate(); // Hindari session fixation
 
@@ -77,10 +77,17 @@ class AuthController extends Controller
             if ($user) {
                 $user->last_login_at = now();
                 $user->save();
-            }
 
-            // Kirim success message jika login berhasil
-            return redirect()->route('admin.beranda')->with('success', 'Selamat datang, Anda berhasil login!');
+                // Cek role setelah menyimpan login
+                if ($user->role && $user->role->nama === 'staf') {
+                    return redirect()->route('admin.beranda')->with('success', 'Selamat datang, Anda berhasil login!');
+                } else {
+                    Auth::logout();
+                    return redirect('/')->withInput()->withErrors([
+                        'login' => 'Hanya akun dengan role staf yang diperbolehkan login.'
+                    ])->with('error', 'Login ditolak, hanya staf yang bisa masuk.');
+                }
+            }
         }
 
         // Jika gagal login, redirect kembali dengan error
@@ -88,6 +95,7 @@ class AuthController extends Controller
             'login' => 'Username atau password salah.'
         ])->with('error', 'Login gagal, periksa kembali username dan password Anda.');
     }
+
 
 
     public function logout(Request $request)

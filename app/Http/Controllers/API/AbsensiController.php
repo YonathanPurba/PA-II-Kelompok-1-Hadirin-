@@ -60,12 +60,12 @@ class AbsensiController extends Controller
 
         if ($request->has('bulan') && $request->has('tahun')) {
             $query->whereMonth('tanggal', $request->bulan)
-                  ->whereYear('tanggal', $request->tahun);
+                ->whereYear('tanggal', $request->tahun);
         }
 
         $perPage = $request->input('per_page', 15);
         $absensi = $query->orderBy('tanggal', 'desc')
-                         ->paginate($perPage);
+            ->paginate($perPage);
 
         return $this->paginatedResponse($absensi, 'Data absensi berhasil diambil');
     }
@@ -94,7 +94,7 @@ class AbsensiController extends Controller
         DB::beginTransaction();
         try {
             $createdRecords = [];
-            
+
             foreach ($request->absensi as $item) {
                 $absensi = Absensi::updateOrCreate(
                     [
@@ -109,16 +109,16 @@ class AbsensiController extends Controller
                         'diperbarui_oleh' => $request->user()->username,
                     ]
                 );
-                
+
                 $createdRecords[] = $absensi->load('siswa');
             }
-            
+
             DB::commit();
-            
+
             return $this->successResponse($createdRecords, 'Absensi berhasil disimpan');
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return $this->errorResponse('Gagal menyimpan absensi: ' . $e->getMessage(), 500);
         }
     }
@@ -161,7 +161,7 @@ class AbsensiController extends Controller
 
         try {
             $absensi = Absensi::findOrFail($id);
-            
+
             $absensi->status = $request->status;
             $absensi->catatan = $request->catatan;
             $absensi->diperbarui_oleh = $request->user()->username;
@@ -197,12 +197,12 @@ class AbsensiController extends Controller
 
         if ($request->has('bulan') && $request->has('tahun')) {
             $query->whereMonth('tanggal', $request->bulan)
-                  ->whereYear('tanggal', $request->tahun);
+                ->whereYear('tanggal', $request->tahun);
         }
 
         $perPage = $request->input('per_page', 15);
         $absensi = $query->orderBy('tanggal', 'desc')
-                         ->paginate($perPage);
+            ->paginate($perPage);
 
         return $this->paginatedResponse($absensi, 'Data absensi siswa berhasil diambil');
     }
@@ -226,20 +226,20 @@ class AbsensiController extends Controller
 
         // Get all jadwal for the class on the specified date
         $hari = strtolower(Carbon::parse($request->tanggal)->locale('id')->dayName);
-        
+
         $jadwals = Jadwal::where('id_kelas', $request->id_kelas)
-                         ->where('hari', $hari)
-                         ->with(['mataPelajaran', 'guru'])
-                         ->get();
-        
+            ->where('hari', $hari)
+            ->with(['mataPelajaran', 'guru'])
+            ->get();
+
         $result = [];
-        
+
         foreach ($jadwals as $jadwal) {
             $absensi = Absensi::with(['siswa'])
                 ->where('id_jadwal', $jadwal->id_jadwal)
                 ->where('tanggal', $request->tanggal)
                 ->get();
-            
+
             $result[] = [
                 'jadwal' => $jadwal,
                 'absensi' => $absensi
@@ -276,9 +276,9 @@ class AbsensiController extends Controller
         ];
 
         $absensi = Absensi::where('id_siswa', $request->id_siswa)
-                         ->whereMonth('tanggal', $request->bulan)
-                         ->whereYear('tanggal', $request->tahun)
-                         ->get();
+            ->whereMonth('tanggal', $request->bulan)
+            ->whereYear('tanggal', $request->tahun)
+            ->get();
 
         foreach ($absensi as $item) {
             $summary[$item->status]++;
@@ -297,7 +297,7 @@ class AbsensiController extends Controller
 
         return $this->successResponse($result, 'Ringkasan absensi berhasil diambil');
     }
-    
+
     /**
      * Get attendance for today
      *
@@ -317,29 +317,29 @@ class AbsensiController extends Controller
 
         $today = Carbon::today()->format('Y-m-d');
         $hari = strtolower(Carbon::today()->locale('id')->dayName);
-        
+
         $query = Jadwal::where('hari', $hari);
-        
+
         if ($request->has('id_kelas')) {
             $query->where('id_kelas', $request->id_kelas);
         }
-        
+
         if ($request->has('id_guru')) {
             $query->where('id_guru', $request->id_guru);
         }
-        
+
         $jadwals = $query->with(['mataPelajaran', 'guru', 'kelas'])
-                        ->orderBy('waktu_mulai')
-                        ->get();
-        
+            ->orderBy('waktu_mulai')
+            ->get();
+
         $result = [];
-        
+
         foreach ($jadwals as $jadwal) {
             $absensi = Absensi::with(['siswa'])
                 ->where('id_jadwal', $jadwal->id_jadwal)
                 ->where('tanggal', $today)
                 ->get();
-            
+
             $result[] = [
                 'jadwal' => $jadwal,
                 'absensi' => $absensi,
@@ -349,5 +349,67 @@ class AbsensiController extends Controller
         }
 
         return $this->successResponse($result, 'Data absensi hari ini berhasil diambil');
+    }
+
+
+
+    public function checkAbsensiStatus($idJadwal, $tanggal)
+    {
+        try {
+            // Cek apakah absensi sudah tercatat pada jadwal dan tanggal tertentu
+            $absensi = Absensi::where('id_jadwal', $idJadwal)
+                ->whereDate('tanggal', $tanggal)
+                ->first();
+
+            if (!$absensi) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Absensi belum tercatat',
+                    'data' => ['exists' => false]
+                ], 200);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Absensi sudah tercatat',
+                'data' => ['exists' => true]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data' => ['exists' => false]
+            ], 500);
+        }
+    }
+
+    public function getAbsensiData($idJadwal, $tanggal)
+    {
+        try {
+            // Ambil semua data absensi berdasarkan jadwal dan tanggal tertentu
+            $absensiData = Absensi::where('id_jadwal', $idJadwal)
+                ->whereDate('tanggal', $tanggal)
+                ->get();
+
+            if ($absensiData->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No data returned',
+                    'data' => []
+                ], 200);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Success',
+                'data' => $absensiData
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
     }
 }
