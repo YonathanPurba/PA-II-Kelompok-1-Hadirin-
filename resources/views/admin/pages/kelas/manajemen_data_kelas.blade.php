@@ -112,12 +112,6 @@
                                                 <a href="{{ route('kelas.edit', $k->id_kelas) }}" class="text-warning" title="Edit">
                                                     <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
-                                                <a href="javascript:void(0);" class="text-danger btn-delete" data-id="{{ $k->id_kelas }}" data-name="{{ $k->nama_kelas }}" title="Hapus">
-                                                    <i class="bi bi-trash-fill fs-5"></i>
-                                                </a>
-                                                <a href="javascript:void(0);" class="text-info btn-update-status" data-id="{{ $k->id_kelas }}" data-name="{{ $k->nama_kelas }}" title="Update Status Siswa">
-                                                    <i class="bi bi-arrow-repeat fs-5"></i>
-                                                </a>
                                             </div>
                                         </td>
                                     </tr>
