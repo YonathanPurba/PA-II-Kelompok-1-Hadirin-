@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\User;
 
 class GuruController extends Controller
 {
@@ -113,10 +114,14 @@ public function exportExcel(Request $request)
     );
 }
 
-    public function create()
-    {
-        return view('admin.pages.guru.tambah_guru');
-    }
+// Update the create method to load mata pelajaran data
+public function create()
+{
+    // Mengambil semua mata pelajaran untuk dropdown
+    $allMataPelajaran = MataPelajaran::orderBy('nama')->get();
+    
+    return view('admin.pages.guru.tambah_guru', compact('allMataPelajaran'));
+}
 
     public function show($id)
     {
@@ -155,96 +160,132 @@ public function exportExcel(Request $request)
         return response()->json($formattedGuru);
     }
 
-    public function edit($id)
-    {
-        // Mengambil data guru beserta mata pelajaran yang terkait melalui pivot table
-        $guru = Guru::with('mataPelajaran')->findOrFail($id);
+// Update the edit method to load related data
+public function edit($id)
+{
+    // Mengambil data guru beserta mata pelajaran yang terkait melalui pivot table
+    $guru = Guru::with(['mataPelajaran', 'jadwal.kelas', 'jadwal.mataPelajaran'])->findOrFail($id);
 
-        // Mengambil semua mata pelajaran untuk dropdown
-        $allMataPelajaran = MataPelajaran::all();
+    // Mengambil semua mata pelajaran untuk dropdown
+    $allMataPelajaran = MataPelajaran::orderBy('nama')->get();
 
-        // Mengirimkan data guru dan mata pelajaran ke view edit
-        return view('admin.pages.guru.edit_guru', compact('guru', 'allMataPelajaran'));
-    }
+    // Mengirimkan data guru dan mata pelajaran ke view edit
+    return view('admin.pages.guru.edit_guru', compact('guru', 'allMataPelajaran'));
+}
 
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama_lengkap'      => 'required|string|max:255',
-            'nip'               => 'nullable|string|max:50|unique:guru,nip',
-            'alamat'            => 'nullable|string',
-            // 'jenis_kelamin'     => 'required|in:L,P',
-            'password'          => 'required|string|min:6|confirmed',
-            'nomor_telepon'     => 'nullable|string|max:20',
-            'id_mata_pelajaran' => 'nullable|exists:mata_pelajaran,id_mata_pelajaran',
+// Update the store method to handle mata_pelajaran and user creation properly
+public function store(Request $request)
+{
+    $request->validate([
+        'nama_lengkap'      => 'required|string|max:255',
+        'nip'               => 'nullable|numeric|digits:18|unique:guru,nip',
+        'nomor_telepon'     => 'nullable|numeric|digits_between:10,15',
+        'bidang_studi'      => 'nullable|string|max:255',
+        'username'          => 'required|string|min:6|max:255|unique:users,username',
+        'password'          => [
+            'required',
+            'string',
+            'min:8',
+            'confirmed',
+            'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'
+        ],
+        'mata_pelajaran'    => 'nullable|array',
+        'mata_pelajaran.*'  => 'exists:mata_pelajaran,id_mata_pelajaran',
+    ], [
+        'nama_lengkap.required' => 'Nama lengkap harus diisi',
+        'nip.numeric' => 'NIP harus berupa angka',
+        'nip.digits' => 'NIP harus terdiri dari 18 digit',
+        'nip.unique' => 'NIP sudah digunakan',
+        'nomor_telepon.numeric' => 'Nomor telepon harus berupa angka',
+        'nomor_telepon.digits_between' => 'Nomor telepon harus terdiri dari 10-15 digit',
+        'username.required' => 'Username harus diisi',
+        'username.min' => 'Username minimal 6 karakter',
+        'username.unique' => 'Username sudah digunakan',
+        'password.required' => 'Password harus diisi',
+        'password.min' => 'Password minimal 8 karakter',
+        'password.regex' => 'Password harus mengandung huruf dan angka',
+        'password.confirmed' => 'Konfirmasi password tidak cocok',
+    ]);
 
+    DB::beginTransaction();
+    try {
+        // Create user account
+        $user = User::create([
+            'username'      => $request->username,
+            'password'      => bcrypt($request->password),
+            'id_role'       => 3, // Role id for guru
+            'dibuat_pada'   => now(),
+            'dibuat_oleh'   => Auth::user()->username ?? 'system',
         ]);
 
-        DB::beginTransaction();
-        try {
-            // Data user
-            $userData = [
-                'username'          => $request->nama,
-                'password'          => bcrypt($request->password), // Hash password
-                'id_role'           => 2, // Asumsikan 2 = guru
-                'nomor_telepon'     => $request->nomor_telepon,
-                'dibuat_pada'       => now(),
-            ];
-
-            // Data guru
-            $guruData = [
-                'nama_lengkap'      => $request->nama_lengkap,
-                'nip'               => $request->nip,
-                'alamat'            => $request->alamat,
-                // 'jenis_kelamin'     => $request->jenis_kelamin,
-                // 'id_mata_pelajaran' => $request->id_mata_pelajaran,
-                'dibuat_pada'       => now(),
-                // 'dibuat_oleh'       => auth()->id(),
-            ];
-
-            // Gunakan UserService untuk menyimpan data
-            $guru = UserService::createGuruWithUser($guruData, $userData);
-
-            DB::commit();
-            return redirect()->route('guru.index')->with('success', 'Data guru berhasil ditambahkan.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()->with('error', 'Gagal menyimpan data guru: ' . $e->getMessage());
-        }
-    }
-
-
-    public function update(Request $request, $id)
-    {
-        // Validasi input
-        $request->validate([
-            'nama_lengkap' => 'required|string|max:255',
-            'nip' => 'nullable|string|max:50',
-            'nomor_telepon' => 'nullable|string|max:20',
-            'mata_pelajaran' => 'required|array',
-            'mata_pelajaran.*' => 'exists:mata_pelajaran,id_mata_pelajaran',
-            'status' => 'required|string|in:aktif,nonaktif',
-
-        ]);
-
-        // Ambil data guru
-        $guru = Guru::findOrFail($id);
-
-        // Update data guru
-        $guru->update([
-            'nama_lengkap' => $request->nama_lengkap,
-            'nip' => $request->nip,
+        // Create guru record
+        $guru = Guru::create([
+            'id_user'       => $user->id_user,
+            'nama_lengkap'  => $request->nama_lengkap,
+            'nip'           => $request->nip,
             'nomor_telepon' => $request->nomor_telepon,
-            'status' => $request->status,
-
+            'bidang_studi'  => $request->bidang_studi,
+            'status'        => 'aktif', // Default to active
+            'dibuat_pada'   => now(),
+            'dibuat_oleh'   => Auth::user()->username ?? 'system',
         ]);
 
-        // Sinkronisasi relasi guru <-> mata pelajaran (pivot table)
-        $guru->mataPelajaran()->sync($request->mata_pelajaran);
+        // Sync mata pelajaran if provided
+        if ($request->has('mata_pelajaran')) {
+            $guru->mataPelajaran()->sync($request->mata_pelajaran);
+        }
 
-        return redirect()->route('guru.index')->with('success', 'Data guru berhasil diperbarui.');
+        DB::commit();
+        return redirect()->route('guru.index')->with('success', 'Data guru berhasil ditambahkan.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->withInput()->with('error', 'Gagal menyimpan data guru: ' . $e->getMessage());
     }
+}
+
+// Update the update method to handle mata_pelajaran properly
+public function update(Request $request, $id)
+{
+    // Validasi input
+    $request->validate([
+        'nama_lengkap'      => 'required|string|max:255',
+        'nip'               => 'nullable|numeric|digits:18|unique:guru,nip,'.$id.',id_guru',
+        'nomor_telepon'     => 'nullable|numeric|digits_between:10,15',
+        'bidang_studi'      => 'nullable|string|max:255',
+        'mata_pelajaran'    => 'required|array',
+        'mata_pelajaran.*'  => 'exists:mata_pelajaran,id_mata_pelajaran',
+        'status'            => 'required|string|in:aktif,nonaktif',
+    ], [
+        'nama_lengkap.required' => 'Nama lengkap harus diisi',
+        'nip.numeric' => 'NIP harus berupa angka',
+        'nip.digits' => 'NIP harus terdiri dari 18 digit',
+        'nip.unique' => 'NIP sudah digunakan',
+        'nomor_telepon.numeric' => 'Nomor telepon harus berupa angka',
+        'nomor_telepon.digits_between' => 'Nomor telepon harus terdiri dari 10-15 digit',
+        'mata_pelajaran.required' => 'Pilih minimal satu mata pelajaran',
+        'status.required' => 'Status harus dipilih',
+    ]);
+
+    // Ambil data guru
+    $guru = Guru::findOrFail($id);
+
+    // Update data guru
+    $guru->update([
+        'nama_lengkap'      => $request->nama_lengkap,
+        'nip'               => $request->nip,
+        'nomor_telepon' => $request->nomor_telepon,
+        'bidang_studi'      => $request->bidang_studi,
+        'status'            => $request->status,
+        'diperbarui_pada'   => now(),
+        'diperbarui_oleh'   => Auth::user()->username ?? 'system',
+    ]);
+
+    // Sinkronisasi relasi guru <-> mata pelajaran (pivot table)
+    $guru->mataPelajaran()->sync($request->mata_pelajaran);
+
+    return redirect()->route('guru.index')->with('success', 'Data guru berhasil diperbarui.');
+}
         
 
     public function destroy($id)

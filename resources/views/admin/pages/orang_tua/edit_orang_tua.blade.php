@@ -45,8 +45,10 @@
                                 <label for="nomor_telepon" class="form-label">Nomor Telepon</label>
                                 <input type="tel" name="nomor_telepon" id="nomor_telepon"
                                     class="form-control @error('nomor_telepon') is-invalid @enderror"
-                                    value="{{ old('nomor_telepon', $orangTua->nomor_telepon) }}" required
-                                    pattern="[0-9]+" title="Masukkan hanya angka">
+                                    value="{{ old('nomor_telepon', $orangTua->nomor_telepon) }}"
+                                    maxlength="15"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                <small class="text-muted">Nomor telepon harus 10-15 digit angka</small>
                                 @error('nomor_telepon')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -166,6 +168,29 @@
             theme: 'bootstrap-5',
             width: '100%',
             minimumResultsForSearch: Infinity // Disable search for this dropdown
+        });
+        
+        // Input restrictions for phone number
+        $('#nomor_telepon').on('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 15) {
+                this.value = this.value.slice(0, 15);
+            }
+        });
+        
+        // Form validation
+        $('#editOrangTuaForm').on('submit', function(e) {
+            let isValid = true;
+            const nomor_telepon = $('#nomor_telepon').val();
+            
+            // Phone number validation
+            if (nomor_telepon && (nomor_telepon.length < 10 || nomor_telepon.length > 15)) {
+                e.preventDefault();
+                alert('Nomor telepon harus terdiri dari 10-15 digit!');
+                isValid = false;
+            }
+            
+            return isValid;
         });
     });
 </script>

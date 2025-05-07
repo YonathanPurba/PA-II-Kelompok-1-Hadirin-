@@ -11,9 +11,7 @@ class Guru extends Model
 
     protected $table = 'guru';
     protected $primaryKey = 'id_guru';
-    
-    const CREATED_AT = 'dibuat_pada';
-    const UPDATED_AT = 'diperbarui_pada';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_user',
@@ -21,9 +19,11 @@ class Guru extends Model
         'nip',
         'nomor_telepon',
         'bidang_studi',
-        'dibuat_oleh',
-        'diperbarui_oleh',
         'status',
+        'dibuat_pada',
+        'dibuat_oleh',
+        'diperbarui_pada',
+        'diperbarui_oleh',
     ];
 
     public function user()
@@ -31,25 +31,18 @@ class Guru extends Model
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
 
+    public function mataPelajaran()
+    {
+        return $this->belongsToMany(MataPelajaran::class, 'guru_mata_pelajaran', 'id_guru', 'id_mata_pelajaran');
+    }
+
     public function kelas()
     {
         return $this->hasMany(Kelas::class, 'id_guru', 'id_guru');
     }
 
-    public function guruMataPelajaran()
-    {
-        return $this->hasMany(GuruMataPelajaran::class, 'id_guru', 'id_guru');
-    }
-
     public function jadwal()
     {
         return $this->hasMany(Jadwal::class, 'id_guru', 'id_guru');
-    }
-
-    public function mataPelajaran()
-    {
-        return $this->belongsToMany(MataPelajaran::class, 'guru_mata_pelajaran', 'id_guru', 'id_mata_pelajaran')
-            ->withPivot(['dibuat_pada', 'dibuat_oleh', 'diperbarui_pada', 'diperbarui_oleh'])
-            ->withTimestamps();
     }
 }

@@ -151,11 +151,28 @@ public function exportExcel(Request $request)
    {
        $request->validate([
            'nama_lengkap' => 'required|string|max:255',
-           'username' => 'required|string|max:255|unique:users,username',
-           'password' => 'required|string|min:6',
+           'username' => 'required|string|min:6|max:255|unique:users,username',
+           'password' => [
+               'required',
+               'string',
+               'min:8',
+               'confirmed',
+               'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'
+           ],
            'alamat' => 'nullable|string',
            'pekerjaan' => 'nullable|string|max:255',
-           'nomor_telepon' => 'nullable|string|max:15',
+           'nomor_telepon' => 'nullable|numeric|digits_between:10,15',
+       ], [
+           'nama_lengkap.required' => 'Nama lengkap harus diisi',
+           'username.required' => 'Username harus diisi',
+           'username.min' => 'Username minimal 6 karakter',
+           'username.unique' => 'Username sudah digunakan',
+           'password.required' => 'Password harus diisi',
+           'password.min' => 'Password minimal 8 karakter',
+           'password.regex' => 'Password harus mengandung huruf dan angka',
+           'password.confirmed' => 'Konfirmasi password tidak cocok',
+           'nomor_telepon.numeric' => 'Nomor telepon harus berupa angka',
+           'nomor_telepon.digits_between' => 'Nomor telepon harus terdiri dari 10-15 digit',
        ]);
 
        DB::beginTransaction();
@@ -227,7 +244,11 @@ public function exportExcel(Request $request)
            'nama_lengkap' => 'required|string|max:255',
            'alamat' => 'nullable|string',
            'pekerjaan' => 'nullable|string|max:255',
-           'nomor_telepon' => 'nullable|string|max:15',
+           'nomor_telepon' => 'nullable|numeric|digits_between:10,15',
+       ], [
+           'nama_lengkap.required' => 'Nama lengkap harus diisi',
+           'nomor_telepon.numeric' => 'Nomor telepon harus berupa angka',
+           'nomor_telepon.digits_between' => 'Nomor telepon harus terdiri dari 10-15 digit',
        ]);
 
        DB::beginTransaction();

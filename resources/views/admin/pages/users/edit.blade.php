@@ -41,21 +41,9 @@
 
                 <div class="data">
                     <form action="{{ route('users.update', $user->id_user) }}" method="POST"
-                        class="p-4 pt-1 rounded-4 bg-white shadow-sm">
+                        class="p-4 pt-1 rounded-4 bg-white shadow-sm" id="formEditUser">
                         @csrf
                         @method('PUT')
-
-                        <!-- Username -->
-                        <!-- <div class="mb-3">
-                            <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
-                            <input type="text" name="username" id="username"
-                                class="form-control @error('username') is-invalid @enderror"
-                                value="{{ old('username', $user->username) }}" required>
-                            @error('username')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <div class="form-text">Username harus unik dan akan digunakan untuk login.</div>
-                        </div> -->
 
                         <!-- Password -->
                         <div class="mb-3">
@@ -65,7 +53,8 @@
                             @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <div class="form-text">Kosongkan jika tidak ingin mengubah password. Jika diisi, minimal 8 karakter.</div>
+                            <div class="form-text">Kosongkan jika tidak ingin mengubah password. Jika diisi, minimal 8 karakter dan harus mengandung huruf dan angka.</div>
+                            <div id="password-strength" class="mt-2"></div>
                         </div>
 
                         <!-- Konfirmasi Password -->
@@ -77,23 +66,8 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="form-text">Masukkan kembali password baru untuk konfirmasi.</div>
+                            <div id="password-match" class="mt-2"></div>
                         </div>
-
-                        <!-- Role -->
-                        <!-- <div class="mb-3">
-                            <label for="id_role" class="form-label">Role <span class="text-danger">*</span></label>
-                            <select name="id_role" id="id_role" class="form-select @error('id_role') is-invalid @enderror" required>
-                                <option value="">-- Pilih Role --</option>
-                                @foreach ($roles as $role)
-                                    <option value="{{ $role->id_role }}" {{ old('id_role', $user->id_role) == $role->id_role ? 'selected' : '' }}>
-                                        {{ $role->role }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('id_role')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div> -->
 
                         <!-- Informasi Update -->
                         <div class="mb-3 mt-4 border-top pt-3">
@@ -146,67 +120,79 @@
 
 @section('scripts')
 <script>
-    // Show password complexity feedback
-    document.getElementById('password').addEventListener('input', function() {
-        const password = this.value;
-        const feedback = document.createElement('div');
+    $(document).ready(function() {
+        // Password strength check
+        $('#password').on('input', function() {
+            const password = $(this).val();
+            const passwordStrength = $('#password-strength');
+            
+            if (password.length === 0) {
+                passwordStrength.html('');
+                return;
+            }
+            
+            // Check for minimum length
+            const hasMinLength = password.length >= 8;
+            // Check for letters and numbers
+            const hasLetters = /[A-Za-z]/.test(password);
+            const hasNumbers = /[0-9]/.test(password);
+            
+            let strengthHtml = '';
+            
+            if (hasMinLength && hasLetters && hasNumbers) {
+                strengthHtml = '<small class="text-success"><i class="bi bi-check-circle"></i> Password kuat</small>';
+            } else {
+                strengthHtml = '<small class="text-danger"><i class="bi bi-x-circle"></i> Password harus minimal 8 karakter dan mengandung huruf dan angka</small>';
+            }
+            
+            passwordStrength.html(strengthHtml);
+        });
         
-        // Remove existing feedbacks
-        this.parentNode.querySelectorAll('.password-feedback').forEach(el => el.remove());
-        
-        feedback.className = 'password-feedback mt-2';
-        
-        if (password === '') {
-            // No feedback if password is empty (as it's optional in edit form)
-            return;
-        } else if (password.length < 8) {
-            feedback.innerHTML = '<small class="text-danger"><i class="bi bi-x-circle"></i> Password terlalu pendek (min. 8 karakter)</small>';
-        } else {
-            feedback.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Panjang password mencukupi</small>';
-        }
-        
-        this.parentNode.appendChild(feedback);
-    });
-    
-    // Check password match
-    document.getElementById('password_confirmation').addEventListener('input', function() {
-        const password = document.getElementById('password').value;
-        const confirmation = this.value;
-        const feedback = document.createElement('div');
-        
-        // Remove existing feedbacks
-        this.parentNode.querySelectorAll('.password-feedback').forEach(el => el.remove());
-        
-        feedback.className = 'password-feedback mt-2';
-        
-        if (confirmation === '') {
-            // No feedback if confirmation is empty
-            return;
-        } else if (password !== confirmation) {
-            feedback.innerHTML = '<small class="text-danger"><i class="bi bi-x-circle"></i> Password tidak cocok</small>';
-        } else {
-            feedback.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Password cocok</small>';
-        }
-        
-        this.parentNode.appendChild(feedback);
-    });
+        // Password match check
+        $('#password_confirmation').on('input', function() {
+            const password = $('#password').val();
+            const confirmation = $(this).val();
+            const matchIndicator = $('#password-match');
+            
+            if (confirmation.length === 0 || password.length === 0) {
+                matchIndicator.html('');
+                return;
+            }
+            
+            if (password === confirmation) {
+                matchIndicator.html('<small class="text-success"><i class="bi bi-check-circle"></i> Password cocok</small>');
+            } else {
+                matchIndicator.html('<small class="text-danger"><i class="bi bi-x-circle"></i> Password tidak cocok</small>');
+            }
+        });
 
-    // Konfirmasi perubahan password
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const password = document.getElementById('password').value;
-        const confirmation = document.getElementById('password_confirmation').value;
-        
-        if (password && password.length < 8) {
-            e.preventDefault();
-            alert('Password minimal harus 8 karakter!');
-            return false;
-        }
-        
-        if (password && password !== confirmation) {
-            e.preventDefault();
-            alert('Password dan konfirmasi password tidak cocok!');
-            return false;
-        }
+        // Form validation
+        $('#formEditUser').on('submit', function(e) {
+            const password = $('#password').val();
+            const confirmation = $('#password_confirmation').val();
+            
+            // Skip validation if password field is empty (no password change)
+            if (password.length === 0) {
+                return true;
+            }
+            
+            // Password complexity check
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
+            if (password.length < 8 || !passwordRegex.test(password)) {
+                e.preventDefault();
+                alert('Password harus minimal 8 karakter dan mengandung huruf dan angka!');
+                return false;
+            }
+            
+            // Password match check
+            if (password !== confirmation) {
+                e.preventDefault();
+                alert('Password dan konfirmasi password tidak cocok!');
+                return false;
+            }
+            
+            return true;
+        });
     });
 </script>
 @endsection

@@ -28,76 +28,6 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        try {
-            // Get roles from correct table
-            $roleTableName = (new Role())->getTable();
-            $roles = DB::table($roleTableName)->get();
-            if ($roles->isEmpty()) {
-                return redirect()->route('users.index')->with('warning', 'Tidak ada data role tersedia. Silakan tambahkan role terlebih dahulu.');
-            }
-            return view('admin.pages.users.create', compact('roles'));
-        } catch (Exception $e) {
-            return redirect()->route('users.index')->with('error', 'Terjadi kesalahan saat memuat halaman: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'username' => 'required|string|max:255|unique:users,username',
-                'password' => 'required|string|min:8|confirmed',
-                'id_role' => 'required',
-            ], [
-                'username.required' => 'Username wajib diisi.',
-                'username.unique' => 'Username sudah digunakan, silakan pilih username lain.',
-                'username.max' => 'Username maksimal 255 karakter.',
-                'password.required' => 'Password wajib diisi.',
-                'password.min' => 'Password minimal 8 karakter.',
-                'password.confirmed' => 'Konfirmasi password tidak cocok.',
-                'id_role.required' => 'Role wajib dipilih.',
-            ]);
-            
-            // Check if the role exists manually
-            $roleTableName = (new Role())->getTable();
-            $roleExists = DB::table($roleTableName)->where('id_role', $request->id_role)->exists();
-            if (!$roleExists) {
-                return redirect()->back()
-                    ->withErrors(['id_role' => 'Role yang dipilih tidak valid.'])
-                    ->withInput();
-            }
-
-            $user = User::create([
-                'username' => $validated['username'],
-                'password' => Hash::make($validated['password']),
-                'id_role' => $validated['id_role'],
-                'dibuat_oleh' => Auth::user()->username,
-                'dibuat_pada' => now(),
-            ]);
-
-            return redirect()->route('users.index')
-                ->with('success', "User '{$user->username}' berhasil ditambahkan.");
-        } catch (ValidationException $e) {
-            return redirect()->back()
-                ->withErrors($e->validator)
-                ->withInput()
-                ->with('error', 'Gagal menambahkan user. Silakan periksa form kembali.');
-        } catch (Exception $e) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
-    }
-
     /**
      * Get the user with related data.
      */
@@ -169,54 +99,61 @@ class UserController extends Controller
                 ->with('error', 'Pengguna tidak ditemukan atau terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
     public function update(Request $request, string $id)
-{
-    try {
-        $user = User::findOrFail($id);
+    {
+        try {
+            $user = User::findOrFail($id);
 
-        // Validasi hanya untuk password
-        $rules = [];
+            // Validasi untuk password
+            $rules = [];
+            $messages = [];
 
-        $messages = [];
+            if ($request->filled('password')) {
+                $rules['password'] = [
+                    'string',
+                    'min:8',
+                    'confirmed',
+                    'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'
+                ];
+                $messages['password.min'] = 'Password minimal 8 karakter.';
+                $messages['password.confirmed'] = 'Konfirmasi password tidak cocok.';
+                $messages['password.regex'] = 'Password harus mengandung huruf dan angka.';
+            }
 
-        if ($request->filled('password')) {
-            $rules['password'] = 'string|min:8|confirmed';
-            $messages['password.min'] = 'Password minimal 8 karakter.';
-            $messages['password.confirmed'] = 'Konfirmasi password tidak cocok.';
+            $validated = $request->validate($rules, $messages);
+
+            $userData = [
+                'diperbarui_oleh' => Auth::user()->username,
+                'diperbarui_pada' => now(),
+            ];
+
+            // Update password jika diisi
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
+            $user->update($userData);
+
+            $message = "User '{$user->username}' berhasil diperbarui";
+            if ($request->filled('password')) {
+                $message .= " dengan password baru";
+            }
+
+            return redirect()->route('users.index')
+                ->with('success', $message);
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput()
+                ->with('error', 'Gagal memperbarui user. Silakan periksa form kembali.');
+        } catch (Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat memperbarui pengguna: ' . $e->getMessage());
         }
-
-        $validated = $request->validate($rules, $messages);
-
-        $userData = [
-            'diperbarui_oleh' => Auth::user()->username,
-            'diperbarui_pada' => now(),
-        ];
-
-        // Update password jika diisi
-        if ($request->filled('password')) {
-            $userData['password'] = Hash::make($request->password);
-        }
-
-        $user->update($userData);
-
-        $message = "User '{$user->username}' berhasil diperbarui";
-        if ($request->filled('password')) {
-            $message .= " dengan password baru";
-        }
-
-        return redirect()->route('users.index')
-            ->with('success', $message);
-    } catch (ValidationException $e) {
-        return redirect()->back()
-            ->withErrors($e->validator)
-            ->withInput()
-            ->with('error', 'Gagal memperbarui user. Silakan periksa form kembali.');
-    } catch (Exception $e) {
-        return redirect()->back()
-            ->withInput()
-            ->with('error', 'Terjadi kesalahan saat memperbarui pengguna: ' . $e->getMessage());
     }
-}
+
 
     
 

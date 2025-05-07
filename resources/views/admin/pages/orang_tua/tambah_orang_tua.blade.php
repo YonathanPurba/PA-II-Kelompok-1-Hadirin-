@@ -18,7 +18,7 @@
                 </header>
 
                 <div class="data">
-                    <form action="{{ route('orang-tua.store') }}" method="POST" class="p-4 pt-1 rounded-4 bg-white shadow-sm">
+                    <form action="{{ route('orang-tua.store') }}" method="POST" class="p-4 pt-1 rounded-4 bg-white shadow-sm" id="formTambahOrangTua">
                         @csrf
 
                         <div class="row mb-4">
@@ -45,8 +45,10 @@
                                 <label for="nomor_telepon" class="form-label">Nomor Telepon</label>
                                 <input type="tel" name="nomor_telepon" id="nomor_telepon"
                                     class="form-control @error('nomor_telepon') is-invalid @enderror"
-                                    value="{{ old('nomor_telepon') }}" required 
-                                    pattern="[0-9]+" title="Masukkan hanya angka">
+                                    value="{{ old('nomor_telepon') }}" 
+                                    maxlength="15"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                <small class="text-muted">Nomor telepon harus 10-15 digit angka</small>
                                 @error('nomor_telepon')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -88,8 +90,8 @@
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" name="username" id="username"
                                     class="form-control @error('username') is-invalid @enderror"
-                                    value="{{ old('username') }}" required>
-                                <small class="text-muted">Username harus unik dan minimal 5 karakter</small>
+                                    value="{{ old('username') }}" required minlength="6">
+                                <small class="text-muted">Username harus unik dan minimal 6 karakter</small>
                                 @error('username')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -101,17 +103,23 @@
                                 <input type="password" name="password" id="password"
                                     class="form-control @error('password') is-invalid @enderror" 
                                     minlength="8" required>
-                                <small class="text-muted">Password minimal 8 karakter</small>
+                                <small class="text-muted">Password minimal 8 karakter, harus mengandung huruf dan angka</small>
                                 @error('password')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                <div id="password-strength" class="mt-2"></div>
                             </div>
                             
                             <!-- Konfirmasi Password -->
                             <div class="col-md-6 mb-3">
                                 <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
                                 <input type="password" name="password_confirmation" id="password_confirmation"
-                                    class="form-control" minlength="8" required>
+                                    class="form-control @error('password_confirmation') is-invalid @enderror" 
+                                    minlength="8" required>
+                                @error('password_confirmation')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div id="password-match" class="mt-2"></div>
                             </div>
                         </div>
 
@@ -134,19 +142,97 @@
 @section('js')
 <script>
     $(document).ready(function() {
+        // Input restrictions for phone number
+        $('#nomor_telepon').on('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 15) {
+                this.value = this.value.slice(0, 15);
+            }
+        });
+
+        // Password strength check
+        $('#password').on('input', function() {
+            const password = $(this).val();
+            const passwordStrength = $('#password-strength');
+            
+            if (password.length === 0) {
+                passwordStrength.html('');
+                return;
+            }
+            
+            // Check for minimum length
+            const hasMinLength = password.length >= 8;
+            // Check for letters and numbers
+            const hasLetters = /[A-Za-z]/.test(password);
+            const hasNumbers = /[0-9]/.test(password);
+            
+            let strengthHtml = '';
+            
+            if (hasMinLength && hasLetters && hasNumbers) {
+                strengthHtml = '<small class="text-success"><i class="bi bi-check-circle"></i> Password kuat</small>';
+            } else {
+                strengthHtml = '<small class="text-danger"><i class="bi bi-x-circle"></i> Password harus minimal 8 karakter dan mengandung huruf dan angka</small>';
+            }
+            
+            passwordStrength.html(strengthHtml);
+        });
+        
+        // Password match check
+        $('#password_confirmation').on('input', function() {
+            const password = $('#password').val();
+            const confirmation = $(this).val();
+            const matchIndicator = $('#password-match');
+            
+            if (confirmation.length === 0) {
+                matchIndicator.html('');
+                return;
+            }
+            
+            if (password === confirmation) {
+                matchIndicator.html('<small class="text-success"><i class="bi bi-check-circle"></i> Password cocok</small>');
+            } else {
+                matchIndicator.html('<small class="text-danger"><i class="bi bi-x-circle"></i> Password tidak cocok</small>');
+            }
+        });
 
         // Form validation
-        $('form').on('submit', function(e) {
+        $('#formTambahOrangTua').on('submit', function(e) {
+            let isValid = true;
             const password = $('#password').val();
             const confirmPassword = $('#password_confirmation').val();
+            const username = $('#username').val();
+            const nomor_telepon = $('#nomor_telepon').val();
             
+            // Password validation
             if (password !== confirmPassword) {
                 e.preventDefault();
                 alert('Password dan konfirmasi password tidak cocok!');
-                return false;
+                isValid = false;
             }
             
-            return true;
+            // Password complexity check
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
+            if (password.length < 8 || !passwordRegex.test(password)) {
+                e.preventDefault();
+                alert('Password harus minimal 8 karakter dan mengandung huruf dan angka!');
+                isValid = false;
+            }
+            
+            // Username validation
+            if (username.length < 6) {
+                e.preventDefault();
+                alert('Username harus minimal 6 karakter!');
+                isValid = false;
+            }
+            
+            // Phone number validation
+            if (nomor_telepon && (nomor_telepon.length < 10 || nomor_telepon.length > 15)) {
+                e.preventDefault();
+                alert('Nomor telepon harus terdiri dari 10-15 digit!');
+                isValid = false;
+            }
+            
+            return isValid;
         });
     });
 </script>

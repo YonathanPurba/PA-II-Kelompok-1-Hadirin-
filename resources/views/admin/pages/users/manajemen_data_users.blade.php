@@ -9,7 +9,7 @@
                 <!-- Header Judul -->
                 <header class="judul">
                     <h1 class="mb-3">Manajemen Data Pengguna</h1>
-                    <p class="mb-2">Staff dapat menambah, melihat, dan mengubah data pengguna sistem</p>
+                    <p class="mb-2">Staff dapat melihat, dan mengubah data pengguna sistem</p>
                 </header>
                 <div class="data">
                     <!-- Alert Success -->
