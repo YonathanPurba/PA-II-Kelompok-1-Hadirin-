@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('siswa', SiswaController::class);
     Route::get('/siswa/kelas/{kelasId}', [SiswaController::class, 'getByKelas']);
     Route::get('/siswa/orang-tua/{orangTuaId}', [SiswaController::class, 'getByOrangTua']);
+    Route::post('siswa/{id}/update-status', [SiswaController::class, 'updateStatus']);
+
 
     // Export Siswa
     Route::get('/siswa/export/pdf', [SiswaController::class, 'exportPdf'])->name('siswa.export.pdf');
@@ -52,15 +54,29 @@ Route::middleware('auth')->group(function () {
     Route::resource('orang-tua', OrangTuaController::class);
     Route::get('orang-tua/export/pdf', [OrangTuaController::class, 'exportPdf'])->name('orang-tua.export.pdf');
     Route::get('orang-tua/export/excel', [OrangTuaController::class, 'exportExcel'])->name('orang-tua.export.excel');
+    Route::post('orang-tua/{id}/update-status', [OrangTuaController::class, 'updateStatus']);
+    Route::get('/orang-tua/{id}/anak', [OrangTuaController::class, 'getAnak']);
+    
+
 
     // Halaman detail berdasarkan kelas yang dipilih
     Route::get('/orang-tua/kelas/{id_kelas}', [OrangTuaController::class, 'showByKelas'])->name('orang-tua.kelas');
 
     // Kelas
     Route::resource('kelas', KelasController::class);
+    Route::resource('kelas', KelasController::class);
+    Route::get('kelas/{id}/students', [KelasController::class, 'getStudents']);
+    Route::post('kelas/{id}/update-student-statuses', [KelasController::class, 'updateStudentStatuses']);
+    Route::get('kelas/tahun-ajaran/{tahunAjaranId}', [KelasController::class, 'getByTahunAjaran']);
+    Route::get('kelas/active', [KelasController::class, 'getActiveClasses']);
+
 
     // Tahun Ajaran
     Route::resource('tahun-ajaran', TahunAjaranController::class);
+    Route::resource('tahun-ajaran', TahunAjaranController::class);
+    Route::get('tahun-ajaran/{id}/set-active', [TahunAjaranController::class, 'setActive'])->name('tahun-ajaran.set-active');
+    Route::get('tahun-ajaran/active', [TahunAjaranController::class, 'getActive']);
+
 
     // Mata Pelajaran
     Route::resource('mata-pelajaran', MataPelajaranController::class);
@@ -90,4 +106,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/rekapitulasi/kelas/{id_kelas}', [RekapitulasiController::class, 'showByKelas']);
     Route::get('/rekapitulasi/export/pdf', [RekapitulasiController::class, 'exportPdf'])->name('rekapitulasi.export.pdf');
     Route::get('/rekapitulasi/export/excel', [RekapitulasiController::class, 'exportExcel'])->name('rekapitulasi.export.excel');
+
+    // Kelas routes
+
+// Status update command route (for admin only)
+// Route::post('update-all-statuses', function() {
+//     Artisan::call('app:update-all-statuses');
+//     return redirect()->back()->with('success', 'Semua status berhasil diperbarui.');
+// })->middleware('auth')->name('update-all-statuses');
+
 });
+

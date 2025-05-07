@@ -84,6 +84,7 @@ class OrangTua extends Model
     {
         return $this->hasMany(Siswa::class, 'id_orangtua', 'id_orangtua');
     }
+    
 
     /**
      * Get permission letters associated with this parent.

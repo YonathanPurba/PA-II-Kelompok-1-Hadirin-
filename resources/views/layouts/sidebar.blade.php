@@ -86,13 +86,13 @@
                 </a>
             </li>
 
-            <!-- <li class="nav-item">
+            <li class="nav-item">
                 <a href="{{ url('/tahun-ajaran') }}" class="nav-link {{ Request::is('tahun-ajaran*') ? 'active' : '' }}">
                     <span class="nav-icon material-symbols-rounded">date_range</span>
                     <span class="nav-label">Manajemen Tahun Ajaran</span>
                     <span class="nav-tooltip">Tahun Ajaran</span>
                 </a>
-            </li> -->
+            </li>
         </ul>
 
         {{-- Secondary Navigation --}}

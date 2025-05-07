@@ -22,51 +22,59 @@ class OrangTuaController extends Controller
    /**
     * Display a listing of all parents.
     */
-   public function index(Request $request)
-   {
-       $kelasId = $request->input('kelas');
-       $status = $request->input('status');
-       $search = $request->input('search');
-   
-       $kelasList = Kelas::orderBy('tingkat')->orderBy('nama_kelas')->get();
-   
-       $query = OrangTua::with(['siswa.kelas', 'user']);
-   
-       // Filter berdasarkan kelas anak
-       if ($kelasId) {
-           $query->whereHas('siswa', function ($siswaQuery) use ($kelasId) {
-               $siswaQuery->where('id_kelas', $kelasId);
-           });
-       }
-   
-       // Filter berdasarkan status
-       if ($request->has('status') && $status !== '' && $status !== 'semua') {
-           $query->where('status', $status);
-       }
-       
-       // Filter berdasarkan pencarian
-       if ($search) {
-           $query->where(function($q) use ($search) {
-               $q->where('nama_lengkap', 'like', "%{$search}%")
-                 ->orWhere('nomor_telepon', 'like', "%{$search}%")
-                 ->orWhere('pekerjaan', 'like', "%{$search}%");
-           });
-       }
-   
-       $orangTuaList = $query->orderBy('nama_lengkap')->get();
-   
-       // Filter ulang relasi siswa jika kelas disaring
-       if ($kelasId) {
-           foreach ($orangTuaList as $orangTua) {
-               $filteredSiswa = $orangTua->siswa->filter(function ($siswa) use ($kelasId) {
-                   return $siswa->id_kelas == $kelasId;
-               });
-               $orangTua->setRelation('siswa', $filteredSiswa);
-           }
-       }
-   
-       return view('admin.pages.orang_tua.manajemen_data_orang_tua', compact('orangTuaList', 'kelasList'));
-   }
+    public function index(Request $request)
+    {
+        $kelasId = $request->input('kelas');
+        $status = $request->input('status');
+        $search = $request->input('search');
+    
+        $kelasList = Kelas::all();
+    
+        $query = OrangTua::with(['siswa.kelas', 'user']);
+    
+        // Filter berdasarkan kelas anak
+        if ($kelasId) {
+            $query->whereHas('siswa', function ($siswaQuery) use ($kelasId) {
+                $siswaQuery->where('id_kelas', $kelasId);
+            });
+        }
+    
+        // Improved status logic to match GuruController:
+        if ($request->has('status')) {
+            if ($status !== '' && $status !== 'semua') {
+                $query->where('orangtua.status', $status);
+            }
+            // If status is 'semua', don't apply any status filter
+        } else {
+            // Default to 'aktif' only when status parameter is not present at all
+            $query->where('orangtua.status', 'aktif');
+        }
+        
+        // Apply search filter if provided
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('nomor_telepon', 'like', "%{$search}%");
+            });
+        }
+    
+        $orangTuaList = $query->orderBy('nama_lengkap')->paginate(10);
+        
+        // Append query parameters to pagination links
+        $orangTuaList->appends($request->query());
+    
+        // Filter ulang relasi siswa jika kelas disaring
+        if ($kelasId) {
+            foreach ($orangTuaList as $orangTua) {
+                $filteredSiswa = $orangTua->siswa->filter(function ($siswa) use ($kelasId) {
+                    return $siswa->id_kelas == $kelasId;
+                });
+                $orangTua->setRelation('siswa', $filteredSiswa);
+            }
+        }
+    
+        return view('admin.pages.orang_tua.manajemen_data_orang_tua', compact('orangTuaList', 'kelasList'));
+    }
 
 
 /**
@@ -335,7 +343,18 @@ public function exportExcel(Request $request)
            'success' => true,
            'data' => $orangTuaList,
        ], 200);
-   }
+
+    }public function getAnak($id)
+    {
+        $orangTua = OrangTua::with('siswa.kelas')->find($id);
+    
+        if (!$orangTua) {
+            return response()->json([], 404);
+        }
+    
+        return response()->json($orangTua->siswa);
+    }
+   
    
    /**
     * Update parent status based on children.

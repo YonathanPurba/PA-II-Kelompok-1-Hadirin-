@@ -1,81 +1,72 @@
 @extends('layouts.admin-layout')
 
-@section('title', 'Edit Data Tahun Ajaran')
+@section('title', 'Edit Tahun Ajaran')
 
 @section('content')
-    <div class="container-fluid">
-        <main class="main-content">
-            <div class="isi">
-                <!-- Header Judul -->
-                <header class="judul mb-4">
-                    <h1 class="mb-3">
-                        <a href="{{ url('/tahun-ajaran') }}" class="text-decoration-none text-success fw-semibold">
-                            Manajemen Tahun Ajaran
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Edit Tahun Ajaran</h3>
+                    <div class="card-tools">
+                        <a href="{{ route('tahun-ajaran.index') }}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Kembali
                         </a>
-                        <span class="fs-5 text-muted">/ Edit Tahun Ajaran</span>
-                    </h1>
-                    <p class="mb-2">Halaman untuk mengubah informasi tahun ajaran</p>
-                </header>
-
-                <div class="data">
-                    <form action="{{ route('tahun-ajaran.update', $tahunAjaran->id_tahun_ajaran) }}" method="POST"
-                        class="p-4 pt-1 rounded-4 bg-white shadow-sm">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> <strong>Perhatian:</strong> Mengubah status aktif tahun ajaran akan mempengaruhi status kelas, siswa, dan orang tua.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form action="{{ route('tahun-ajaran.update', $tahunAjaran->id_tahun_ajaran) }}" method="POST">
                         @csrf
                         @method('PUT')
-
-                        <!-- Nama Tahun Ajaran -->
-                        <div class="mb-3">
-                            <label for="nama_tahun_ajaran" class="form-label">Nama Tahun Ajaran</label>
-                            <input type="text" name="nama_tahun_ajaran" id="nama_tahun_ajaran"
-                                class="form-control @error('nama_tahun_ajaran') is-invalid @enderror"
-                                value="{{ old('nama_tahun_ajaran', $tahunAjaran->nama_tahun_ajaran) }}" required>
+                        
+                        <div class="form-group">
+                            <label for="nama_tahun_ajaran">Nama Tahun Ajaran <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('nama_tahun_ajaran') is-invalid @enderror" id="nama_tahun_ajaran" name="nama_tahun_ajaran" value="{{ old('nama_tahun_ajaran', $tahunAjaran->nama_tahun_ajaran) }}" required>
                             @error('nama_tahun_ajaran')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-
-                        <!-- Tanggal Mulai -->
-                        <div class="mb-3">
-                            <label for="tanggal_mulai" class="form-label">Tanggal Mulai</label>
-                            <input type="date" name="tanggal_mulai" id="tanggal_mulai"
-                                class="form-control @error('tanggal_mulai') is-invalid @enderror"
-                                value="{{ old('tanggal_mulai', $tahunAjaran->tanggal_mulai) }}" required>
+                        
+                        <div class="form-group">
+                            <label for="tanggal_mulai">Tanggal Mulai <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control @error('tanggal_mulai') is-invalid @enderror" id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai', $tahunAjaran->tanggal_mulai->format('Y-m-d')) }}" required>
                             @error('tanggal_mulai')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-
-                        <!-- Tanggal Selesai -->
-                        <div class="mb-3">
-                            <label for="tanggal_selesai" class="form-label">Tanggal Selesai</label>
-                            <input type="date" name="tanggal_selesai" id="tanggal_selesai"
-                                class="form-control @error('tanggal_selesai') is-invalid @enderror"
-                                value="{{ old('tanggal_selesai', $tahunAjaran->tanggal_selesai) }}" required>
+                        
+                        <div class="form-group">
+                            <label for="tanggal_selesai">Tanggal Selesai <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control @error('tanggal_selesai') is-invalid @enderror" id="tanggal_selesai" name="tanggal_selesai" value="{{ old('tanggal_selesai', $tahunAjaran->tanggal_selesai->format('Y-m-d')) }}" required>
                             @error('tanggal_selesai')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-
-                        <!-- Status Aktif -->
-                        <div class="mb-3">
-                            <label for="aktif" class="form-label">Status Aktif</label>
-                            <select name="aktif" id="aktif" class="form-select @error('aktif') is-invalid @enderror">
-                                <option value="1" {{ old('aktif', $tahunAjaran->aktif) == 1 ? 'selected' : '' }}>Aktif</option>
-                                <option value="0" {{ old('aktif', $tahunAjaran->aktif) == 0 ? 'selected' : '' }}>Tidak Aktif</option>
-                            </select>
-                            @error('aktif')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="aktif" name="aktif" value="1" {{ old('aktif', $tahunAjaran->aktif) ? 'checked' : '' }}>
+                                <label class="custom-control-label" for="aktif">Aktifkan tahun ajaran ini</label>
+                            </div>
                         </div>
-
-                        <!-- Tombol Aksi -->
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ url('/tahun-ajaran') }}" class="btn btn-outline-secondary">Batal</a>
-                            <button type="submit" class="btn btn-success px-4">Simpan</button>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                            <a href="{{ route('tahun-ajaran.index') }}" class="btn btn-secondary">Batal</a>
                         </div>
                     </form>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
+</div>
 @endsection
