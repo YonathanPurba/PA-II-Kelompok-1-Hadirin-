@@ -168,6 +168,9 @@
 
                         <dt class="col-sm-4">Jumlah Jadwal Mengajar</dt>
                         <dd class="col-sm-8" id="view-jadwal">-</dd>
+
+                        <dt class="col-sm-4">Wali Kelas</dt>
+                        <dd class="col-sm-8" id="view-wali-kelas">-</dd>
                     </dl>
 
                     <hr>
@@ -236,6 +239,7 @@
             $('#view-mata-pelajaran').text('Memuat...');
             $('#view-status').text('Memuat...');
             $('#view-jadwal').text('Memuat...');
+            $('#view-wali-kelas').text('Memuat...');
             $('#table-jadwal-body').html('<tr><td colspan="5" class="text-center">Memuat data...</td></tr>');
             
             // Fetch guru details
@@ -257,6 +261,25 @@
                     }
                     
                     $('#view-jadwal').text(response.jumlah_jadwal);
+                    
+                    // Display wali kelas information
+                    if (response.wali_kelas && response.wali_kelas.length > 0) {
+                        let waliKelasText = '';
+                        response.wali_kelas.forEach((kelas, index) => {
+                            const statusBadge = kelas.status_tahun_ajaran === 'Aktif' 
+                                ? '<span class="badge bg-success ms-1">Aktif</span>' 
+                                : '<span class="badge bg-secondary ms-1">Tidak Aktif</span>';
+                            
+                            waliKelasText += `${kelas.nama_kelas} (${kelas.tahun_ajaran}) ${statusBadge}`;
+                            
+                            if (index < response.wali_kelas.length - 1) {
+                                waliKelasText += '<br>';
+                            }
+                        });
+                        $('#view-wali-kelas').html(waliKelasText);
+                    } else {
+                        $('#view-wali-kelas').text('Bukan Wali Kelas');
+                    }
                     
                     // Fill in schedule table
                     if (response.jadwal && response.jadwal.length > 0) {

@@ -136,6 +136,20 @@ public function create()
             'jadwal.mataPelajaran',
         ])->findOrFail($id);
 
+        // Get classes where this teacher is a homeroom teacher (wali kelas)
+        $waliKelas = \App\Models\Kelas::where('id_guru', $id)
+            ->with('tahunAjaran')
+            ->get()
+            ->map(function($kelas) {
+                return [
+                    'id_kelas' => $kelas->id_kelas,
+                    'nama_kelas' => $kelas->nama_kelas,
+                    'tingkat' => $kelas->tingkat,
+                    'tahun_ajaran' => $kelas->tahunAjaran->nama_tahun_ajaran ?? '-',
+                    'status_tahun_ajaran' => $kelas->tahunAjaran->aktif ? 'Aktif' : 'Tidak Aktif'
+                ];
+            });
+
         // Format data for better display
         $formattedGuru = [
             'id_guru' => $guru->id_guru,
@@ -145,6 +159,7 @@ public function create()
             'status' => $guru->status,
             'mata_pelajaran' => $guru->mataPelajaran->pluck('nama')->join(', ') ?: '-',
             'jumlah_jadwal' => $guru->jadwal->count(),
+            'wali_kelas' => $waliKelas,
             'jadwal' => $guru->jadwal->map(function($jadwal) {
                 return [
                     'id_jadwal' => $jadwal->id_jadwal,

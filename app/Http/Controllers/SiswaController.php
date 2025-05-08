@@ -508,8 +508,24 @@ class SiswaController extends Controller
    public function updateStatus($id)
    {
        try {
-           $siswa = Siswa::findOrFail($id);
-           $siswa->updateStatusBasedOnClass();
+           $siswa = Siswa::with(['kelas.tahunAjaran'])->findOrFail($id);
+           
+           // Determine status based on class and academic year
+           if ($siswa->kelas && $siswa->kelas->tahunAjaran) {
+               $isActive = $siswa->kelas->tahunAjaran->aktif;
+               $siswa->status = $isActive ? Siswa::STATUS_ACTIVE : Siswa::STATUS_INACTIVE;
+           } else if ($siswa->tahunAjaran) {
+               // If student has academic year but no class
+               $isActive = $siswa->tahunAjaran->aktif;
+               $siswa->status = $isActive ? Siswa::STATUS_ACTIVE : Siswa::STATUS_INACTIVE;
+           } else {
+               // Default to inactive if no class or academic year
+               $siswa->status = Siswa::STATUS_INACTIVE;
+           }
+           
+           $siswa->diperbarui_pada = now();
+           $siswa->diperbarui_oleh = Auth::user()->username ?? 'system';
+           $siswa->save();
            
            return response()->json([
                'success' => true,

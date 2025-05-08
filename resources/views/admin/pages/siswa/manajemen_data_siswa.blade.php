@@ -238,12 +238,6 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <a id="btn-edit-siswa" href="#" class="btn btn-warning">
-                        <i class="bi bi-pencil me-1"></i> Edit
-                    </a>
-                    <a id="btn-update-status" href="#" class="btn btn-info">
-                        <i class="bi bi-arrow-repeat me-1"></i> Update Status
-                    </a>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
