@@ -36,7 +36,7 @@ class MataPelajaran extends Model
     public function guru()
     {
         return $this->belongsToMany(Guru::class, 'guru_mata_pelajaran', 'id_mata_pelajaran', 'id_guru')
-            ->withPivot(['dibuat_pada', 'dibuat_oleh', 'diperbarui_pada', 'diperbarui_oleh'])
-            ->withTimestamps();
+            ->withPivot(['dibuat_pada', 'dibuat_oleh', 'diperbarui_pada', 'diperbarui_oleh']);
+        // Remove withTimestamps() as we're using custom timestamp columns
     }
 }

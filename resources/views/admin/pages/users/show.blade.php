@@ -107,14 +107,6 @@
                                 <a href="{{ route('users.edit', $user->id_user) }}" class="btn btn-warning me-2">
                                     <i class="bi bi-pencil-square me-1"></i>Edit
                                 </a>
-                                <form action="{{ route('users.destroy', $user->id_user) }}" method="POST" class="d-inline" 
-                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="bi bi-trash me-1"></i>Hapus
-                                    </button>
-                                </form>
                             </div>
                         </div>
                     </div>

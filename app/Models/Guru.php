@@ -33,15 +33,18 @@ class Guru extends Model
 
     public function mataPelajaran()
     {
-        return $this->belongsToMany(MataPelajaran::class, 'guru_mata_pelajaran', 'id_guru', 'id_mata_pelajaran');
+        return $this->belongsToMany(MataPelajaran::class, 'guru_mata_pelajaran', 'id_guru', 'id_mata_pelajaran')
+            ->withPivot(['dibuat_pada', 'dibuat_oleh', 'diperbarui_pada', 'diperbarui_oleh']);
+        // Remove withTimestamps() as we're using custom timestamp columns
     }
 
     public function jadwal()
     {
         return $this->hasMany(Jadwal::class, 'id_guru', 'id_guru');
     }
+    
     public function kelas()
-{
-    return $this->hasOne(Kelas::class, 'id_guru', 'id_guru');
-}
+    {
+        return $this->hasOne(Kelas::class, 'id_guru', 'id_guru');
+    }
 }
