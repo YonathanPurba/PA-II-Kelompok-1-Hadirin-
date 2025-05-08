@@ -17,15 +17,25 @@ class UserController extends Controller
     /**
      * Display a listing of the users.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $users = User::with('role')->get();
+            $query = User::with('role');
+    
+            // Tambahkan filter berdasarkan input pencarian username
+            if ($request->filled('search')) {
+                $query->where('username', 'like', '%' . $request->search . '%');
+            }
+    
+            // Urutkan dan paginate hasilnya
+            $users = $query->orderBy('username')->paginate(10);
+    
             return view('admin.pages.users.manajemen_data_users', compact('users'));
         } catch (Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+    
 
     /**
      * Retrieve a user with related models.
