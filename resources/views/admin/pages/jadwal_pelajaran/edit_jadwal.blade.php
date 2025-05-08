@@ -128,9 +128,9 @@
                     <div class="alert alert-info mb-4">
                         <i class="bi bi-info-circle me-2"></i> <strong>Informasi Jadwal:</strong>
                         <ul class="mb-0 mt-2">
-                            <li>Jadwal dimulai pukul 07:30 pagi</li>
+                            <li>Jadwal dimulai pukul 07:45 pagi</li>
                             <li>Setiap sesi pelajaran berdurasi 45 menit</li>
-                            <li>Istirahat antar sesi 5 menit</li>
+                            <li>Istirahat 15 menit setelah sesi ketiga (10:00 - 10:15)</li>
                             <li>Sistem akan otomatis memeriksa konflik jadwal</li>
                         </ul>
                     </div>

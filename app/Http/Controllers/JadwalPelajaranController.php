@@ -125,6 +125,12 @@ class JadwalPelajaranController extends Controller
         $validator = Validator::make($request->all(), [
             'id_kelas' => 'required|exists:kelas,id_kelas',
             'jadwal' => 'required|array',
+            'jadwal.*.hari' => 'required|in:senin,selasa,rabu,kamis,jumat,sabtu',
+            'jadwal.*.sesi' => 'required|array',
+            'jadwal.*.sesi.*.id_mata_pelajaran' => 'required|exists:mata_pelajaran,id_mata_pelajaran',
+            'jadwal.*.sesi.*.id_guru' => 'required|exists:guru,id_guru',
+            'jadwal.*.sesi.*.waktu_mulai' => 'required',
+            'jadwal.*.sesi.*.waktu_selesai' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -149,7 +155,6 @@ class JadwalPelajaranController extends Controller
             
             // Simpan jadwal untuk setiap hari dan sesi
             $conflictErrors = [];
-            $jadwalCount = 0;
             
             foreach ($request->jadwal as $hari => $hariData) {
                 if (!isset($hariData['sesi']) || !is_array($hariData['sesi'])) {
@@ -190,7 +195,6 @@ class JadwalPelajaranController extends Controller
                     }
                     
                     $jadwal->save();
-                    $jadwalCount++;
                 }
             }
             
@@ -199,14 +203,6 @@ class JadwalPelajaranController extends Controller
                 DB::rollBack();
                 return redirect()->back()
                     ->with('error', 'Terdapat konflik jadwal:<br>' . implode('<br>', $conflictErrors))
-                    ->withInput();
-            }
-            
-            // Jika tidak ada jadwal yang disimpan
-            if ($jadwalCount === 0) {
-                DB::rollBack();
-                return redirect()->back()
-                    ->with('error', 'Tidak ada jadwal yang disimpan. Pastikan Anda telah mengisi minimal satu jadwal.')
                     ->withInput();
             }
             
@@ -608,26 +604,6 @@ class JadwalPelajaranController extends Controller
             
             return redirect()->back()
                 ->with('error', 'Gagal menyalin jadwal: ' . $e->getMessage());
-        }
-    }
-
-    // Add this method to handle the API endpoint for getting guru by mata pelajaran
-    public function getGuruByMataPelajaran($mataPelajaranId)
-    {
-        try {
-            $guruList = Guru::whereHas('mataPelajaran', function($query) use ($mataPelajaranId) {
-                $query->where('mata_pelajaran.id_mata_pelajaran', $mataPelajaranId);
-            })->where('status', 'aktif')->get();
-            
-            return response()->json([
-                'success' => true,
-                'data' => $guruList
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memuat data guru: ' . $e->getMessage()
-            ], 500);
         }
     }
 }
