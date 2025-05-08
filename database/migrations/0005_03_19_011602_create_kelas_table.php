@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama_kelas');
             $table->string('tingkat');
             // Relasi ke tabel guru (optional)
-            $table->foreignId('id_guru')->nullable()->constrained('guru', 'id_guru')->onDelete('set null');
+            $table->foreignId('id_guru')->constrained('guru', 'id_guru');
             // Kolom timestamp untuk audit trail
             $table->timestamp('dibuat_pada')->nullable();
             $table->string('dibuat_oleh')->nullable();
