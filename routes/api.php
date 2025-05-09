@@ -193,6 +193,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}/siswa', [OrangtuaController::class, 'getSiswa']);
         Route::get('/by-user/{userId}', [OrangtuaController::class, 'getByUserId']);
         Route::get('/search', [OrangtuaController::class, 'search']);
+
+        //Digunakan di Flutter
+        Route::get('/anak/{id_user}', [OrangtuaController::class, 'getDaftarAnak']);
+        Route::get('/notifikasi/{id_user}', [OrangtuaController::class, 'getNotifikasi']);
+        Route::get('/profile/{id_user}', [OrangtuaController::class, 'getProfile']);
+        Route::get('/surat-izin/{id_user}', [OrangtuaController::class, 'riwayatOrangTua']);
+
+        Route::get('/presentase-kehadiran/{anakId}', [OrangTuaController::class, 'presentaseKehadiran']);
+        Route::get('/riwayat/anak/{anakId}', [OrangTuaController::class, 'riwayatAbsensi']);
+
+
     });
 
     // Mata Pelajaran Routes
