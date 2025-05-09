@@ -44,6 +44,11 @@ class Kelas extends Model
     {
         return $this->hasMany(Jadwal::class, 'id_kelas', 'id_kelas');
     }
+    
+    public function activeJadwal()
+    {
+        return $this->jadwal()->where('status', 'aktif');
+    }
 
     public function rekapAbsensi()
     {
@@ -106,6 +111,41 @@ class Kelas extends Model
         } else {
             return '<span class="badge bg-secondary">Non-Aktif</span>';
         }
+    }
+    
+    /**
+     * Check if class has schedule conflicts
+     * 
+     * @param string $day
+     * @param string $startTime
+     * @param string $endTime
+     * @param int|null $excludeScheduleId
+     * @return bool
+     */
+    public function hasScheduleConflict($day, $startTime, $endTime, $excludeScheduleId = null)
+    {
+        $query = $this->jadwal()
+            ->where('hari', $day)
+            ->where('status', 'aktif')
+            ->where(function($q) use ($startTime, $endTime) {
+                // Check for time overlaps
+                $q->where(function($query) use ($startTime, $endTime) {
+                    $query->where('waktu_mulai', '>=', $startTime)
+                          ->where('waktu_mulai', '<', $endTime);
+                })->orWhere(function($query) use ($startTime, $endTime) {
+                    $query->where('waktu_selesai', '>', $startTime)
+                          ->where('waktu_selesai', '<=', $endTime);
+                })->orWhere(function($query) use ($startTime, $endTime) {
+                    $query->where('waktu_mulai', '<=', $startTime)
+                          ->where('waktu_selesai', '>=', $endTime);
+                });
+            });
+            
+        if ($excludeScheduleId) {
+            $query->where('id_jadwal', '!=', $excludeScheduleId);
+        }
+        
+        return $query->exists();
     }
 
     /**

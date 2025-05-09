@@ -41,6 +41,11 @@ class TahunAjaran extends Model
     {
         return $this->hasMany(Siswa::class, 'id_tahun_ajaran', 'id_tahun_ajaran');
     }
+    
+    public function jadwal()
+    {
+        return $this->hasMany(Jadwal::class, 'id_tahun_ajaran', 'id_tahun_ajaran');
+    }
 
     /**
      * Status constants for students
@@ -87,6 +92,14 @@ class TahunAjaran extends Model
                     'diperbarui_pada' => now(),
                     'diperbarui_oleh' => Auth::user()->username ?? 'system'
                 ]);
+                
+            // Update all schedules for this academic year
+            Jadwal::where('id_tahun_ajaran', $this->id_tahun_ajaran)
+                ->update([
+                    'status' => 'aktif',
+                    'diperbarui_pada' => now(),
+                    'diperbarui_oleh' => Auth::user()->username ?? 'system'
+                ]);
         
             DB::commit();
         
@@ -119,6 +132,15 @@ class TahunAjaran extends Model
                 ->whereNull('id_kelas')
                 ->update([
                     'status' => $newStatus,
+                    'diperbarui_pada' => now(),
+                    'diperbarui_oleh' => Auth::user()->username ?? 'system'
+                ]);
+                
+            // Update all schedules for this academic year
+            $scheduleStatus = $this->aktif ? 'aktif' : 'nonaktif';
+            Jadwal::where('id_tahun_ajaran', $this->id_tahun_ajaran)
+                ->update([
+                    'status' => $scheduleStatus,
                     'diperbarui_pada' => now(),
                     'diperbarui_oleh' => Auth::user()->username ?? 'system'
                 ]);

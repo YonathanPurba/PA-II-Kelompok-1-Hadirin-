@@ -33,16 +33,6 @@ class KelasSeeder extends Seeder
                 'diperbarui_pada' => now(),
                 'diperbarui_oleh' => 'seeder'
             ],
-            [
-                'nama_kelas' => '8A',
-                'tingkat' => '8',
-                'id_guru' => null, // belum ada wali kelas
-                'id_tahun_ajaran' => 1, // 2024/2025
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
         ];
 
         DB::table('kelas')->insert($kelas);

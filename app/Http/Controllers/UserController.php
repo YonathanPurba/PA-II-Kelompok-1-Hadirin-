@@ -2,69 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Role;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
-use Exception;
 use Illuminate\Validation\ValidationException;
+use Exception;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the users.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $users = User::with('role')->get();
+            $query = User::with('role');
+    
+            // Tambahkan filter berdasarkan input pencarian username
+            if ($request->filled('search')) {
+                $query->where('username', 'like', '%' . $request->search . '%');
+            }
+    
+            // Urutkan dan paginate hasilnya
+            $users = $query->orderBy('username')->paginate(10);
+    
             return view('admin.pages.users.manajemen_data_users', compact('users'));
         } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+    
+
     /**
-     * Get the user with related data.
+     * Retrieve a user with related models.
      */
     private function getUserWithRelations($id)
     {
-        try {
-            // Get the columns that actually exist in the guru table
-            $guruColumns = Schema::getColumnListing('guru');
-            $selectColumns = ['id_guru', 'id_user'];
-            
-            // Add other columns only if they exist
-            foreach (['nama_lengkap', 'nip', 'alamat'] as $column) {
-                if (in_array($column, $guruColumns)) {
-                    $selectColumns[] = $column;
-                }
+        $guruColumns = Schema::getColumnListing('guru');
+        $selectColumns = ['id_guru', 'id_user'];
+
+        foreach (['nama_lengkap', 'nip', 'alamat'] as $column) {
+            if (in_array($column, $guruColumns)) {
+                $selectColumns[] = $column;
             }
-            
-            $user = User::with(['role', 
-                'guru' => function($query) use ($selectColumns) {
-                    $query->select($selectColumns);
-                }, 
-                'orangtua', 
-                'staf'
-            ])->where('id_user', $id)->first();
-            
-            if (!$user) {
-                throw new Exception('User dengan ID tersebut tidak ditemukan.');
-            }
-            
-            return $user;
-        } catch (Exception $e) {
-            throw new Exception('Gagal memuat data pengguna: ' . $e->getMessage());
         }
+
+        $user = User::with([
+            'role',
+            'guru' => fn($q) => $q->select($selectColumns),
+            'orangtua',
+            'staf'
+        ])->find($id);
+
+        if (!$user) {
+            abort(404, 'User tidak ditemukan.');
+        }
+
+        return $user;
     }
 
     /**
-     * Display the specified resource.
+     * Show the detail of a user.
      */
     public function show(string $id)
     {
@@ -72,40 +74,37 @@ class UserController extends Controller
             $user = $this->getUserWithRelations($id);
             return view('admin.pages.users.show', compact('user'));
         } catch (Exception $e) {
-            return redirect()->route('admin.pages.users.index')
-                ->with('error', $e->getMessage());
+            return redirect()->route('users.index')->with('error', $e->getMessage());
         }
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show form for editing a user.
      */
     public function edit(string $id)
     {
         try {
             $user = User::findOrFail($id);
-            // Get roles from correct table
-            $roleTableName = (new Role())->getTable();
-            $roles = DB::table($roleTableName)->get();
-            
+            $roles = Role::all();
+
             if ($roles->isEmpty()) {
-                return redirect()->route('users.index')
-                    ->with('warning', 'Tidak ada data role tersedia. Silakan tambahkan role terlebih dahulu.');
+                return redirect()->route('users.index')->with('warning', 'Belum ada data role tersedia.');
             }
-            
+
             return view('admin.pages.users.edit', compact('user', 'roles'));
         } catch (Exception $e) {
-            return redirect()->route('users.index')
-                ->with('error', 'Pengguna tidak ditemukan atau terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->route('users.index')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Update user data.
+     */
     public function update(Request $request, string $id)
     {
         try {
             $user = User::findOrFail($id);
 
-            // Validasi untuk password
             $rules = [];
             $messages = [];
 
@@ -114,11 +113,13 @@ class UserController extends Controller
                     'string',
                     'min:8',
                     'confirmed',
-                    'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/'
+                    'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/',
                 ];
-                $messages['password.min'] = 'Password minimal 8 karakter.';
-                $messages['password.confirmed'] = 'Konfirmasi password tidak cocok.';
-                $messages['password.regex'] = 'Password harus mengandung huruf dan angka.';
+                $messages = [
+                    'password.min' => 'Password minimal 8 karakter.',
+                    'password.confirmed' => 'Konfirmasi password tidak cocok.',
+                    'password.regex' => 'Password harus mengandung huruf dan angka.',
+                ];
             }
 
             $validated = $request->validate($rules, $messages);
@@ -128,72 +129,51 @@ class UserController extends Controller
                 'diperbarui_pada' => now(),
             ];
 
-            // Update password jika diisi
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);
             }
 
             $user->update($userData);
 
-            $message = "User '{$user->username}' berhasil diperbarui";
-            if ($request->filled('password')) {
-                $message .= " dengan password baru";
-            }
+            $message = "User '{$user->username}' berhasil diperbarui" . ($request->filled('password') ? " dengan password baru." : ".");
 
-            return redirect()->route('users.index')
-                ->with('success', $message);
+            return redirect()->route('users.index')->with('success', $message);
         } catch (ValidationException $e) {
-            return redirect()->back()
-                ->withErrors($e->validator)
-                ->withInput()
-                ->with('error', 'Gagal memperbarui user. Silakan periksa form kembali.');
+            return back()->withErrors($e->validator)->withInput()->with('error', 'Periksa kembali input Anda.');
         } catch (Exception $e) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Terjadi kesalahan saat memperbarui pengguna: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-
-    
-
     /**
-     * Remove the specified resource from storage.
+     * Delete a user safely.
      */
     public function destroy(string $id)
     {
         try {
             $user = User::findOrFail($id);
             $username = $user->username;
-            
-            // Check if user has related records
+
             if ($user->guru()->exists()) {
-                return redirect()->route('users.index')
-                    ->with('error', "User '{$username}' tidak dapat dihapus karena memiliki data guru terkait.");
+                return redirect()->route('users.index')->with('error', "User '{$username}' memiliki data guru terkait.");
             }
-            
+
             if ($user->orangtua()->exists()) {
-                return redirect()->route('users.index')
-                    ->with('error', "User '{$username}' tidak dapat dihapus karena memiliki data orangtua terkait.");
+                return redirect()->route('users.index')->with('error', "User '{$username}' memiliki data orangtua terkait.");
             }
-            
+
             if ($user->staf()->exists()) {
-                return redirect()->route('users.index')
-                    ->with('error', "User '{$username}' tidak dapat dihapus karena memiliki data staf terkait.");
+                return redirect()->route('users.index')->with('error', "User '{$username}' memiliki data staf terkait.");
             }
-            
-            // Check if trying to delete own account
+
             if (Auth::id() == $user->id_user) {
-                return redirect()->route('users.index')
-                    ->with('error', 'Anda tidak dapat menghapus akun yang sedang digunakan.');
+                return redirect()->route('users.index')->with('error', 'Anda tidak bisa menghapus akun yang sedang digunakan.');
             }
-            
+
             $user->delete();
-            return redirect()->route('users.index')
-                ->with('success', "User '{$username}' berhasil dihapus.");
+            return redirect()->route('users.index')->with('success', "User '{$username}' berhasil dihapus.");
         } catch (Exception $e) {
-            return redirect()->route('users.index')
-                ->with('error', 'Terjadi kesalahan saat menghapus pengguna: ' . $e->getMessage());
+            return redirect()->route('users.index')->with('error', 'Terjadi kesalahan saat menghapus: ' . $e->getMessage());
         }
     }
 }

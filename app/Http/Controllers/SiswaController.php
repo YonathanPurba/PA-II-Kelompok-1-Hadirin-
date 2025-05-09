@@ -279,6 +279,10 @@ class SiswaController extends Controller
            // Allow manual status override if provided
            if ($request->has('status') && in_array($request->status, [Siswa::STATUS_ACTIVE, Siswa::STATUS_INACTIVE])) {
                $updateData['status'] = $request->status;
+               // Set a flag to indicate manual status change
+               $manualStatusChange = true;
+           } else {
+               $manualStatusChange = false;
            }
            
            $siswa->update($updateData);
@@ -290,11 +294,13 @@ class SiswaController extends Controller
                    $oldParent->updateStatusBasedOnChildren();
                }
            }
-           
-           // Update new parent status
-           $newParent = OrangTua::find($request->id_orangtua);
-           if ($newParent) {
-               $newParent->updateStatusBasedOnChildren();
+
+           // Update new parent status only if parent changed or if this wasn't a manual status change
+           if (!isset($manualStatusChange) || !$manualStatusChange || $oldParentId != $request->id_orangtua) {
+               $newParent = OrangTua::find($request->id_orangtua);
+               if ($newParent) {
+                   $newParent->updateStatusBasedOnChildren();
+               }
            }
            
            DB::commit();
@@ -502,8 +508,24 @@ class SiswaController extends Controller
    public function updateStatus($id)
    {
        try {
-           $siswa = Siswa::findOrFail($id);
-           $siswa->updateStatusBasedOnClass();
+           $siswa = Siswa::with(['kelas.tahunAjaran'])->findOrFail($id);
+           
+           // Determine status based on class and academic year
+           if ($siswa->kelas && $siswa->kelas->tahunAjaran) {
+               $isActive = $siswa->kelas->tahunAjaran->aktif;
+               $siswa->status = $isActive ? Siswa::STATUS_ACTIVE : Siswa::STATUS_INACTIVE;
+           } else if ($siswa->tahunAjaran) {
+               // If student has academic year but no class
+               $isActive = $siswa->tahunAjaran->aktif;
+               $siswa->status = $isActive ? Siswa::STATUS_ACTIVE : Siswa::STATUS_INACTIVE;
+           } else {
+               // Default to inactive if no class or academic year
+               $siswa->status = Siswa::STATUS_INACTIVE;
+           }
+           
+           $siswa->diperbarui_pada = now();
+           $siswa->diperbarui_oleh = Auth::user()->username ?? 'system';
+           $siswa->save();
            
            return response()->json([
                'success' => true,

@@ -87,7 +87,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
     Route::get('/jadwal-pelajaran/kelas/{kelasId}', [JadwalPelajaranController::class, 'getByKelas']);
     Route::get('/jadwal-pelajaran/guru/{guruId}', [JadwalPelajaranController::class, 'getByGuru']);
-
+    Route::get('/jadwal-pelajaran/tahun-ajaran/{tahunAjaranId}', [JadwalPelajaranController::class, 'getByTahunAjaran']);
+    Route::post('/jadwal-pelajaran/{id}/update-status', [JadwalPelajaranController::class, 'updateStatus']);
+    Route::post('/jadwal-pelajaran/batch-update-status', [JadwalPelajaranController::class, 'batchUpdateStatus']);
+    Route::post('/jadwal-pelajaran/check-conflicts', [JadwalPelajaranController::class, 'checkConflicts']);
+    Route::post('/jadwal-pelajaran/copy', [JadwalPelajaranController::class, 'copyJadwal']);
+    
+    // Tambahkan rute baru untuk jadwal per tingkat
+    Route::get('/jadwal-pelajaran/create-by-tingkat', [JadwalPelajaranController::class, 'createByTingkat'])->name('jadwal-pelajaran.create-by-tingkat');
+    Route::post('/jadwal-pelajaran/store-by-tingkat', [JadwalPelajaranController::class, 'storeByTingkat'])->name('jadwal-pelajaran.store-by-tingkat');
+    
     // Absensi
     Route::resource('absensi', AbsensiController::class);
     Route::get('/absensi/siswa/{siswaId}', [AbsensiController::class, 'getBySiswa']);
@@ -116,4 +125,4 @@ Route::middleware('auth')->group(function () {
 // })->middleware('auth')->name('update-all-statuses');
 
 });
-
+    

@@ -147,17 +147,6 @@
                                                     <i class="bi bi-pencil-square fs-5"></i>
                                                 </a>
                                                 
-                                                <!-- Update Status Button -->
-                                                <a href="javascript:void(0);" class="text-info btn-update-status"
-                                                    data-id="{{ $siswa->id_siswa }}" data-name="{{ $siswa->nama }}" title="Update Status">
-                                                    <i class="bi bi-arrow-repeat fs-5"></i>
-                                                </a>
-                                                
-                                                <!-- Delete Button -->
-                                                <a href="javascript:void(0);" class="text-danger btn-delete-siswa"
-                                                    data-id="{{ $siswa->id_siswa }}" data-name="{{ $siswa->nama }}" title="Hapus">
-                                                    <i class="bi bi-trash-fill fs-5"></i>
-                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -249,12 +238,6 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <a id="btn-edit-siswa" href="#" class="btn btn-warning">
-                        <i class="bi bi-pencil me-1"></i> Edit
-                    </a>
-                    <a id="btn-update-status" href="#" class="btn btn-info">
-                        <i class="bi bi-arrow-repeat me-1"></i> Update Status
-                    </a>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>

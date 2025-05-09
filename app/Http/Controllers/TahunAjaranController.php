@@ -200,21 +200,48 @@ class TahunAjaranController extends Controller
      */
     public function setActive($id)
     {
+        DB::beginTransaction();
         try {
             $tahunAjaran = TahunAjaran::findOrFail($id);
             
             // If already active, do nothing
             if ($tahunAjaran->aktif) {
+                DB::commit();
                 return redirect()->route('tahun-ajaran.index')
                     ->with('info', 'Tahun ajaran ' . $tahunAjaran->nama_tahun_ajaran . ' sudah aktif.');
             }
             
-            // Set as active (this will also update all related classes and students)
-            $tahunAjaran->setAsActive();
+            // Deactivate all other academic years
+            TahunAjaran::where('aktif', true)
+                ->where('id_tahun_ajaran', '!=', $id)
+                ->update([
+                    'aktif' => false,
+                    'diperbarui_pada' => now(),
+                    'diperbarui_oleh' => Auth::user()->username ?? 'system',
+                ]);
+            
+            // Update the status of classes and students in deactivated academic years
+            $deactivatedYears = TahunAjaran::where('aktif', false)->get();
+            foreach ($deactivatedYears as $year) {
+                $this->updateRelatedStatuses($year);
+            }
+            
+            // Set this academic year as active
+            $tahunAjaran->update([
+                'aktif' => true,
+                'diperbarui_pada' => now(),
+                'diperbarui_oleh' => Auth::user()->username ?? 'system',
+            ]);
+            
+            // Update the status of classes and students in this academic year
+            $this->updateRelatedStatuses($tahunAjaran);
+            
+            DB::commit();
             
             return redirect()->route('tahun-ajaran.index')
                 ->with('success', 'Tahun ajaran ' . $tahunAjaran->nama_tahun_ajaran . ' berhasil diaktifkan.');
         } catch (\Exception $e) {
+            DB::rollBack();
             return redirect()->back()
                 ->with('error', 'Gagal mengaktifkan tahun ajaran: ' . $e->getMessage());
         }
@@ -225,14 +252,26 @@ class TahunAjaranController extends Controller
      */
     private function updateRelatedStatuses(TahunAjaran $tahunAjaran)
     {
-        // Update all classes in this academic year
-        foreach ($tahunAjaran->kelas as $kelas) {
-            $kelas->updateStudentsStatus();
+        $isActive = $tahunAjaran->aktif;
+        $status = $isActive ? Siswa::STATUS_ACTIVE : Siswa::STATUS_INACTIVE;
+        
+        // Get all classes in this academic year
+        $kelasIds = Kelas::where('id_tahun_ajaran', $tahunAjaran->id_tahun_ajaran)
+            ->pluck('id_kelas')
+            ->toArray();
+        
+        // Update all students in these classes
+        if (!empty($kelasIds)) {
+            Siswa::whereIn('id_kelas', $kelasIds)
+                ->update([
+                    'status' => $status,
+                    'diperbarui_pada' => now(),
+                    'diperbarui_oleh' => Auth::user()->username ?? 'system'
+                ]);
         }
         
         // Update all students directly associated with this academic year
         // but not through a class (if any)
-        $status = $tahunAjaran->aktif ? Siswa::STATUS_ACTIVE : Siswa::STATUS_INACTIVE;
         Siswa::where('id_tahun_ajaran', $tahunAjaran->id_tahun_ajaran)
             ->whereNull('id_kelas')
             ->update([
