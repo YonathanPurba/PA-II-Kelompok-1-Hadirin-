@@ -121,16 +121,15 @@ class JadwalPelajaranController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi input
+        // Validate input
         $validator = Validator::make($request->all(), [
             'id_kelas' => 'required|exists:kelas,id_kelas',
-            'jadwal' => 'required|array',
-            'jadwal.*.hari' => 'required|in:senin,selasa,rabu,kamis,jumat,sabtu',
-            'jadwal.*.sesi' => 'required|array',
-            'jadwal.*.sesi.*.id_mata_pelajaran' => 'required|exists:mata_pelajaran,id_mata_pelajaran',
-            'jadwal.*.sesi.*.id_guru' => 'required|exists:guru,id_guru',
-            'jadwal.*.sesi.*.waktu_mulai' => 'required',
-            'jadwal.*.sesi.*.waktu_selesai' => 'required',
+            'hari' => 'required|in:senin,selasa,rabu,kamis,jumat,sabtu',
+            'id_mata_pelajaran' => 'required|exists:mata_pelajaran,id_mata_pelajaran',
+            'id_guru' => 'required|exists:guru,id_guru',
+            'sesi_mulai' => 'required|integer|min:1|max:6',
+            'sesi_selesai' => 'required|integer|min:1|max:6|gte:sesi_mulai',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
         if ($validator->fails()) {
@@ -150,51 +149,34 @@ class JadwalPelajaranController extends Controller
 
         DB::beginTransaction();
         try {
-            $idKelas = $request->id_kelas;
-            $kelas = Kelas::findOrFail($idKelas);
+            $sesiList = $this->generateSesiWaktu();
+            $sesiMulai = (int)$request->sesi_mulai;
+            $sesiSelesai = (int)$request->sesi_selesai;
             
-            // Simpan jadwal untuk setiap hari dan sesi
+            // Cek apakah ada konflik jadwal untuk semua sesi yang akan dibuat
             $conflictErrors = [];
             
-            foreach ($request->jadwal as $hari => $hariData) {
-                if (!isset($hariData['sesi']) || !is_array($hariData['sesi'])) {
-                    continue;
-                }
+            for ($sesi = $sesiMulai; $sesi <= $sesiSelesai; $sesi++) {
+                $waktuMulai = $sesiList[$sesi - 1]['waktu_mulai'];
+                $waktuSelesai = $sesiList[$sesi - 1]['waktu_selesai'];
                 
-                foreach ($hariData['sesi'] as $sesiIndex => $sesiData) {
-                    // Skip jika tidak ada mata pelajaran yang dipilih
-                    if (empty($sesiData['id_mata_pelajaran']) || $sesiData['id_mata_pelajaran'] == '0') {
-                        continue;
+                // Buat jadwal sementara untuk pengecekan konflik
+                $tempJadwal = new Jadwal();
+                $tempJadwal->id_kelas = $request->id_kelas;
+                $tempJadwal->id_guru = $request->id_guru;
+                $tempJadwal->hari = $request->hari;
+                $tempJadwal->waktu_mulai = $waktuMulai;
+                $tempJadwal->waktu_selesai = $waktuSelesai;
+                
+                if ($tempJadwal->hasConflicts()) {
+                    $conflicts = $tempJadwal->getConflicts();
+                    foreach ($conflicts as $conflict) {
+                        $conflictErrors[] = "Konflik jadwal pada hari " . ucfirst($request->hari) . " sesi " . $sesi . 
+                            " (" . date('H:i', strtotime($waktuMulai)) . "-" . date('H:i', strtotime($waktuSelesai)) . "): " . 
+                            ($conflict->id_kelas == $request->id_kelas ? 
+                                "Kelas sudah memiliki jadwal dengan " . $conflict->mataPelajaran->nama : 
+                                "Guru " . $conflict->guru->nama_lengkap . " sudah mengajar di kelas " . $conflict->kelas->nama_kelas);
                     }
-                    
-                    // Buat jadwal baru
-                    $jadwal = new Jadwal();
-                    $jadwal->id_kelas = $idKelas;
-                    $jadwal->id_mata_pelajaran = $sesiData['id_mata_pelajaran'];
-                    $jadwal->id_guru = $sesiData['id_guru'];
-                    $jadwal->id_tahun_ajaran = $tahunAjaranAktif->id_tahun_ajaran;
-                    $jadwal->hari = $hari;
-                    $jadwal->waktu_mulai = $sesiData['waktu_mulai'];
-                    $jadwal->waktu_selesai = $sesiData['waktu_selesai'];
-                    $jadwal->status = 'aktif';
-                    $jadwal->dibuat_pada = now();
-                    $jadwal->dibuat_oleh = Auth::user()->username ?? 'system';
-                    
-                    // Cek konflik jadwal sebelum menyimpan
-                    if ($jadwal->hasConflicts()) {
-                        $conflicts = $jadwal->getConflicts();
-                        foreach ($conflicts as $conflict) {
-                            $conflictErrors[] = "Konflik jadwal pada hari " . ucfirst($hari) . " pukul " . 
-                                date('H:i', strtotime($sesiData['waktu_mulai'])) . "-" . 
-                                date('H:i', strtotime($sesiData['waktu_selesai'])) . 
-                                ": " . ($conflict->id_kelas == $idKelas ? 
-                                    "Kelas sudah memiliki jadwal dengan " . $conflict->mataPelajaran->nama : 
-                                    "Guru " . $conflict->guru->nama_lengkap . " sudah mengajar di kelas " . $conflict->kelas->nama_kelas);
-                        }
-                        continue;
-                    }
-                    
-                    $jadwal->save();
                 }
             }
             
@@ -204,6 +186,25 @@ class JadwalPelajaranController extends Controller
                 return redirect()->back()
                     ->with('error', 'Terdapat konflik jadwal:<br>' . implode('<br>', $conflictErrors))
                     ->withInput();
+            }
+            
+            // Jika tidak ada konflik, buat jadwal untuk setiap sesi
+            for ($sesi = $sesiMulai; $sesi <= $sesiSelesai; $sesi++) {
+                $waktuMulai = $sesiList[$sesi - 1]['waktu_mulai'];
+                $waktuSelesai = $sesiList[$sesi - 1]['waktu_selesai'];
+                
+                $jadwal = new Jadwal();
+                $jadwal->id_kelas = $request->id_kelas;
+                $jadwal->id_mata_pelajaran = $request->id_mata_pelajaran;
+                $jadwal->id_guru = $request->id_guru;
+                $jadwal->id_tahun_ajaran = $tahunAjaranAktif->id_tahun_ajaran;
+                $jadwal->hari = $request->hari;
+                $jadwal->waktu_mulai = $waktuMulai;
+                $jadwal->waktu_selesai = $waktuSelesai;
+                $jadwal->status = $request->status;
+                $jadwal->dibuat_pada = now();
+                $jadwal->dibuat_oleh = Auth::user()->username ?? 'system';
+                $jadwal->save();
             }
             
             DB::commit();
@@ -270,8 +271,8 @@ class JadwalPelajaranController extends Controller
             'id_mata_pelajaran' => 'required|exists:mata_pelajaran,id_mata_pelajaran',
             'id_guru' => 'required|exists:guru,id_guru',
             'hari' => 'required|in:senin,selasa,rabu,kamis,jumat,sabtu',
-            'waktu_mulai' => 'required',
-            'waktu_selesai' => 'required|after:waktu_mulai',
+            'sesi_mulai' => 'required|integer|min:1|max:6',
+            'sesi_selesai' => 'required|integer|min:1|max:6|gte:sesi_mulai',
             'status' => 'required|in:aktif,nonaktif',
         ]);
 
@@ -283,51 +284,98 @@ class JadwalPelajaranController extends Controller
 
         DB::beginTransaction();
         try {
-            $jadwal = Jadwal::findOrFail($id);
+            // Get the original jadwal
+            $originalJadwal = Jadwal::findOrFail($id);
+            $sesiList = $this->generateSesiWaktu();
+            $sesiMulai = (int)$request->sesi_mulai;
+            $sesiSelesai = (int)$request->sesi_selesai;
             
-            // Update jadwal
+            // Delete all related jadwal entries (same class, subject, day, and consecutive times)
+            $relatedJadwals = Jadwal::where('id_kelas', $originalJadwal->id_kelas)
+                ->where('id_mata_pelajaran', $originalJadwal->id_mata_pelajaran)
+                ->where('id_guru', $originalJadwal->id_guru)
+                ->where('hari', $originalJadwal->hari)
+                ->where(function($query) use ($originalJadwal) {
+                    // Find consecutive time slots
+                    $query->where('waktu_mulai', '=', $originalJadwal->waktu_selesai)
+                        ->orWhere('waktu_selesai', '=', $originalJadwal->waktu_mulai);
+                })
+                ->where('id_jadwal', '!=', $id)
+                ->get();
+                
+            // Add the original jadwal to the list
+            $relatedJadwals->push($originalJadwal);
+            
+            // Delete all related jadwals
+            foreach ($relatedJadwals as $jadwal) {
+                $jadwal->delete();
+            }
+            
+            // Check for conflicts with new schedule
+            $conflictErrors = [];
+            
+            for ($sesi = $sesiMulai; $sesi <= $sesiSelesai; $sesi++) {
+                $waktuMulai = $sesiList[$sesi - 1]['waktu_mulai'];
+                $waktuSelesai = $sesiList[$sesi - 1]['waktu_selesai'];
+                
+                // Create temporary jadwal for conflict checking
+                $tempJadwal = new Jadwal();
+                $tempJadwal->id_kelas = $request->id_kelas;
+                $tempJadwal->id_mata_pelajaran = $request->id_mata_pelajaran;
+                $tempJadwal->id_guru = $request->id_guru;
+                $tempJadwal->hari = $request->hari;
+                $tempJadwal->waktu_mulai = $waktuMulai;
+                $tempJadwal->waktu_selesai = $waktuSelesai;
+                
+                if ($tempJadwal->hasConflicts()) {
+                    $conflicts = $tempJadwal->getConflicts();
+                    foreach ($conflicts as $conflict) {
+                        $conflictErrors[] = "Konflik jadwal pada hari " . ucfirst($request->hari) . " sesi " . $sesi . 
+                            " (" . date('H:i', strtotime($waktuMulai)) . "-" . date('H:i', strtotime($waktuSelesai)) . "): " . 
+                            ($conflict->id_kelas == $request->id_kelas ? 
+                                "Kelas sudah memiliki jadwal dengan " . $conflict->mataPelajaran->nama : 
+                                "Guru " . $conflict->guru->nama_lengkap . " sudah mengajar di kelas " . $conflict->kelas->nama_kelas);
+                }
+            }
+        }
+        
+        // If there are conflicts, rollback and show error
+        if (!empty($conflictErrors)) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terdapat konflik jadwal:<br>' . implode('<br>', $conflictErrors))
+                ->withInput();
+        }
+        
+        // Create new jadwal entries for each session
+        for ($sesi = $sesiMulai; $sesi <= $sesiSelesai; $sesi++) {
+            $waktuMulai = $sesiList[$sesi - 1]['waktu_mulai'];
+            $waktuSelesai = $sesiList[$sesi - 1]['waktu_selesai'];
+            
+            $jadwal = new Jadwal();
             $jadwal->id_kelas = $request->id_kelas;
             $jadwal->id_mata_pelajaran = $request->id_mata_pelajaran;
             $jadwal->id_guru = $request->id_guru;
+            $jadwal->id_tahun_ajaran = $originalJadwal->id_tahun_ajaran;
             $jadwal->hari = $request->hari;
-            $jadwal->waktu_mulai = $request->waktu_mulai;
-            $jadwal->waktu_selesai = $request->waktu_selesai;
+            $jadwal->waktu_mulai = $waktuMulai;
+            $jadwal->waktu_selesai = $waktuSelesai;
             $jadwal->status = $request->status;
-            $jadwal->diperbarui_pada = now();
-            $jadwal->diperbarui_oleh = Auth::user()->username ?? 'system';
-            
-            // Cek konflik jadwal sebelum menyimpan
-            if ($jadwal->hasConflicts()) {
-                $conflicts = $jadwal->getConflicts();
-                $conflictMessages = [];
-                
-                foreach ($conflicts as $conflict) {
-                    $conflictMessages[] = "Konflik dengan jadwal " . 
-                        $conflict->mataPelajaran->nama . " di kelas " . 
-                        $conflict->kelas->nama_kelas . " (" . 
-                        date('H:i', strtotime($conflict->waktu_mulai)) . "-" . 
-                        date('H:i', strtotime($conflict->waktu_selesai)) . ") " . 
-                        "oleh " . $conflict->guru->nama_lengkap;
-                }
-                
-                DB::rollBack();
-                return redirect()->back()
-                    ->with('error', 'Terdapat konflik jadwal:<br>' . implode('<br>', $conflictMessages))
-                    ->withInput();
-            }
-            
+            $jadwal->dibuat_pada = now();
+            $jadwal->dibuat_oleh = Auth::user()->username ?? 'system';
             $jadwal->save();
-            
-            DB::commit();
-            return redirect()->route('jadwal-pelajaran.index')
-                ->with('success', 'Jadwal pelajaran berhasil diperbarui.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage())
-                ->withInput();
         }
+        
+        DB::commit();
+        return redirect()->route('jadwal-pelajaran.index')
+            ->with('success', 'Jadwal pelajaran berhasil diperbarui.');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()
+            ->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage())
+            ->withInput();
     }
+}
 
     /**
      * Remove the specified resource from storage.
@@ -470,24 +518,44 @@ class JadwalPelajaranController extends Controller
      */
     private function generateSesiWaktu()
     {
-        $sesiList = [];
-        $waktuMulai = strtotime(self::WAKTU_MULAI_PERTAMA);
-        
-        for ($i = 1; $i <= 10; $i++) {
-            $waktuSelesai = $waktuMulai + (self::DURASI_SESI * 60);
-            
-            $sesiList[] = [
-                'sesi' => $i,
-                'label' => "Sesi $i (" . date('H:i', $waktuMulai) . " - " . date('H:i', $waktuSelesai) . ")",
-                'waktu_mulai' => date('H:i:s', $waktuMulai),
-                'waktu_selesai' => date('H:i:s', $waktuSelesai)
-            ];
-            
-            // Tambahkan istirahat untuk sesi berikutnya
-            $waktuMulai = $waktuSelesai + (self::ISTIRAHAT_ANTAR_SESI * 60);
-        }
-        
-        return $sesiList;
+        return [
+            [
+                'sesi' => 1,
+                'label' => "Sesi 1 (07:45 - 08:30)",
+                'waktu_mulai' => "07:45:00",
+                'waktu_selesai' => "08:30:00"
+            ],
+            [
+                'sesi' => 2,
+                'label' => "Sesi 2 (08:30 - 09:15)",
+                'waktu_mulai' => "08:30:00",
+                'waktu_selesai' => "09:15:00"
+            ],
+            [
+                'sesi' => 3,
+                'label' => "Sesi 3 (09:15 - 10:00)",
+                'waktu_mulai' => "09:15:00",
+                'waktu_selesai' => "10:00:00"
+            ],
+            [
+                'sesi' => 4,
+                'label' => "Sesi 4 (10:15 - 11:00)",
+                'waktu_mulai' => "10:15:00",
+                'waktu_selesai' => "11:00:00"
+            ],
+            [
+                'sesi' => 5,
+                'label' => "Sesi 5 (11:00 - 11:45)",
+                'waktu_mulai' => "11:00:00",
+                'waktu_selesai' => "11:45:00"
+            ],
+            [
+                'sesi' => 6,
+                'label' => "Sesi 6 (11:45 - 12:30)",
+                'waktu_mulai' => "11:45:00",
+                'waktu_selesai' => "12:30:00"
+            ]
+        ];
     }
 
     /**
@@ -499,43 +567,54 @@ class JadwalPelajaranController extends Controller
             'id_kelas' => 'required|exists:kelas,id_kelas',
             'id_guru' => 'required|exists:guru,id_guru',
             'hari' => 'required|in:senin,selasa,rabu,kamis,jumat,sabtu',
-            'waktu_mulai' => 'required',
-            'waktu_selesai' => 'required|after:waktu_mulai',
+            'sesi_mulai' => 'required|integer|min:1|max:6',
+            'sesi_selesai' => 'required|integer|min:1|max:6|gte:sesi_mulai',
             'id_jadwal' => 'nullable|exists:jadwal,id_jadwal'
         ]);
         
-        // Buat objek jadwal sementara untuk pengecekan
-        $jadwal = new Jadwal();
-        $jadwal->id_kelas = $request->id_kelas;
-        $jadwal->id_guru = $request->id_guru;
-        $jadwal->hari = $request->hari;
-        $jadwal->waktu_mulai = $request->waktu_mulai;
-        $jadwal->waktu_selesai = $request->waktu_selesai;
+        $sesiList = $this->generateSesiWaktu();
+        $sesiMulai = (int)$request->sesi_mulai;
+        $sesiSelesai = (int)$request->sesi_selesai;
         
-        // Jika ini adalah edit jadwal, exclude jadwal yang sedang diedit
-        if ($request->id_jadwal) {
-            $jadwal->id_jadwal = $request->id_jadwal;
-        }
+        $conflictMessages = [];
         
-        $conflicts = $jadwal->getConflicts();
-        
-        if ($conflicts->count() > 0) {
-            $conflictMessages = [];
+        for ($sesi = $sesiMulai; $sesi <= $sesiSelesai; $sesi++) {
+            $waktuMulai = $sesiList[$sesi - 1]['waktu_mulai'];
+            $waktuSelesai = $sesiList[$sesi - 1]['waktu_selesai'];
             
-            foreach ($conflicts as $conflict) {
-                $conflictMessages[] = [
-                    'id_jadwal' => $conflict->id_jadwal,
-                    'kelas' => $conflict->kelas->nama_kelas,
-                    'mata_pelajaran' => $conflict->mataPelajaran->nama,
-                    'guru' => $conflict->guru->nama_lengkap,
-                    'waktu' => date('H:i', strtotime($conflict->waktu_mulai)) . " - " . date('H:i', strtotime($conflict->waktu_selesai)),
-                    'message' => "Konflik dengan jadwal " . $conflict->mataPelajaran->nama . 
-                        " di kelas " . $conflict->kelas->nama_kelas . 
-                        " (" . date('H:i', strtotime($conflict->waktu_mulai)) . "-" . date('H:i', strtotime($conflict->waktu_selesai)) . ") " . 
-                        "oleh " . $conflict->guru->nama_lengkap
-                ];
+            // Buat jadwal sementara untuk pengecekan konflik
+            $tempJadwal = new Jadwal();
+            $tempJadwal->id_kelas = $request->id_kelas;
+            $tempJadwal->id_guru = $request->id_guru;
+            $tempJadwal->hari = $request->hari;
+            $tempJadwal->waktu_mulai = $waktuMulai;
+            $tempJadwal->waktu_selesai = $waktuSelesai;
+            
+            // Jika ini adalah edit jadwal, exclude jadwal yang sedang diedit
+            if ($request->id_jadwal) {
+                $tempJadwal->id_jadwal = $request->id_jadwal;
             }
             
+            $conflicts = $tempJadwal->getConflicts();
+            
+            if ($conflicts->count() > 0) {
+                foreach ($conflicts as $conflict) {
+                    $conflictMessages[] = [
+                        'id_jadwal' => $conflict->id_jadwal,
+                        'kelas' => $conflict->kelas->nama_kelas,
+                        'mata_pelajaran' => $conflict->mataPelajaran->nama,
+                        'guru' => $conflict->guru->nama_lengkap,
+                        'waktu' => date('H:i', strtotime($conflict->waktu_mulai)) . " - " . date('H:i', strtotime($conflict->waktu_selesai)),
+                        'message' => "Konflik pada sesi " . $sesi . " (" . date('H:i', strtotime($waktuMulai)) . "-" . date('H:i', strtotime($waktuSelesai)) . "): " . 
+                            "Jadwal " . $conflict->mataPelajaran->nama . 
+                            " di kelas " . $conflict->kelas->nama_kelas . 
+                            " oleh " . $conflict->guru->nama_lengkap
+                    ];
+                }
+            }
+        }
+        
+        if (!empty($conflictMessages)) {
             return response()->json([
                 'success' => false,
                 'conflicts' => $conflictMessages

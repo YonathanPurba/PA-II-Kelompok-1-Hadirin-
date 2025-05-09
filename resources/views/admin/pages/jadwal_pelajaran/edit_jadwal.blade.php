@@ -88,27 +88,58 @@
                             @enderror
                         </div>
 
-                        <!-- Waktu -->
+                        <!-- Sesi Waktu Mulai -->
                         <div class="col-md-6 mb-3">
-                            <label for="sesi" class="form-label">Sesi Waktu <span class="text-danger">*</span></label>
-                            <select name="sesi" id="sesi" class="form-select @error('sesi') is-invalid @enderror" required>
-                                <option value="">-- Pilih Sesi --</option>
+                            <label for="sesi_mulai" class="form-label">Sesi Mulai <span class="text-danger">*</span></label>
+                            <select name="sesi_mulai" id="sesi_mulai" class="form-select @error('sesi_mulai') is-invalid @enderror" required>
+                                <option value="">-- Pilih Sesi Mulai --</option>
+                                @php
+                                    $currentSesi = 0;
+                                    foreach($sesiList as $index => $sesi) {
+                                        if(substr($jadwal->waktu_mulai, 0, 5) == substr($sesi['waktu_mulai'], 0, 5)) {
+                                            $currentSesi = $sesi['sesi'];
+                                            break;
+                                        }
+                                    }
+                                @endphp
                                 @foreach($sesiList as $sesi)
-                                    <option value="{{ $sesi['sesi'] }}" 
-                                            data-waktu-mulai="{{ $sesi['waktu_mulai'] }}" 
-                                            data-waktu-selesai="{{ $sesi['waktu_selesai'] }}"
-                                            {{ (old('waktu_mulai', substr($jadwal->waktu_mulai, 0, 5)) == substr($sesi['waktu_mulai'], 0, 5) && 
-                                               old('waktu_selesai', substr($jadwal->waktu_selesai, 0, 5)) == substr($sesi['waktu_selesai'], 0, 5)) ? 'selected' : '' }}>
+                                    <option value="{{ $sesi['sesi'] }}" {{ old('sesi_mulai', $currentSesi) == $sesi['sesi'] ? 'selected' : '' }}>
                                         {{ $sesi['label'] }}
                                     </option>
                                 @endforeach
                             </select>
-                            @error('sesi')
+                            @error('sesi_mulai')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            
-                            <input type="hidden" name="waktu_mulai" id="waktu_mulai" value="{{ old('waktu_mulai', $jadwal->waktu_mulai) }}">
-                            <input type="hidden" name="waktu_selesai" id="waktu_selesai" value="{{ old('waktu_selesai', $jadwal->waktu_selesai) }}">
+                        </div>
+
+                        <!-- Sesi Waktu Selesai -->
+                        <div class="col-md-6 mb-3">
+                            <label for="sesi_selesai" class="form-label">Sesi Selesai <span class="text-danger">*</span></label>
+                            <select name="sesi_selesai" id="sesi_selesai" class="form-select @error('sesi_selesai') is-invalid @enderror" required>
+                                <option value="">-- Pilih Sesi Selesai --</option>
+                                @php
+                                    $currentSesiSelesai = 0;
+                                    foreach($sesiList as $index => $sesi) {
+                                        if(substr($jadwal->waktu_selesai, 0, 5) == substr($sesi['waktu_selesai'], 0, 5)) {
+                                            $currentSesiSelesai = $sesi['sesi'];
+                                            break;
+                                        }
+                                    }
+                                    // If not found, default to the same as start session
+                                    if($currentSesiSelesai == 0) {
+                                        $currentSesiSelesai = $currentSesi;
+                                    }
+                                @endphp
+                                @foreach($sesiList as $sesi)
+                                    <option value="{{ $sesi['sesi'] }}" {{ old('sesi_selesai', $currentSesiSelesai) == $sesi['sesi'] ? 'selected' : '' }}>
+                                        {{ $sesi['label'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('sesi_selesai')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <!-- Status -->
@@ -131,6 +162,7 @@
                             <li>Jadwal dimulai pukul 07:45 pagi</li>
                             <li>Setiap sesi pelajaran berdurasi 45 menit</li>
                             <li>Istirahat 15 menit setelah sesi ketiga (10:00 - 10:15)</li>
+                            <li>Anda dapat memilih beberapa sesi berurutan untuk satu mata pelajaran</li>
                             <li>Sistem akan otomatis memeriksa konflik jadwal</li>
                         </ul>
                     </div>
@@ -154,18 +186,35 @@
 @section('js')
 <script>
     $(document).ready(function() {
-        // Update waktu mulai dan selesai saat sesi dipilih
-        $('#sesi').on('change', function() {
-            const selectedOption = $(this).find('option:selected');
-            const waktuMulai = selectedOption.data('waktu-mulai');
-            const waktuSelesai = selectedOption.data('waktu-selesai');
+        // Validasi sesi selesai harus >= sesi mulai
+        $('#sesi_mulai, #sesi_selesai').on('change', function() {
+            const sesiMulai = parseInt($('#sesi_mulai').val()) || 0;
+            const sesiSelesai = parseInt($('#sesi_selesai').val()) || 0;
             
-            $('#waktu_mulai').val(waktuMulai);
-            $('#waktu_selesai').val(waktuSelesai);
+            if (sesiMulai > 0 && sesiSelesai > 0 && sesiSelesai < sesiMulai) {
+                Swal.fire({
+                    title: 'Perhatian!',
+                    text: 'Sesi selesai harus sama dengan atau setelah sesi mulai',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#198754'
+                });
+                $('#sesi_selesai').val(sesiMulai);
+            }
+            
+            // Disable sesi selesai yang lebih kecil dari sesi mulai
+            if (sesiMulai > 0) {
+                $('#sesi_selesai option').each(function() {
+                    const sesiValue = parseInt($(this).val()) || 0;
+                    $(this).prop('disabled', sesiValue > 0 && sesiValue < sesiMulai);
+                });
+            } else {
+                $('#sesi_selesai option').prop('disabled', false);
+            }
         });
         
-        // Inisialisasi waktu berdasarkan sesi yang dipilih
-        $('#sesi').trigger('change');
+        // Trigger change to apply initial validation
+        $('#sesi_mulai').trigger('change');
         
         // Filter guru berdasarkan mata pelajaran yang dipilih
         $('#id_mata_pelajaran').on('change', function() {
@@ -234,12 +283,12 @@
             const kelasId = $('#id_kelas').val();
             const guruId = $('#id_guru').val();
             const hari = $('#hari').val();
-            const waktuMulai = $('#waktu_mulai').val();
-            const waktuSelesai = $('#waktu_selesai').val();
+            const sesiMulai = $('#sesi_mulai').val();
+            const sesiSelesai = $('#sesi_selesai').val();
             const jadwalId = '{{ $jadwal->id_jadwal }}';
             
             // Validasi input
-            if (!kelasId || !guruId || !hari || !waktuMulai || !waktuSelesai) {
+            if (!kelasId || !guruId || !hari || !sesiMulai || !sesiSelesai) {
                 Swal.fire({
                     title: 'Error!',
                     text: 'Silakan lengkapi semua field yang diperlukan.',
@@ -271,8 +320,8 @@
                     id_kelas: kelasId,
                     id_guru: guruId,
                     hari: hari,
-                    waktu_mulai: waktuMulai,
-                    waktu_selesai: waktuSelesai,
+                    sesi_mulai: sesiMulai,
+                    sesi_selesai: sesiSelesai,
                     id_jadwal: jadwalId
                 },
                 success: function(response) {
