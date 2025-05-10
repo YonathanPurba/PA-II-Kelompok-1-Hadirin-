@@ -64,7 +64,6 @@ Route::middleware('auth')->group(function () {
 
     // Kelas
     Route::resource('kelas', KelasController::class);
-    Route::resource('kelas', KelasController::class);
     Route::get('kelas/{id}/students', [KelasController::class, 'getStudents']);
     Route::post('kelas/{id}/update-student-statuses', [KelasController::class, 'updateStudentStatuses']);
     Route::get('kelas/tahun-ajaran/{tahunAjaranId}', [KelasController::class, 'getByTahunAjaran']);
@@ -72,7 +71,6 @@ Route::middleware('auth')->group(function () {
 
 
     // Tahun Ajaran
-    Route::resource('tahun-ajaran', TahunAjaranController::class);
     Route::resource('tahun-ajaran', TahunAjaranController::class);
     Route::get('tahun-ajaran/{id}/set-active', [TahunAjaranController::class, 'setActive'])->name('tahun-ajaran.set-active');
     Route::get('tahun-ajaran/active', [TahunAjaranController::class, 'getActive']);
@@ -85,17 +83,7 @@ Route::middleware('auth')->group(function () {
 
     // Jadwal Pelajaran
     Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
-    Route::get('/jadwal-pelajaran/kelas/{kelasId}', [JadwalPelajaranController::class, 'getByKelas']);
-    Route::get('/jadwal-pelajaran/guru/{guruId}', [JadwalPelajaranController::class, 'getByGuru']);
-    Route::get('/jadwal-pelajaran/tahun-ajaran/{tahunAjaranId}', [JadwalPelajaranController::class, 'getByTahunAjaran']);
-    Route::post('/jadwal-pelajaran/{id}/update-status', [JadwalPelajaranController::class, 'updateStatus']);
-    Route::post('/jadwal-pelajaran/batch-update-status', [JadwalPelajaranController::class, 'batchUpdateStatus']);
-    Route::post('/jadwal-pelajaran/check-conflicts', [JadwalPelajaranController::class, 'checkConflicts']);
-    Route::post('/jadwal-pelajaran/copy', [JadwalPelajaranController::class, 'copyJadwal']);
-    
-    // Tambahkan rute baru untuk jadwal per tingkat
-    Route::get('/jadwal-pelajaran/create-by-tingkat', [JadwalPelajaranController::class, 'createByTingkat'])->name('jadwal-pelajaran.create-by-tingkat');
-    Route::post('/jadwal-pelajaran/store-by-tingkat', [JadwalPelajaranController::class, 'storeByTingkat'])->name('jadwal-pelajaran.store-by-tingkat');
+    Route::get('/jadwal-pelajaran/guru-by-mapel/{idMataPelajaran}', [JadwalPelajaranController::class, 'getGuruByMataPelajaran']);
     
     // Absensi
     Route::resource('absensi', AbsensiController::class);
@@ -115,14 +103,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/rekapitulasi/kelas/{id_kelas}', [RekapitulasiController::class, 'showByKelas']);
     Route::get('/rekapitulasi/export/pdf', [RekapitulasiController::class, 'exportPdf'])->name('rekapitulasi.export.pdf');
     Route::get('/rekapitulasi/export/excel', [RekapitulasiController::class, 'exportExcel'])->name('rekapitulasi.export.excel');
-
-    // Kelas routes
-
-// Status update command route (for admin only)
-// Route::post('update-all-statuses', function() {
-//     Artisan::call('app:update-all-statuses');
-//     return redirect()->back()->with('success', 'Semua status berhasil diperbarui.');
-// })->middleware('auth')->name('update-all-statuses');
-
 });
-    

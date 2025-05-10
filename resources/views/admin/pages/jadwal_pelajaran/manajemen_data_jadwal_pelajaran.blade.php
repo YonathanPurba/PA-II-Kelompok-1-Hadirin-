@@ -184,6 +184,9 @@
                     <dt class="col-sm-4">Waktu</dt>
                     <dd class="col-sm-8" id="detail-waktu">-</dd>
                     
+                    <dt class="col-sm-4">Sesi</dt>
+                    <dd class="col-sm-8" id="detail-sesi">-</dd>
+                    
                     <dt class="col-sm-4">Tahun Ajaran</dt>
                     <dd class="col-sm-8" id="detail-tahun-ajaran">-</dd>
                     
@@ -220,6 +223,38 @@
                         $('#detail-guru').text(jadwal.guru.nama_lengkap);
                         $('#detail-hari').text(jadwal.hari.charAt(0).toUpperCase() + jadwal.hari.slice(1));
                         $('#detail-waktu').text(formatTime(jadwal.waktu_mulai) + ' - ' + formatTime(jadwal.waktu_selesai));
+                        
+                        // Determine session number based on time
+                        const sesiList = [
+                            { start: '07:45', end: '08:30', sesi: 1 },
+                            { start: '08:30', end: '09:15', sesi: 2 },
+                            { start: '09:15', end: '10:00', sesi: 3 },
+                            { start: '10:15', end: '11:00', sesi: 4 },
+                            { start: '11:00', end: '11:45', sesi: 5 },
+                            { start: '11:45', end: '12:30', sesi: 6 }
+                        ];
+                        
+                        const startTime = formatTime(jadwal.waktu_mulai);
+                        const endTime = formatTime(jadwal.waktu_selesai);
+                        
+                        let startSesi = 0;
+                        let endSesi = 0;
+                        
+                        sesiList.forEach(sesi => {
+                            if (sesi.start === startTime) startSesi = sesi.sesi;
+                            if (sesi.end === endTime) endSesi = sesi.sesi;
+                        });
+                        
+                        if (startSesi > 0 && endSesi > 0) {
+                            if (startSesi === endSesi) {
+                                $('#detail-sesi').text(`Sesi ${startSesi}`);
+                            } else {
+                                $('#detail-sesi').text(`Sesi ${startSesi} - ${endSesi}`);
+                            }
+                        } else {
+                            $('#detail-sesi').text('-');
+                        }
+                        
                         $('#detail-tahun-ajaran').text(jadwal.tahun_ajaran ? jadwal.tahun_ajaran.nama_tahun_ajaran : '-');
                         
                         // Set status badge
