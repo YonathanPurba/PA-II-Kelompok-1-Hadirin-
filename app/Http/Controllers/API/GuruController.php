@@ -416,7 +416,7 @@ class GuruController extends Controller
 
         $guru = $user->guru;
 
-        if (!$guru || $guru->kelas->isEmpty()) {
+        if (!$guru || !$guru->kelas) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data guru atau kelas tidak ditemukan.',

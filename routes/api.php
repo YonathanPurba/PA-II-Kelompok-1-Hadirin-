@@ -203,7 +203,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/presentase-kehadiran/{anakId}', [OrangTuaController::class, 'presentaseKehadiran']);
         Route::get('/riwayat/anak/{anakId}', [OrangTuaController::class, 'riwayatAbsensi']);
 
+        Route::get('/jadwal/{id}', [OrangTuaController::class, 'getJadwalAnak']);
 
+        Route::post('/surat-izin', [SuratIzinController::class, 'store']);
+        Route::post('/surat-izin', [SuratIzinController::class, 'store']);
+        Route::get('/storage/lampiran_surat_izin/{fileName}', [SuratIzinController::class, 'viewFile']);
     });
 
     // Mata Pelajaran Routes

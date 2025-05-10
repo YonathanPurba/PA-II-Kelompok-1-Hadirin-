@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Siswa;
 use App\Models\Absensi;
@@ -462,11 +463,24 @@ class OrangTuaController extends Controller
 
             $totalSesi = $hadir + $izin + $sakit + $alpa;
 
+            // Jika tidak ada data, set semua persentase ke 0
             if ($totalSesi == 0) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Data absensi tidak ditemukan.',
-                ], 404);
+                    'status' => 'success',
+                    'id_siswa' => $anakId,
+                    'hadir' => 0,
+                    'izin' => 0,
+                    'sakit' => 0,
+                    'alpa' => 0,
+                    'jumlah' => [
+                        'hadir' => 0,
+                        'izin' => 0,
+                        'sakit' => 0,
+                        'alpa' => 0,
+                        'total' => 0,
+                    ],
+                    'message' => 'Belum ada data absensi.',
+                ]);
             }
 
             return response()->json([
@@ -491,30 +505,35 @@ class OrangTuaController extends Controller
             ], 500);
         }
     }
-    
+
     public function riwayatAbsensi($id)
     {
         try {
-            // Pastikan siswa ditemukan, atau berikan respons yang tepat jika tidak ada
             $siswa = Siswa::with([
                 'absensi' => function ($query) {
                     $query->orderBy('tanggal', 'desc');
                 },
                 'absensi.jadwal',
+                'absensi.jadwal.mataPelajaran',
+                'absensi.jadwal.guru'
             ])->findOrFail($id);
 
-            // Mengambil data absensi siswa dan mengembalikan dalam format yang tepat
             $absensi = $siswa->absensi->map(function ($absen) {
+                $waktuMulai = $absen->jadwal?->waktu_mulai;
+                $waktuSelesai = $absen->jadwal?->waktu_selesai;
+
                 return [
                     'tanggal' => $absen->tanggal,
                     'status' => $absen->status,
                     'catatan' => $absen->catatan,
                     'jadwal' => [
+                        'waktu_mulai' => $waktuMulai ? Carbon::parse($waktuMulai)->format('H:i') : null,
+                        'waktu_selesai' => $waktuSelesai ? Carbon::parse($waktuSelesai)->format('H:i') : null,
                         'mata_pelajaran' => [
-                            'nama' => $absen->jadwal ? $absen->jadwal->mataPelajaran->nama : '-',
+                            'nama' => $absen->jadwal?->mataPelajaran?->nama ?? '-',
                         ],
                         'guru' => [
-                            'nama_lengkap' => $absen->jadwal->guru ? $absen->jadwal->guru->nama_lengkap : '-',
+                            'nama_lengkap' => $absen->jadwal?->guru?->nama_lengkap ?? '-',
                         ],
                     ],
                 ];
@@ -528,6 +547,41 @@ class OrangTuaController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengambil riwayat absensi: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getJadwalAnak($id)
+    {
+        try {
+            // Ambil data siswa dengan relasi kelas dan jadwal
+            $siswa = Siswa::with([
+                'kelas.jadwal.mataPelajaran',
+                'kelas.jadwal.guru'
+            ])->findOrFail($id);
+
+            // Ambil jadwal dari kelas siswa
+            $jadwal = $siswa->kelas->jadwal->map(function ($item) {
+                $waktuMulai = $item->waktu_mulai;
+                $waktuSelesai = $item->waktu_selesai;
+
+                return [
+                    'hari' => $item->hari,
+                    'waktu_mulai' => $waktuMulai ? Carbon::parse($waktuMulai)->format('H:i') : null,
+                    'waktu_selesai' => $waktuSelesai ? Carbon::parse($waktuSelesai)->format('H:i') : null,
+                    'mata_pelajaran' => $item->mataPelajaran->nama ?? '-',
+                    'guru' => $item->guru->nama_lengkap ?? '-',
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $jadwal,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil jadwal anak: ' . $e->getMessage(),
             ], 500);
         }
     }
