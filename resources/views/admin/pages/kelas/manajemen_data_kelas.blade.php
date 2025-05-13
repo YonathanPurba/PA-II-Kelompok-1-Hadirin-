@@ -13,12 +13,6 @@
                 </header>
 
                 <div class="data">
-                    <!-- Tombol Tambah -->
-                    <div class="mb-4 text-end">
-                        <a href="{{ route('kelas.create') }}" class="btn btn-success">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah Kelas
-                        </a>
-                    </div>
 
                     <!-- Informasi Status -->
                     <!-- <div class="row mb-4">
@@ -48,7 +42,7 @@
                             </div>
 
                             <div class="d-flex align-items-center gap-2">
-                                <label for="tahun_ajaran" class="me-2 mb-0">Tahun Ajaran:</label>
+                                <label for="tahun_ajaran" class="me-2 mb-0">T/A:</label>
                                 <select name="tahun_ajaran" id="tahun_ajaran" class="form-select">
                                     <option value="">Semua Tahun Ajaran</option>
                                     @foreach($tahunAjaranList as $ta)
@@ -68,10 +62,15 @@
                                 <i class="bi bi-filter me-1"></i> Filter
                             </button>
 
+                             <a href="{{ route('kelas.create') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Tambah
+                        </a>
+
                             @if(request()->has('tingkat') || request()->has('tahun_ajaran') || request()->has('search'))
                                 <a href="{{ route('kelas.index') }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-x-circle me-1"></i> Reset
                                 </a>
+                                
                             @endif
                         </form>
 

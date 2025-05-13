@@ -31,7 +31,7 @@
                 <!-- Tombol Tambah -->
                 <div class="mb-4 text-end">
                     <a href="{{ route('tahun-ajaran.create') }}" class="btn btn-success px-4">
-                        <i class="bi bi-plus-circle me-1"></i> Tambah Tahun Ajaran
+                        <i class="bi bi-plus-circle me-1"></i> Tambah
                     </a>
                 </div>
 

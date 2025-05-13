@@ -13,43 +13,44 @@
             </header>
 
             <div class="data">
-                <!-- Tombol Tambah di kanan atas -->
-                <div class="mb-4 text-end">
-                    <a href="{{ route('jadwal-pelajaran.create') }}" class="btn btn-success">
-                        <i class="bi bi-plus-circle me-1"></i>Tambah Jadwal
-                    </a>
-                </div>
 
                 <!-- Filter Tahun Ajaran -->
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <form method="GET" action="{{ route('jadwal-pelajaran.index') }}" class="d-flex align-items-center gap-3">
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="tahun_ajaran" class="me-2 mb-0">Tahun Ajaran:</label>
-                                <select name="tahun_ajaran" id="tahun_ajaran" class="form-select">
-                                    <option value="">Semua Tahun Ajaran</option>
-                                    @foreach($tahunAjaranList as $ta)
-                                        <option value="{{ $ta->id_tahun_ajaran }}" 
-                                            {{ request('tahun_ajaran', $tahunAjaranAktif->id_tahun_ajaran ?? '') == $ta->id_tahun_ajaran ? 'selected' : '' }}
-                                            {{ $ta->aktif ? 'class=fw-bold text-success' : '' }}>
-                                            {{ $ta->nama_tahun_ajaran }} {{ $ta->aktif ? '(Aktif)' : '' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-filter me-1"></i> Filter
-                            </button>
-                            
-                            @if(request()->has('tahun_ajaran'))
-                                <a href="{{ route('jadwal-pelajaran.index') }}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-x-circle me-1"></i> Reset
-                                </a>
-                            @endif
-                        </form>
-                    </div>
-                </div>
+               <div class="row mb-4">
+    <div class="col-md-12">
+        <form method="GET" action="{{ route('jadwal-pelajaran.index') }}" class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <label for="tahun_ajaran" class="me-2 mb-0">T/A:</label>
+                <select name="tahun_ajaran" id="tahun_ajaran" class="form-select" style="min-width: 200px;">
+                    <option value="">Semua Tahun Ajaran</option>
+                    @foreach($tahunAjaranList as $ta)
+                        <option value="{{ $ta->id_tahun_ajaran }}" 
+                            {{ request('tahun_ajaran', $tahunAjaranAktif->id_tahun_ajaran ?? '') == $ta->id_tahun_ajaran ? 'selected' : '' }}
+                            {{ $ta->aktif ? 'class=fw-bold text-success' : '' }}>
+                            {{ $ta->nama_tahun_ajaran }} {{ $ta->aktif ? '(Aktif)' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-outline-success">
+                <i class="bi bi-filter me-1"></i> Filter
+            </button>
+
+            @if(request()->has('tahun_ajaran'))
+                <a href="{{ route('jadwal-pelajaran.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i> Reset
+                </a>
+            @endif
+
+            <div class="ms-auto"> <!-- This div pushes the "Tambah" button to the right -->
+                <a href="{{ route('jadwal-pelajaran.create') }}" class="btn btn-success">
+                    <i class="bi bi-plus-circle me-1"></i> Tambah
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
 
                 <!-- Tampilan Jadwal -->
                 <div class="table-responsive">

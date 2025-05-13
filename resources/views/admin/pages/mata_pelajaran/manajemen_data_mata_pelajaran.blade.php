@@ -14,7 +14,7 @@
                 <div class="data">
                     <div class="mb-4 text-end">
                         <a href="{{ route('mata-pelajaran.create') }}" class="btn btn-success">
-                            <i class="bi bi-plus-circle me-1"></i>Tambah Mata Pelajaran
+                            <i class="bi bi-plus-circle me-1"></i>Tambah
                         </a>
                     </div>
 
