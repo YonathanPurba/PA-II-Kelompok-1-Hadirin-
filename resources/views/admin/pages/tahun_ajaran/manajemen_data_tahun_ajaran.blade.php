@@ -14,7 +14,7 @@
 
             <div class="data">
                 <!-- Informasi Status -->
-                <div class="row mb-4">
+                <!-- <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Status Tahun Ajaran:</strong>
@@ -26,7 +26,7 @@
                             </ul>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Tombol Tambah -->
                 <div class="mb-4 text-end">

@@ -64,6 +64,9 @@ class TahunAjaran extends Model
         DB::beginTransaction();
         
         try {
+            // Get previously active academic year
+            $previousActive = self::where('aktif', true)->first();
+            
             // Deactivate all academic years
             self::where('aktif', true)
                 ->update([
@@ -71,18 +74,18 @@ class TahunAjaran extends Model
                     'diperbarui_pada' => now(),
                     'diperbarui_oleh' => Auth::user()->username ?? 'system'
                 ]);
-        
+    
             // Activate this academic year
             $this->aktif = true;
             $this->diperbarui_pada = now();
             $this->diperbarui_oleh = Auth::user()->username ?? 'system';
             $this->save();
-        
+    
             // Update all classes in this academic year
             foreach ($this->kelas as $kelas) {
                 $kelas->updateStudentsStatus();
             }
-        
+    
             // Update all students directly associated with this academic year
             // but not through a class (if any)
             Siswa::where('id_tahun_ajaran', $this->id_tahun_ajaran)
@@ -92,18 +95,28 @@ class TahunAjaran extends Model
                     'diperbarui_pada' => now(),
                     'diperbarui_oleh' => Auth::user()->username ?? 'system'
                 ]);
-                
-            // Update all schedules for this academic year
+            
+            // Update all schedules for this academic year to active
             Jadwal::where('id_tahun_ajaran', $this->id_tahun_ajaran)
                 ->update([
                     'status' => 'aktif',
                     'diperbarui_pada' => now(),
                     'diperbarui_oleh' => Auth::user()->username ?? 'system'
                 ]);
-        
-            DB::commit();
-        
-            return true;
+            
+            // Deactivate schedules from other academic years
+            if ($previousActive) {
+                Jadwal::where('id_tahun_ajaran', '!=', $this->id_tahun_ajaran)
+                    ->update([
+                        'status' => 'nonaktif',
+                        'diperbarui_pada' => now(),
+                        'diperbarui_oleh' => Auth::user()->username ?? 'system'
+                    ]);
+            }
+    
+        DB::commit();
+    
+        return true;
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -135,7 +148,7 @@ class TahunAjaran extends Model
                     'diperbarui_pada' => now(),
                     'diperbarui_oleh' => Auth::user()->username ?? 'system'
                 ]);
-                
+            
             // Update all schedules for this academic year
             $scheduleStatus = $this->aktif ? 'aktif' : 'nonaktif';
             Jadwal::where('id_tahun_ajaran', $this->id_tahun_ajaran)
@@ -144,6 +157,16 @@ class TahunAjaran extends Model
                     'diperbarui_pada' => now(),
                     'diperbarui_oleh' => Auth::user()->username ?? 'system'
                 ]);
+            
+            // If this academic year is being activated, deactivate schedules from other academic years
+            if ($this->aktif) {
+                Jadwal::where('id_tahun_ajaran', '!=', $this->id_tahun_ajaran)
+                    ->update([
+                        'status' => 'nonaktif',
+                        'diperbarui_pada' => now(),
+                        'diperbarui_oleh' => Auth::user()->username ?? 'system'
+                    ]);
+            }
         }
         
         return $result;

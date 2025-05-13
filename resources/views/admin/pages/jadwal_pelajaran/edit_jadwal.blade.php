@@ -14,7 +14,7 @@
                     </a>
                     <span class="fs-5 text-muted">/ Edit Jadwal</span>
                 </h1>
-                <p class="mb-2">Staff dapat mengubah informasi jadwal pelajaran</p>
+                <p class="mb-2">Staff dapat mengubah informasi jadwal pelajaran dengan lebih efisien</p>
             </header>
 
             <div class="data">
@@ -88,57 +88,68 @@
                             @enderror
                         </div>
 
-                        <!-- Sesi Waktu Mulai -->
-                        <div class="col-md-6 mb-3">
-                            <label for="sesi_mulai" class="form-label">Sesi Mulai <span class="text-danger">*</span></label>
-                            <select name="sesi_mulai" id="sesi_mulai" class="form-select @error('sesi_mulai') is-invalid @enderror" required>
-                                <option value="">-- Pilih Sesi Mulai --</option>
-                                @php
-                                    $currentSesi = 0;
-                                    foreach($sesiList as $index => $sesi) {
-                                        if(substr($jadwal->waktu_mulai, 0, 5) == substr($sesi['waktu_mulai'], 0, 5)) {
-                                            $currentSesi = $sesi['sesi'];
-                                            break;
-                                        }
-                                    }
-                                @endphp
-                                @foreach($sesiList as $sesi)
-                                    <option value="{{ $sesi['sesi'] }}" {{ old('sesi_mulai', $currentSesi) == $sesi['sesi'] ? 'selected' : '' }}>
-                                        {{ $sesi['label'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('sesi_mulai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Sesi Waktu Selesai -->
-                        <div class="col-md-6 mb-3">
-                            <label for="sesi_selesai" class="form-label">Sesi Selesai <span class="text-danger">*</span></label>
-                            <select name="sesi_selesai" id="sesi_selesai" class="form-select @error('sesi_selesai') is-invalid @enderror" required>
-                                <option value="">-- Pilih Sesi Selesai --</option>
-                                @php
-                                    $currentSesiSelesai = 0;
-                                    foreach($sesiList as $index => $sesi) {
-                                        if(substr($jadwal->waktu_selesai, 0, 5) == substr($sesi['waktu_selesai'], 0, 5)) {
-                                            $currentSesiSelesai = $sesi['sesi'];
-                                            break;
-                                        }
-                                    }
-                                    // If not found, default to the same as start session
-                                    if($currentSesiSelesai == 0) {
-                                        $currentSesiSelesai = $currentSesi;
-                                    }
-                                @endphp
-                                @foreach($sesiList as $sesi)
-                                    <option value="{{ $sesi['sesi'] }}" {{ old('sesi_selesai', $currentSesiSelesai) == $sesi['sesi'] ? 'selected' : '' }}>
-                                        {{ $sesi['label'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('sesi_selesai')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                        <!-- Sesi Waktu -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Sesi Waktu <span class="text-danger">*</span></label>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="text-center">Pilih</th>
+                                            <th>Sesi</th>
+                                            <th>Waktu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @php
+                                            // Menentukan sesi yang sudah dipilih sebelumnya
+                                            $selectedSessions = [];
+                                            $sessionStart = 0;
+                                            $sessionEnd = 0;
+                                            
+                                            // Cari sesi mulai berdasarkan waktu mulai
+                                            foreach($sesiList as $sesi) {
+                                                if(substr($jadwal->waktu_mulai, 0, 5) == substr($sesi['waktu_mulai'], 0, 5)) {
+                                                    $sessionStart = $sesi['sesi'];
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            // Cari sesi selesai berdasarkan waktu selesai
+                                            foreach($sesiList as $sesi) {
+                                                if(substr($jadwal->waktu_selesai, 0, 5) == substr($sesi['waktu_selesai'], 0, 5)) {
+                                                    $sessionEnd = $sesi['sesi'];
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            // Buat array sesi yang dipilih
+                                            if($sessionStart > 0 && $sessionEnd > 0) {
+                                                for($i = $sessionStart; $i <= $sessionEnd; $i++) {
+                                                    $selectedSessions[] = $i;
+                                                }
+                                            }
+                                        @endphp
+                                        
+                                        @foreach($sesiList as $sesi)
+                                        <tr>
+                                            <td class="text-center">
+                                                <div class="form-check">
+                                                    <input class="form-check-input sesi-checkbox" type="checkbox" 
+                                                        name="sesi[]" value="{{ $sesi['sesi'] }}" 
+                                                        id="sesi{{ $sesi['sesi'] }}" 
+                                                        {{ in_array($sesi['sesi'], old('sesi', $selectedSessions)) ? 'checked' : '' }}>
+                                                </div>
+                                            </td>
+                                            <td>Sesi {{ $sesi['sesi'] }}</td>
+                                            <td>{{ substr($sesi['waktu_mulai'], 0, 5) }} - {{ substr($sesi['waktu_selesai'], 0, 5) }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            @error('sesi')
+                                <div class="text-danger mt-1">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -186,109 +197,90 @@
 @section('js')
 <script>
     $(document).ready(function() {
-        // Validasi sesi selesai harus >= sesi mulai
-        $('#sesi_mulai, #sesi_selesai').on('change', function() {
-            const sesiMulai = parseInt($('#sesi_mulai').val()) || 0;
-            const sesiSelesai = parseInt($('#sesi_selesai').val()) || 0;
-            
-            if (sesiMulai > 0 && sesiSelesai > 0 && sesiSelesai < sesiMulai) {
-                Swal.fire({
-                    title: 'Perhatian!',
-                    text: 'Sesi selesai harus sama dengan atau setelah sesi mulai',
-                    icon: 'warning',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#198754'
+        // Fungsi untuk memastikan checkbox sesi berurutan
+        function validateConsecutiveSessions() {
+            $(document).on('change', '.sesi-checkbox', function() {
+                let selectedSessions = [];
+                $('.sesi-checkbox:checked').each(function() {
+                    selectedSessions.push(parseInt($(this).val()));
                 });
-                $('#sesi_selesai').val(sesiMulai);
-            }
-            
-            // Disable sesi selesai yang lebih kecil dari sesi mulai
-            if (sesiMulai > 0) {
-                $('#sesi_selesai option').each(function() {
-                    const sesiValue = parseInt($(this).val()) || 0;
-                    $(this).prop('disabled', sesiValue > 0 && sesiValue < sesiMulai);
-                });
-            } else {
-                $('#sesi_selesai option').prop('disabled', false);
-            }
-        });
+                
+                // Jika tidak ada yang dipilih, tidak perlu validasi
+                if (selectedSessions.length === 0) return;
+                
+                // Urutkan sesi
+                selectedSessions.sort((a, b) => a - b);
+                
+                // Cek apakah berurutan
+                let isConsecutive = true;
+                for (let i = 1; i < selectedSessions.length; i++) {
+                    // Khusus untuk sesi 3 ke 4 ada istirahat, jadi boleh loncat
+                    if (selectedSessions[i-1] === 3 && selectedSessions[i] === 4) {
+                        continue;
+                    }
+                    
+                    if (selectedSessions[i] !== selectedSessions[i-1] + 1) {
+                        isConsecutive = false;
+                        break;
+                    }
+                }
+                
+                if (!isConsecutive) {
+                    Swal.fire({
+                        title: 'Perhatian!',
+                        text: 'Sesi yang dipilih harus berurutan.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#198754'
+                    });
+                    
+                    // Uncheck the last clicked checkbox
+                    $(this).prop('checked', false);
+                }
+            });
+        }
         
-        // Trigger change to apply initial validation
-        $('#sesi_mulai').trigger('change');
+        // Validasi sesi berurutan
+        validateConsecutiveSessions();
         
-        // Filter guru berdasarkan mata pelajaran yang dipilih
+        // Highlight guru yang mengajar mata pelajaran tertentu
         $('#id_mata_pelajaran').on('change', function() {
             const mapelId = $(this).val();
-            const guruSelect = $('#id_guru');
-            const currentGuruId = guruSelect.val();
             
-            // Reset guru select
-            guruSelect.empty().append('<option value="">-- Pilih Guru --</option>');
+            // Reset semua opsi guru
+            $('#id_guru option').removeClass('text-success fw-bold');
             
             if (mapelId) {
-                // Tampilkan loading spinner
-                guruSelect.prop('disabled', true);
-                guruSelect.after('<div id="guru-loading" class="spinner-border spinner-border-sm text-success ms-2" role="status"><span class="visually-hidden">Loading...</span></div>');
-                
-                // Ambil data guru berdasarkan mata pelajaran
-                $.ajax({
-                    url: `/api/mata-pelajaran/${mapelId}/guru-pengampu`,
-                    method: 'GET',
-                    success: function(response) {
-                        // Hapus loading spinner
-                        $('#guru-loading').remove();
-                        guruSelect.prop('disabled', false);
-                        
-                        if (response.success && response.data.length > 0) {
-                            // Tambahkan opsi guru
-                            response.data.forEach(function(guru) {
-                                const selected = guru.id_guru == currentGuruId ? 'selected' : '';
-                                guruSelect.append(`<option value="${guru.id_guru}" ${selected}>${guru.nama_lengkap}</option>`);
-                            });
-                        } else {
-                            // Jika tidak ada guru, tampilkan pesan
-                            Swal.fire({
-                                title: 'Perhatian!',
-                                text: 'Tidak ada guru yang mengajar mata pelajaran ini.',
-                                icon: 'warning',
-                                confirmButtonText: 'OK',
-                                confirmButtonColor: '#198754'
-                            });
+                // Highlight guru yang mengajar mata pelajaran ini
+                @foreach($guruList as $guru)
+                    @foreach($guru->mataPelajaran as $mapel)
+                        if ('{{ $mapel->id_mata_pelajaran }}' === mapelId) {
+                            $('#id_guru option[value="{{ $guru->id_guru }}"]').addClass('text-success fw-bold');
                         }
-                    },
-                    error: function() {
-                        // Hapus loading spinner
-                        $('#guru-loading').remove();
-                        guruSelect.prop('disabled', false);
-                        
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Gagal memuat data guru.',
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#198754'
-                        });
-                    }
-                });
-            } else {
-                // Disable guru select jika tidak ada mata pelajaran yang dipilih
-                guruSelect.prop('disabled', true);
+                    @endforeach
+                @endforeach
             }
         });
+        
+        // Trigger change untuk highlight guru pada load
+        $('#id_mata_pelajaran').trigger('change');
         
         // Cek konflik jadwal saat form disubmit
         $('#formEditJadwal').on('submit', function(e) {
             e.preventDefault();
             
+            // Validasi input
             const kelasId = $('#id_kelas').val();
             const guruId = $('#id_guru').val();
             const hari = $('#hari').val();
-            const sesiMulai = $('#sesi_mulai').val();
-            const sesiSelesai = $('#sesi_selesai').val();
             const jadwalId = '{{ $jadwal->id_jadwal }}';
+            const selectedSessions = [];
             
-            // Validasi input
-            if (!kelasId || !guruId || !hari || !sesiMulai || !sesiSelesai) {
+            $('.sesi-checkbox:checked').each(function() {
+                selectedSessions.push(parseInt($(this).val()));
+            });
+            
+            if (!kelasId || !guruId || !hari || selectedSessions.length === 0) {
                 Swal.fire({
                     title: 'Error!',
                     text: 'Silakan lengkapi semua field yang diperlukan.',
@@ -298,6 +290,13 @@
                 });
                 return false;
             }
+            
+            // Urutkan sesi
+            selectedSessions.sort((a, b) => a - b);
+            
+            // Tentukan sesi mulai dan selesai
+            const sesiMulai = selectedSessions[0];
+            const sesiSelesai = selectedSessions[selectedSessions.length - 1];
             
             // Tampilkan loading
             Swal.fire({
@@ -345,7 +344,10 @@
                             cancelButtonColor: '#6c757d'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                $('#formEditJadwal')[0].submit();
+                                // Tambahkan parameter force_save
+                                const form = $('#formEditJadwal');
+                                form.append('<input type="hidden" name="force_save" value="1">');
+                                form[0].submit();
                             }
                         });
                     } else {

@@ -70,7 +70,7 @@ class JadwalController extends Controller
             'id_guru_mata_pelajaran' => 'nullable|exists:guru_mata_pelajaran,id_guru_mata_pelajaran',
             'hari' => 'required|in:senin,selasa,rabu,kamis,jumat,sabtu,minggu',
             'semester' => 'required|in:ganjil,genap',
-            'id_tahun_ajaran' => 'nullable|exists:tahun_ajaran,id_tahun_ajaran',
+            'id_tahun_ajaran' => 'required|exists:tahun_ajaran,id_tahun_ajaran',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
         ]);
@@ -303,6 +303,49 @@ class JadwalController extends Controller
         return response()->json([
             'success' => true,
             'data' => $jadwal
+        ]);
+    }
+
+    /**
+     * Get schedules by academic year
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getByAcademicYear(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id_tahun_ajaran' => 'required|exists:tahun_ajaran,id_tahun_ajaran',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $jadwal = Jadwal::with(['kelas', 'mataPelajaran', 'guru'])
+                        ->where('id_tahun_ajaran', $request->id_tahun_ajaran)
+                        ->orderBy('hari')
+                        ->orderBy('waktu_mulai')
+                        ->get();
+
+        // Group by day
+        $groupedJadwal = $jadwal->groupBy('hari');
+        $result = [];
+
+        foreach ($groupedJadwal as $hari => $items) {
+            $result[] = [
+                'hari' => $hari,
+                'jadwal' => $items
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $result
         ]);
     }
 }

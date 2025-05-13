@@ -29,28 +29,6 @@
                         </div>
                     @endif
 
-                    <!-- Filter Bar -->
-                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                        <form method="GET" action="{{ route('users.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
-
-                            
-                            <div class="d-flex align-items-center gap-2">
-                                <input type="text" name="search" class="form-control" placeholder="Cari username..." 
-                                    value="{{ request('search') }}">
-                            </div>
-                            
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-filter me-1"></i> Filter
-                            </button>
-                            
-                            @if(request()->has('role') || request()->has('status') || request()->has('search'))
-                                <a href="{{ route('users.index') }}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-x-circle me-1"></i> Reset
-                                </a>
-                            @endif
-                        </form>
-                    </div>
-
                     <!-- Tabel Data Pengguna -->
                     <div class="table-responsive">
                         <table id="usersTable" class="table table-striped table-bordered table-sm align-middle">
@@ -91,15 +69,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
-
-                    <!-- Pagination jika menggunakan paginate -->
-                    @if($users instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                        <div class="d-flex justify-content-center mt-3">
-                            {{ $users->appends(request()->query())->links() }}
-                        </div>
-                    @endif
-                    
+                    </div>                    
                 </div>
             </div>
         </main>
@@ -156,93 +126,4 @@
             </div>
         </div>
     </div>
-    @endsection
-
-    @section('scripts')
-    <script>
-        $(document).ready(function() {
-            // DataTables can cause column count issues, so we'll disable it
-            // and rely on Laravel's built-in pagination
-            /*
-            if (!$.fn.DataTable.isDataTable('#usersTable')) {
-                $('#usersTable').DataTable({
-                    responsive: true,
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json',
-                    },
-                    columnDefs: [
-                        { orderable: false, targets: 5 }
-                    ],
-                    paging: false,
-                    searching: false,
-                    info: false
-                });
-            }
-            */
-
-            // Handle view user button click
-            $('.btn-view-user').on('click', function(e) {
-                e.preventDefault(); // Prevents any default navigation
-                const id = $(this).data('id');
-                
-                // Show loading state
-                $('#view-username').text('Memuat...');
-                $('#view-role').text('Memuat...');
-                $('#view-created').text('Memuat...');
-                $('#view-last-login').text('Memuat...');
-                $('#table-akses-body').html('<tr><td colspan="3" class="text-center">Memuat data...</td></tr>');
-                
-                // Mengambil data secara langsung dari atribut data
-                const userData = {
-                    username: $(this).data('username') || '-',
-                    role: $(this).data('role') || '-',
-                    created: $(this).data('created') || '-',
-                    last_login: $(this).data('last-login') || '-',
-                };
-
-                // Fill in basic details dari atribut data
-                $('#view-username').text(userData.username);
-                $('#view-role').text(userData.role);
-                $('#view-created').text(userData.created);
-                $('#view-last-login').text(userData.last_login);
-                
-                
-                // Tampilkan modal
-                $('#modalViewUser').modal('show');
-                
-                // Coba ambil data hak akses via AJAX
-                $.ajax({
-                    url: `/users/${id}/akses`,
-                    method: 'GET',
-                    success: function(response) {
-                        // Fill in akses table
-                        if (response && response.length > 0) {
-                            let tableContent = '';
-                            response.forEach((akses, index) => {
-                                // Create status badge based on access status
-                                let aksesBadge = akses.has_access ? 
-                                    '<span class="badge bg-success"><i class="bi bi-check-lg"></i> Ya</span>' : 
-                                    '<span class="badge bg-secondary"><i class="bi bi-x-lg"></i> Tidak</span>';
-                                
-                                tableContent += `
-                                    <tr>
-                                        <td class="text-center">${index + 1}</td>
-                                        <td>${akses.modul_name}</td>
-                                        <td class="text-center">${aksesBadge}</td>
-                                    </tr>
-                                `;
-                            });
-                            $('#table-akses-body').html(tableContent);
-                        } else {
-                            $('#table-akses-body').html('<tr><td colspan="3" class="text-center">Tidak ada data hak akses</td></tr>');
-                        }
-                    },
-                    error: function(xhr) {
-                        console.error('Error fetching access data:', xhr);
-                        $('#table-akses-body').html('<tr><td colspan="3" class="text-center">Tidak ada data hak akses</td></tr>');
-                    }
-                });
-            });
-        });
-    </script>
     @endsection

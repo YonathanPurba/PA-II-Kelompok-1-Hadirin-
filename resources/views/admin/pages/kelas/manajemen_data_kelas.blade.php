@@ -13,8 +13,15 @@
                 </header>
 
                 <div class="data">
+                    <!-- Tombol Tambah -->
+                    <div class="mb-4 text-end">
+                        <a href="{{ route('kelas.create') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Tambah Kelas
+                        </a>
+                    </div>
+
                     <!-- Informasi Status -->
-                    <div class="row mb-4">
+                    <!-- <div class="row mb-4">
                         <div class="col-md-12">
                             <div class="alert alert-info">
                                 <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Status:</strong>
@@ -25,7 +32,7 @@
                                 </ul>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Filter & Action Bar -->
                     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
@@ -68,9 +75,7 @@
                             @endif
                         </form>
 
-                        <a href="{{ route('kelas.create') }}" class="btn btn-success">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah Kelas
-                        </a>
+                        
                     </div>
 
                     <!-- Tabel Kelas -->

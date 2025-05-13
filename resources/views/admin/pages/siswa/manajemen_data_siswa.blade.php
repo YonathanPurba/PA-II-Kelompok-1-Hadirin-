@@ -13,8 +13,15 @@
                 </header>
 
                 <div class="data">
+                    <!-- Tombol Tambah -->
+                    <div class="mb-4 text-end">
+                        <a href="{{ route('siswa.create') }}" class="btn btn-success px-4">
+                            <i class="bi bi-plus-circle me-1"></i> Tambah Siswa
+                        </a>
+                    </div>
+
                     <!-- Informasi Status -->
-                    <div class="row mb-4">
+                    <!-- <div class="row mb-4">
                         <div class="col-md-12">
                             <div class="alert alert-info">
                                 <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Status Siswa:</strong>
@@ -26,7 +33,7 @@
                                 </ul>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Filter & Export Bar -->
                     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
@@ -157,18 +164,6 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div class="mt-4">
-                        {{ $siswaList->links() }}
-                    </div>
-
-                    <!-- Tombol Tambah -->
-                    <div class="mt-4 text-end">
-                        <a href="{{ route('siswa.create') }}" class="btn btn-success px-4">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah Siswa
-                        </a>
                     </div>
                 </div>
             </div>

@@ -12,6 +12,12 @@
                     <p class="mb-2">Filter data guru berdasarkan mata pelajaran dan status</p>
                 </header>
                 <div class="data">
+                    <!-- Tombol Tambah -->
+                    <div class="mb-4 text-end">
+                        <a href="{{ url('guru/create') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i>Tambah Guru
+                        </a>
+                    </div>
                     <!-- Filter Bar -->
                     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                         <form method="GET" action="{{ route('guru.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
@@ -122,17 +128,6 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $gurus->links() }}
-                    </div>
-
-                    <div class="mt-4 text-end">
-                        <a href="{{ url('guru/create') }}" class="btn btn-success">
-                            <i class="bi bi-plus-circle me-1"></i>Tambah Guru
-                        </a>
                     </div>
                 </div>
             </div>

@@ -91,6 +91,7 @@
             font-size: 16px;
         }
     </style>
+    @yield('css')
 </head>
 
 <body>
@@ -118,6 +119,126 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('js/admin.js') }}"></script>
     <script src="{{ asset('js/toast.js') }}"></script>
+
+    <!-- DataTables CSS and JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+
+    <!-- Global DataTables Configuration -->
+    <script>
+        // Global DataTables configuration
+        $.extend(true, $.fn.dataTable.defaults, {
+            responsive: true,
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json',
+            },
+            // Enable pagination by default
+            "paging": true,
+            // Show entry length menu
+            "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Semua"]],
+            // Enable info display
+            "info": true,
+            // Enable searching
+            "searching": true,
+            // Add DOM positioning for length, filter, etc.
+            "dom": '<"top"<"d-flex justify-content-between"<"dataTables_length"l><"dataTables_filter"f>>>rt<"bottom"<"d-flex justify-content-between"<"dataTables_info"i><"dataTables_paginate"p>>><"clear">'
+        });
+    </script>
+
+    <!-- Global CSS for DataTables -->
+    <style>
+        .dataTables_wrapper .dataTables_length, 
+        .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 15px;
+        }
+        .dataTables_wrapper .dataTables_paginate {
+            margin-top: 15px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.3em 0.8em;
+            border: 1px solid #ddd;
+            margin-left: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #198754;
+            color: white !important;
+            border-color: #198754;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+            background-color: #f0f0f0;
+        }
+        .dataTables_wrapper .dataTables_info {
+            margin-top: 15px;
+        }
+        .dt-buttons {
+            margin-bottom: 15px;
+        }
+        
+        /* Form styling improvements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+        }
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+        .form-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        /* Card styling for forms */
+        .card-form {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 0.5rem;
+        }
+        .card-form .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+        }
+        .card-form .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Button styling */
+        .btn-action {
+            border-radius: 0.375rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+        .btn-submit {
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .btn-submit:hover {
+            background-color: #157347;
+            border-color: #146c43;
+        }
+        .btn-cancel {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-cancel:hover {
+            background-color: #5c636a;
+            border-color: #565e64;
+        }
+    </style>
 
     @yield('scripts')
 

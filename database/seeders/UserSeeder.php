@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class UserSeeder extends Seeder
 {
@@ -13,57 +14,60 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = [
-            // Admin
-            [
-                'username' => 'admin',
+        $users = [];
+        $id = 1;
+        
+        // Admin users (10 users)
+        for ($i = 1; $i <= 10; $i++) {
+            $users[] = [
+                'id_user' => $id++,
+                'username' => 'staf' . $i,
                 'password' => Hash::make('password'),
-                'id_role' => 1, // admin
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            // Guru
-            [
-                'username' => 'guru1',
+                'id_role' => 1, // staf
+                'fcm_token' => null,
+                'remember_token' => null,
+                'last_login_at' => null,
+                'dibuat_pada' => Carbon::now(),
+                'dibuat_oleh' => 'system',
+                'diperbarui_pada' => Carbon::now(),
+                'diperbarui_oleh' => 'system'
+            ];
+        }
+        
+        // Teacher users (30 users)
+        for ($i = 1; $i <= 30; $i++) {
+            $users[] = [
+                'id_user' => $id++,
+                'username' => 'guru' . $i,
                 'password' => Hash::make('password'),
                 'id_role' => 3, // guru
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            [
-                'username' => 'guru2',
-                'password' => Hash::make('password'),
-                'id_role' => 3, // guru
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            // Orangtua
-            [
-                'username' => 'orangtua1',
+                'fcm_token' => null,
+                'remember_token' => null,
+                'last_login_at' => null,
+                'dibuat_pada' => Carbon::now(),
+                'dibuat_oleh' => 'system',
+                'diperbarui_pada' => Carbon::now(),
+                'diperbarui_oleh' => 'system'
+            ];
+        }
+        
+        // Parent users (100 users)
+        for ($i = 1; $i <= 100; $i++) {
+            $users[] = [
+                'id_user' => $id++,
+                'username' => 'ortu' . $i,
                 'password' => Hash::make('password'),
                 'id_role' => 2, // orangtua
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            [
-                'username' => 'orangtua2',
-                'password' => Hash::make('password'),
-                'id_role' => 2, // orangtua
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-        ];
-
+                'fcm_token' => null,
+                'remember_token' => null,
+                'last_login_at' => null,
+                'dibuat_pada' => Carbon::now(),
+                'dibuat_oleh' => 'system',
+                'diperbarui_pada' => Carbon::now(),
+                'diperbarui_oleh' => 'system'
+            ];
+        }
+        
         DB::table('users')->insert($users);
     }
 }

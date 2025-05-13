@@ -83,6 +83,9 @@ Route::middleware('auth')->group(function () {
 
     // Jadwal Pelajaran
     Route::resource('jadwal-pelajaran', JadwalPelajaranController::class);
+    Route::post('/jadwal-pelajaran/store-massal', [JadwalPelajaranController::class, 'storeMassal'])->name('jadwal-pelajaran.store-massal');
+    Route::post('/jadwal-pelajaran/check-conflicts', [JadwalPelajaranController::class, 'checkConflicts']);
+    Route::post('/jadwal-pelajaran/check-conflicts-massal', [JadwalPelajaranController::class, 'checkConflictsMassal']);
     Route::get('/jadwal-pelajaran/guru-by-mapel/{idMataPelajaran}', [JadwalPelajaranController::class, 'getGuruByMataPelajaran']);
     
     // Absensi

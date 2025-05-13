@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class SiswaSeeder extends Seeder
 {
@@ -12,57 +13,43 @@ class SiswaSeeder extends Seeder
      */
     public function run(): void
     {
-        $siswa = [
-            [
-                'nama' => 'Andi Wijaya',
-                'nis' => '2024001',
-                'id_orangtua' => 1, // Ahmad Wijaya
-                'id_kelas' => 1, // 7A
-                'id_tahun_ajaran' => 1, // 2024/2025
-                'tempat_lahir' => 'Jakarta',
-                'tanggal_lahir' => '2011-05-15',
-                'jenis_kelamin' => 'laki-laki',
-                'alamat' => 'Jl. Merdeka No. 123, Jakarta',
-                'status' => 'aktif',
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            [
-                'nama' => 'Budi Wijaya',
-                'nis' => '2024002',
-                'id_orangtua' => 1, // Ahmad Wijaya
-                'id_kelas' => 2, // 7B
-                'id_tahun_ajaran' => 1, // 2024/2025
-                'tempat_lahir' => 'Jakarta',
-                'tanggal_lahir' => '2012-08-20',
-                'jenis_kelamin' => 'laki-laki',
-                'alamat' => 'Jl. Merdeka No. 123, Jakarta',
-                'status' => 'aktif',
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            [
-                'nama' => 'Citra Susanti',
-                'nis' => '2024003',
-                'id_orangtua' => 2, // Dewi Susanti
-                'id_kelas' => 1, // 7A
-                'id_tahun_ajaran' => 1, // 2024/2025
-                'tempat_lahir' => 'Bandung',
-                'tanggal_lahir' => '2011-03-10',
-                'jenis_kelamin' => 'perempuan',
-                'alamat' => 'Jl. Pahlawan No. 45, Jakarta',
-                'status' => 'aktif',
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-        ];
-
+        $siswa = [];
+        $id = 1;
+        
+        // Get active tahun ajaran
+        $tahunAjaranAktif = DB::table('tahun_ajaran')->where('aktif', 1)->first();
+        $idTahunAjaran = $tahunAjaranAktif ? $tahunAjaranAktif->id_tahun_ajaran : 1;
+        
+        // Generate 25 students for each class (12 classes total)
+        for ($idKelas = 1; $idKelas <= 12; $idKelas++) {
+            $kelasInfo = DB::table('kelas')->where('id_kelas', $idKelas)->first();
+            
+            for ($i = 1; $i <= 25; $i++) {
+                $gender = ($i % 2 == 0) ? 'laki-laki' : 'perempuan';
+                $birthYear = 2025 - (12 + intval($kelasInfo->tingkat));
+                
+                $siswa[] = [
+                    'id_siswa' => $id,
+                    'nama' => ($gender == 'laki-laki' ? 'Siswa Laki-laki ' : 'Siswa Perempuan ') . $id,
+                    'nis' => $kelasInfo->tingkat . str_pad($idKelas, 2, '0', STR_PAD_LEFT) . str_pad($i, 3, '0', STR_PAD_LEFT),
+                    'id_orangtua' => min($id, 100), // Max 100 parents
+                    'id_kelas' => $idKelas,
+                    'id_tahun_ajaran' => $idTahunAjaran,
+                    'tempat_lahir' => 'Kota ' . chr(64 + ($id % 26) + 1),
+                    'tanggal_lahir' => Carbon::createFromDate($birthYear, ($id % 12) + 1, ($id % 28) + 1)->format('Y-m-d'),
+                    'jenis_kelamin' => $gender,
+                    'alamat' => 'Jalan Siswa No. ' . $id,
+                    'status' => 'aktif',
+                    'dibuat_pada' => Carbon::now(),
+                    'dibuat_oleh' => 'system',
+                    'diperbarui_pada' => Carbon::now(),
+                    'diperbarui_oleh' => 'system'
+                ];
+                
+                $id++;
+            }
+        }
+        
         DB::table('siswa')->insert($siswa);
     }
 }
