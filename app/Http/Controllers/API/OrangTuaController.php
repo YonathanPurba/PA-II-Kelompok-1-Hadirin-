@@ -10,9 +10,12 @@ use App\Models\OrangTua;
 use App\Models\SuratIzin;
 use App\Models\Notifikasi;
 use Illuminate\Http\Request;
+use App\Services\UserService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class OrangTuaController extends Controller
@@ -119,7 +122,8 @@ class OrangTuaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $orangTua = OrangTua::with('user')->find($id);
+        $user = User::findOrFail($id);
+        $orangTua = OrangTua::where('id_user', $id)->firstOrFail();
 
         if (!$orangTua) {
             return response()->json([
@@ -421,7 +425,128 @@ class OrangTuaController extends Controller
             ], 500);
         }
     }
+    public function updateProfile(Request $request, $id_user)
+    {
+        try {
+            // Find the user and associated orangTua record
+            $user = User::findOrFail($id_user);
+            $orangTua = OrangTua::where('id_user', $id_user)->firstOrFail();
 
+            // Debug log incoming request data
+            Log::info('Update OrangTua Profile Request:', [
+                'request' => $request->all(),
+                'files' => $request->hasFile('foto') ? 'Has foto file' : 'No foto file'
+            ]);
+
+            // Extract orang_tua data from request
+            $orangTuaData = $request->input('orang_tua', []);
+
+            // Handle array format from Flutter's multipart request
+            if (empty($orangTuaData) && $request->has('orang_tua.nama_lengkap')) {
+                $orangTuaData = [
+                    'nama_lengkap' => $request->input('orang_tua.nama_lengkap'),
+                    'nomor_telepon' => $request->input('orang_tua.nomor_telepon'),
+                    'alamat' => $request->input('orang_tua.alamat'),
+                    'pekerjaan' => $request->input('orang_tua.pekerjaan'),
+                    'nik' => $request->input('orang_tua.nik'),
+                ];
+            }
+
+            // Validate request
+            $validator = Validator::make(array_merge($request->all(), ['orang_tua' => $orangTuaData]), [
+                'username' => 'required|string|max:255|unique:users,username,' . $id_user . ',id_user',
+                'email' => 'nullable|email|unique:users,email,' . $id_user . ',id_user',
+                'password' => 'nullable|min:6|confirmed',
+                'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'orang_tua.nama_lengkap' => 'required|string|max:255',
+                'orang_tua.nomor_telepon' => 'nullable|string|max:20',
+                'orang_tua.alamat' => 'nullable|string',
+                'orang_tua.pekerjaan' => 'nullable|string|max:255',
+                // 'orang_tua.nik' => 'nullable|string|max:30|unique:orang_tua,nik,' . $orangTua->id . ',id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            // Prepare user data for update
+            $userData = [
+                'username' => $request->input('username')
+            ];
+
+            // Add email if provided
+            if ($request->filled('email')) {
+                $userData['email'] = $request->input('email');
+            }
+
+            // Update password if provided
+            if ($request->filled('password')) {
+                $userData['password'] = bcrypt($request->input('password'));
+            }
+
+            // Prepare orangTua data for update
+            $ortuData = [
+                'nama_lengkap' => $orangTuaData['nama_lengkap'],
+            ];
+
+            // Add optional fields if provided
+            if (!empty($orangTuaData['alamat'])) {
+                $ortuData['alamat'] = $orangTuaData['alamat'];
+            }
+
+            if (!empty($orangTuaData['nomor_telepon'])) {
+                $ortuData['nomor_telepon'] = $orangTuaData['nomor_telepon'];
+            }
+
+            if (!empty($orangTuaData['pekerjaan'])) {
+                $ortuData['pekerjaan'] = $orangTuaData['pekerjaan'];
+            }
+
+            if (!empty($orangTuaData['nik'])) {
+                $ortuData['nik'] = $orangTuaData['nik'];
+            }
+
+            // Handle profile photo upload if provided
+            if ($request->hasFile('foto')) {
+                // Delete existing photo if exists
+                if ($orangTua->foto) {
+                    Storage::delete('public/' . $orangTua->foto);
+                }
+
+                // Store new photo
+                $path = $request->file('foto')->store('foto_orangtua', 'public');
+                $ortuData['foto'] = $path;
+            }
+
+            // Log the processed data before update
+            Log::info('Processed data for update:', [
+                'userData' => $userData,
+                'ortuData' => $ortuData
+            ]);
+            // Update via service
+            UserService::updateOrangTuaWithUser($orangTua->id_orangtua, $ortuData, $userData);
+
+            // Return success response with updated user data
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil orang tua berhasil diperbarui',
+                'user' => $user->fresh('orangTua'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating orangTua profile: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
     public function riwayatOrangTua($id)
     {
         try {

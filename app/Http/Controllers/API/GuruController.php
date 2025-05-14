@@ -486,14 +486,12 @@ class GuruController extends Controller
                 ], 404);
             }
 
-            // Ambil jadwal guru berdasarkan id_guru
             $jadwal = Jadwal::where('id_guru', $guru->id_guru)
-                ->with(['kelas', 'mataPelajaran'])
+                ->with(['kelas.tahunAjaran', 'mataPelajaran']) // tambahkan relasi tahun ajaran
                 ->orderBy('hari')
                 ->orderBy('waktu_mulai')
                 ->get();
 
-            // Format jadwal
             $formattedJadwal = $jadwal->map(function ($item) {
                 $status = $this->getStatusJadwal($item->waktu_mulai, $item->waktu_selesai);
 
@@ -504,8 +502,10 @@ class GuruController extends Controller
                     'waktu' => $item->waktu_mulai->format('H:i') . ' - ' . $item->waktu_selesai->format('H:i'),
                     'status' => $status,
                     'color' => $this->getStatusColor($status),
+                    'tahun_ajaran' => $item->kelas->tahunAjaran->nama_tahun_ajaran ?? '-', // tambahan ini
                 ];
             });
+
 
             return response()->json([
                 'success' => true,
@@ -595,7 +595,7 @@ class GuruController extends Controller
             // Validasi
             $validated = $request->validate([
                 'nama_lengkap'   => 'required|string|max:255',
-                'nomor_telepon'  => 'nullable|string|max:20',
+                'telepon'  => 'nullable|string|max:20',
                 'password'       => 'nullable|string|min:6',
                 'foto'           => 'nullable|image|max:2048',
             ]);
@@ -603,7 +603,7 @@ class GuruController extends Controller
             // Siapkan data guru
             $guruData = [
                 'nama_lengkap'    => $validated['nama_lengkap'],
-                'nomor_telepon'   => $validated['nomor_telepon'] ?? null,
+                'nomor_telepon'   => $validated['telepon'] ?? null,
                 'diperbarui_pada' => now(),
                 'diperbarui_oleh' => $validated['nama_lengkap'],
             ];

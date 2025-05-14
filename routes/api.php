@@ -215,6 +215,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/notifikasi/{id_user}', [OrangtuaController::class, 'getNotifikasi']);
         Route::post('/notifikasi/{id}/baca', [OrangtuaController::class, 'bacaNotifikasi']);
         Route::get('/profile/{id_user}', [OrangtuaController::class, 'getProfile']);
+        Route::post('/update-profile/{id_user}', [OrangTuaController::class, 'updateProfile']);
         Route::get('/surat-izin/{id_user}', [OrangtuaController::class, 'riwayatOrangTua']);
 
         Route::get('/presentase-kehadiran/{anakId}', [OrangTuaController::class, 'presentaseKehadiran']);

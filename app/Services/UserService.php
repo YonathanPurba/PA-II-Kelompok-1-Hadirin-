@@ -89,4 +89,19 @@ class UserService
             }
         });
     }
+    public static function updateOrangTuaWithUser($orangTuaId, array $ortuData, array $userData)
+    {
+        DB::transaction(function () use ($orangTuaId, $ortuData, $userData) {
+            // Cari data orang tua
+            $orangTua = OrangTua::findOrFail($orangTuaId);
+
+            // Update data orang tua
+            $orangTua->update($ortuData);
+
+            // Update data user terkait jika ada
+            if ($orangTua->user) {
+                $orangTua->user->update($userData);
+            }
+        });
+    }
 }
