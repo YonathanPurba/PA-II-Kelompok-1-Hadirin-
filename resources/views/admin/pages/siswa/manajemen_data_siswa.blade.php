@@ -13,66 +13,67 @@
                 </header>
 
                 <div class="data">
-                    <!-- Filter & Export Bar -->
-                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                        <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="kelas" class="form-label form-label-sm me-2 mb-0">Kelas:</label>
-                                <select name="kelas" id="kelas" class="form-select form-select-sm" style="min-width: 140px; max-width: 160px;">
-                                    <option value="">Semua Kelas</option>
-                                    @foreach ($kelasList as $kelas)
-                                        <option value="{{ $kelas->id_kelas }}"
-                                            {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
-                                            {{ $kelas->nama_kelas }}
-                                            @if($kelas->tahunAjaran)
-                                                ({{ $kelas->tahunAjaran->nama_tahun_ajaran }})
-                                                @if($kelas->tahunAjaran->aktif)
-                                                    - Aktif
-                                                @endif
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="status" class="me-2 mb-0">Status:</label>
-                                <select name="status" id="status" class="form-select form-select-sm" style="min-width: 140px; max-width: 160px;">
-                                    <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
-                                    <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status'))) ? 'selected' : '' }}>Aktif</option>
-                                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                                </select>
-                            </div>
-                            
-                            <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama/NIS..." 
-                                value="{{ request('search') }}" style="width: 220px; min-width: 180px;">
-                            
-                            <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center gap-2">
-                                <i class="bi bi-filter"></i> Filter
-                            </button>
-                            
-                            @if(request()->has('kelas') || request()->has('status') || request()->has('search'))
-                                <a href="{{ route('siswa.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
-                                    <i class="bi bi-x-circle"></i> Reset
-                                </a>
+                    <!-- Filter Bar -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="d-flex align-items-center gap-2">
+            <label for="kelas" class="form-label form-label-sm me-2 mb-0">Kelas:</label>
+            <select name="kelas" id="kelas" class="form-select form-select-sm" style="min-width: 140px; max-width: 160px;">
+                <option value="">Semua Kelas</option>
+                @foreach ($kelasList as $kelas)
+                    <option value="{{ $kelas->id_kelas }}"
+                        {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
+                        {{ $kelas->nama_kelas }}
+                        @if($kelas->tahunAjaran)
+                            ({{ $kelas->tahunAjaran->nama_tahun_ajaran }})
+                            @if($kelas->tahunAjaran->aktif)
+                                - Aktif
                             @endif
-                        </form>
+                        @endif
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2">
+            <label for="status" class="me-2 mb-0">Status:</label>
+            <select name="status" id="status" class="form-select form-select-sm" style="min-width: 140px; max-width: 160px;">
+                <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
+                <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status'))) ? 'selected' : '' }}>Aktif</option>
+                <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+            </select>
+        </div>
+        
+        <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama/NIS..." 
+            value="{{ request('search') }}" style="width: 230px; min-width: 180px;">
+        
+        <button type="submit" class="btn btn-outline-success d-flex align-items-center gap-2">
+            <i class="bi bi-filter"></i> Filter
+        </button>
+        
+        @if(request()->has('kelas') || request()->has('status') || request()->has('search'))
+            <a href="{{ route('siswa.index') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                <i class="bi bi-x-circle"></i> Reset
+            </a>
+        @endif
+    </form>
 
-                        <!-- Export Buttons -->
-                        <div class="d-flex gap-3">
-                            <a href="{{ route('siswa.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
-                                class="btn btn-danger btn-sm d-flex align-items-center gap-2">
-                                <i class="bi bi-file-earmark-pdf-fill"></i> PDF
-                            </a>
-                            <a href="{{ route('siswa.export.excel', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
-                                class="btn btn-success btn-sm d-flex align-items-center gap-2">
-                                <i class="bi bi-file-earmark-excel-fill"></i> Excel
-                            </a>
-                            <a href="{{ route('siswa.create') }}" class="btn btn-success btn-sm d-flex align-items-center gap-2">
-                                <i class="bi bi-plus-circle"></i> Tambah
-                            </a>
-                        </div>
-                    </div>
+    <!-- Export Buttons -->
+    <div class="d-flex gap-3">
+        <a href="{{ route('siswa.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
+            class="btn btn-danger d-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+        </a>
+        <a href="{{ route('siswa.export.excel', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
+            class="btn btn-success d-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark-excel-fill"></i> Excel
+        </a>
+        <a href="{{ route('siswa.create') }}" class="btn btn-success d-flex align-items-center gap-2">
+            <i class="bi bi-plus-circle"></i> Tambah
+        </a>
+    </div>
+</div>
+
 
                     <!-- Tabel Siswa -->
                     <div class="table-responsive">
