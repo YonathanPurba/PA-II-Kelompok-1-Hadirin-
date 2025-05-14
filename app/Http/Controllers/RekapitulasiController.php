@@ -6,6 +6,7 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\Absensi;
 use App\Models\RekapAbsensi;
+use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -15,10 +16,25 @@ use Maatwebsite\Excel\Facades\Excel;
 class RekapitulasiController extends Controller
 {
     public function index()
-    {
-        $kelasList = Kelas::orderBy('tingkat')->orderBy('nama_kelas')->get();
-        return view('admin.pages.rekapitulasi.rekapitulasi', compact('kelasList'));
+{
+    // Ambil tahun ajaran yang aktif
+    $tahunAjaranAktif = TahunAjaran::where('aktif', true)->first();
+
+    // Jika tidak ada tahun ajaran aktif, kembalikan view dengan kelas kosong
+    if (!$tahunAjaranAktif) {
+        $kelasList = collect(); // kosong
+    } else {
+        // Ambil kelas yang berada dalam tahun ajaran aktif
+        $kelasList = Kelas::with(['guru', 'tahunAjaran', 'siswa'])
+            ->where('id_tahun_ajaran', $tahunAjaranAktif->id_tahun_ajaran)
+            ->orderBy('tingkat')
+            ->orderBy('nama_kelas')
+            ->get();
     }
+
+    return view('admin.pages.rekapitulasi.rekapitulasi', compact('kelasList'));
+}
+
 
     public function showByKelas(Request $request, $id_kelas)
     {

@@ -25,12 +25,12 @@
                             Per Kelas
                         </button>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    <!-- <li class="nav-item" role="presentation">
                         <button class="nav-link" id="massal-tab" data-bs-toggle="tab" data-bs-target="#massal-content" 
                                 type="button" role="tab" aria-controls="massal-content" aria-selected="false">
                             Pembuatan Massal
                         </button>
-                    </li>
+                    </li> -->
                 </ul>
 
                 <div class="tab-content" id="jadwalTabContent">
@@ -153,7 +153,7 @@
                                 </div> -->
 
                                 <!-- Tahun Ajaran -->
-                                <div class="col-md-6 mb-3">
+                                <!-- <div class="col-md-6 mb-3">
                                     <label for="id_tahun_ajaran" class="form-label">Tahun Ajaran <span class="text-danger">*</span></label>
                                     <select name="id_tahun_ajaran" id="id_tahun_ajaran" class="form-select @error('id_tahun_ajaran') is-invalid @enderror" required>
                                         <option value="">Pilih Tahun Ajaran</option>
@@ -168,7 +168,7 @@
                                     @error('id_tahun_ajaran')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
+                                </div> -->
                             </div>
 
                             <!-- Informasi Jadwal -->
