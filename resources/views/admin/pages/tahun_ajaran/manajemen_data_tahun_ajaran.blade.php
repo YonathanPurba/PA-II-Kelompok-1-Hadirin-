@@ -37,17 +37,17 @@
 
                 <!-- Tabel Tahun Ajaran -->
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered table-sm">
+                    <table id="taTable" table class="table table-striped table-bordered table-sm">
                         <thead class="bg-success text-white">
                             <tr>
                                 <th width="5%">No</th>
-                                <th>Nama Tahun Ajaran</th>
-                                <th>Tanggal Mulai</th>
-                                <th>Tanggal Selesai</th>
-                                <th>Status</th>
-                                <th>Jumlah Kelas</th>
-                                <th>Jumlah Siswa</th>
-                                <th width="18%" class="text-center">Aksi</th>
+                                <th wdith="15">Nama Tahun Ajaran</th>
+                                <th width="10%">Tanggal Mulai</th>
+                                <th width="10%">Tanggal Selesai</th>
+                                <th width="10%">Status</th>
+                                <th width="10%">Jumlah Kelas</th>
+                                <th width="10%">Jumlah Siswa</th>
+                                <th width="10%" class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>

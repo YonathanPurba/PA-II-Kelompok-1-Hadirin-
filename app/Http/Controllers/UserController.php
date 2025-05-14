@@ -28,7 +28,7 @@ class UserController extends Controller
             }
     
             // Urutkan dan paginate hasilnya
-            $users = $query->orderBy('username')->paginate(10);
+            $users = $query->orderBy('username')->get();
     
             return view('admin.pages.users.manajemen_data_users', compact('users'));
         } catch (Exception $e) {

@@ -55,7 +55,7 @@ class SiswaController extends Controller
            });
        }
 
-       $siswaList = $query->orderBy('nama')->paginate(15);
+       $siswaList = $query->orderBy('nama')->get();
 
        // Kirim data ke view
        return view('admin.pages.siswa.manajemen_data_siswa', compact('siswaList', 'kelasList'));

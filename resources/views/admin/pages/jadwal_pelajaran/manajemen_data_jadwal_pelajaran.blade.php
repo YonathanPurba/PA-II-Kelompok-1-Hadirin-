@@ -56,7 +56,7 @@
                 <div class="table-responsive">
                     @if($jadwalList->isEmpty())
                         <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i> Tidak ada jadwal pelajaran yang ditemukan.
+                            <i class="bi bi-info-circle me-2"></i> Tidak ada jadwal pelajaran.
                         </div>
                     @else
                         <!-- Tampilan Jadwal dengan DataTable -->
@@ -69,7 +69,7 @@
                                     <th>Waktu</th>
                                     <th>Mata Pelajaran</th>
                                     <th>Guru</th>
-                                    <th>Status</th>
+                                    <!-- <th>Status</th> -->
                                     <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -82,13 +82,13 @@
                                     <td>{{ date('H:i', strtotime($jadwal->waktu_mulai)) }} - {{ date('H:i', strtotime($jadwal->waktu_selesai)) }}</td>
                                     <td>{{ $jadwal->mataPelajaran->nama }}</td>
                                     <td>{{ $jadwal->guru->nama_lengkap }}</td>
-                                    <td>
+                                    <!-- <td>
                                         @if($jadwal->status == 'aktif')
                                             <span class="badge bg-success">Aktif</span>
                                         @else
                                             <span class="badge bg-secondary">Non-Aktif</span>
                                         @endif
-                                    </td>
+                                    </td> -->
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-4">
                                             <a href="{{ route('jadwal-pelajaran.edit', $jadwal->id_jadwal) }}" 

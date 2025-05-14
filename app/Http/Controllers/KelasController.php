@@ -15,31 +15,51 @@ class KelasController extends Controller
      * Tampilkan daftar kelas dengan filter.
      */
     public function index(Request $request)
-    {
-        $tingkat = $request->input('tingkat');
-        $tahunAjaran = $request->input('tahun_ajaran');
-        $search = $request->input('search');
-
-        $query = Kelas::with(['guru', 'tahunAjaran', 'siswa']);
-
-        if ($tingkat) {
-            $query->where('tingkat', $tingkat);
-        }
-
-        if ($tahunAjaran) {
+{
+    $tingkat = $request->input('tingkat');
+    $tahunAjaran = $request->input('tahun_ajaran');
+    $search = $request->input('search');
+    
+    // Get active academic year by default
+    $tahunAjaranAktif = TahunAjaran::where('aktif', true)->first();
+    
+    $query = Kelas::with(['guru', 'tahunAjaran', 'siswa']);
+    
+    // Filter by grade level if specified
+    if ($tingkat) {
+        $query->where('tingkat', $tingkat);
+    }
+    
+    // Apply academic year filter logic
+    if ($request->has('tahun_ajaran')) {
+        // If "All Academic Years" is explicitly selected (empty value)
+        if ($tahunAjaran === '') {
+            // Show all academic years, no filter needed
+        } else if ($tahunAjaran) {
+            // Filter by specific academic year if provided
             $query->where('id_tahun_ajaran', $tahunAjaran);
         }
-
-        if ($search) {
-            $query->where('nama_kelas', 'like', "%{$search}%");
+    } else {
+        // Default behavior when no filter is provided: show only active academic year
+        if ($tahunAjaranAktif) {
+            $query->where('id_tahun_ajaran', $tahunAjaranAktif->id_tahun_ajaran);
+            $tahunAjaran = $tahunAjaranAktif->id_tahun_ajaran; // For the dropdown selection
         }
-
-        $kelas = $query->orderBy('tingkat')->orderBy('nama_kelas')->get();
-        $tahunAjaranList = TahunAjaran::orderBy('nama_tahun_ajaran', 'desc')->get();
-        $tingkatList = Kelas::select('tingkat')->distinct()->orderBy('tingkat')->pluck('tingkat');
-
-        return view('admin.pages.kelas.manajemen_data_kelas', compact('kelas', 'tahunAjaranList', 'tingkatList'));
     }
+    
+    // Apply search filter if specified
+    if ($search) {
+        $query->where('nama_kelas', 'like', "%{$search}%");
+    }
+
+    $kelas = $query->orderBy('tingkat')->orderBy('nama_kelas')->get();
+    $tahunAjaranList = TahunAjaran::orderBy('nama_tahun_ajaran', 'desc')->get();
+    $tingkatList = Kelas::select('tingkat')->distinct()->orderBy('tingkat')->pluck('tingkat');
+
+    return view('admin.pages.kelas.manajemen_data_kelas', compact(
+        'kelas', 'tahunAjaranList', 'tingkatList', 'tahunAjaran'
+    ));
+}
 
     /**
      * Form tambah kelas.

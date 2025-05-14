@@ -58,11 +58,13 @@ class OrangTuaController extends Controller
             });
         }
     
-        $orangTuaList = $query->orderBy('nama_lengkap')->paginate(10);
-        
+        // $orangTuaList = $query->orderBy('nama_lengkap')->paginate(perPage: 10);
+        // $orangTuaList = $query->orderBy('nama_lengkap')->get();
+        $orangTuaList = $query->orderBy('nama_lengkap')->get();
+
         // Append query parameters to pagination links
-        $orangTuaList->appends($request->query());
-    
+        // $orangTuaList->appends($request->query());
+        
         // Filter ulang relasi siswa jika kelas disaring
         if ($kelasId) {
             foreach ($orangTuaList as $orangTua) {

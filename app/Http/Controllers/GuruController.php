@@ -57,7 +57,7 @@ public function index(Request $request)
         ->orderBy('nama_lengkap');
             
     // Get paginated results
-    $gurus = $gurusQuery->paginate(10)->withQueryString();
+    $gurus = $gurusQuery->get();
 
     return view('admin.pages.guru.manajemen_data_guru', compact('gurus', 'mataPelajaranList'));
 }

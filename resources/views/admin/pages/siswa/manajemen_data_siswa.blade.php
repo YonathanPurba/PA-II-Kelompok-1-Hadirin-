@@ -13,163 +13,142 @@
                 </header>
 
                 <div class="data">
-                    <!-- Tombol Tambah -->
-
-
-                    <!-- Informasi Status -->
-                    <!-- <div class="row mb-4">
-                        <div class="col-md-12">
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Status Siswa:</strong>
-                                <ul class="mb-0 mt-2">
-                                    <li>Status siswa ditentukan oleh status kelas dan tahun ajaran</li>
-                                    <li>Siswa pada kelas dengan tahun ajaran aktif akan memiliki status "Aktif"</li>
-                                    <li>Siswa pada kelas dengan tahun ajaran nonaktif akan memiliki status "Nonaktif"</li>
-                                    <li>Perubahan status tahun ajaran akan otomatis mengubah status siswa</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div> -->
-
                     <!-- Filter & Export Bar -->
-<div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-nowrap">
-    <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-3 flex-nowrap">
-        <div class="d-flex align-items-center gap-2">
-            <label for="kelas" class="me-2 mb-0">Kelas:</label>
-            <select name="kelas" id="kelas" class="form-select form-select-md" style="min-width: 120px; max-width: 140px;">
-                <option value="">Semua Kelas</option>
-                @foreach ($kelasList as $kelas)
-                    <option value="{{ $kelas->id_kelas }}"
-                        {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
-                        {{ $kelas->nama_kelas }}
-                        @if($kelas->tahunAjaran)
-                            ({{ $kelas->tahunAjaran->nama_tahun_ajaran }})
-                            @if($kelas->tahunAjaran->aktif)
-                                - Aktif
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                        <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="kelas" class="form-label form-label-sm me-2 mb-0">Kelas:</label>
+                                <select name="kelas" id="kelas" class="form-select form-select-sm" style="min-width: 140px; max-width: 160px;">
+                                    <option value="">Semua Kelas</option>
+                                    @foreach ($kelasList as $kelas)
+                                        <option value="{{ $kelas->id_kelas }}"
+                                            {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
+                                            {{ $kelas->nama_kelas }}
+                                            @if($kelas->tahunAjaran)
+                                                ({{ $kelas->tahunAjaran->nama_tahun_ajaran }})
+                                                @if($kelas->tahunAjaran->aktif)
+                                                    - Aktif
+                                                @endif
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="status" class="me-2 mb-0">Status:</label>
+                                <select name="status" id="status" class="form-select form-select-sm" style="min-width: 140px; max-width: 160px;">
+                                    <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
+                                    <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status'))) ? 'selected' : '' }}>Aktif</option>
+                                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                </select>
+                            </div>
+                            
+                            <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama/NIS..." 
+                                value="{{ request('search') }}" style="width: 220px; min-width: 180px;">
+                            
+                            <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-filter"></i> Filter
+                            </button>
+                            
+                            @if(request()->has('kelas') || request()->has('status') || request()->has('search'))
+                                <a href="{{ route('siswa.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                                    <i class="bi bi-x-circle"></i> Reset
+                                </a>
                             @endif
-                        @endif
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        
-        <div class="d-flex align-items-center gap-2">
-            <label for="status" class="me-2 mb-0">Status:</label>
-            <select name="status" id="status" class="form-select form-select-md" style="min-width: 120px; max-width: 140px;">
-                <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
-                <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status'))) ? 'selected' : '' }}>Aktif</option>
-                <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-            </select>
-        </div>
-        
-        <div class="d-flex align-items-center gap-2">
-            <label for="search" class="me-2 mb-0">Cari:</label>
-            <input type="text" name="search" id="search" class="form-control form-control-md" placeholder="Nama atau NIS..." value="{{ request('search') }}" style="width: 220px;">
-        </div>
-        
-        <button type="submit" class="btn btn-outline-success btn-md">
-            <i class="bi bi-filter me-1"></i> Filter
-        </button>
-        
-        @if(request()->has('kelas') || request()->has('status') || request()->has('search'))
-            <a href="{{ route('siswa.index') }}" class="btn btn-outline-secondary btn-md">
-                <i class="bi bi-x-circle me-1"></i> Reset
-            </a>
-        @endif
-    </form>
+                        </form>
 
-                            <div class="d-flex gap-3">
-                            <a href="{{ route('orang-tua.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
-                               class="btn btn-danger">
-                                <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
+                        <!-- Export Buttons -->
+                        <div class="d-flex gap-3">
+                            <a href="{{ route('siswa.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
+                                class="btn btn-danger btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-pdf-fill"></i> PDF
                             </a>
-                            <a href="{{ route('orang-tua.export.excel', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
-                               class="btn btn-success">
-                                <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
+                            <a href="{{ route('siswa.export.excel', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
+                                class="btn btn-success btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-excel-fill"></i> Excel
                             </a>
-                            <a href="{{ route('orang-tua.create') }}" class="btn btn-success">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah
-                        </a>
+                            <a href="{{ route('siswa.create') }}" class="btn btn-success btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-plus-circle"></i> Tambah
+                            </a>
                         </div>
-    </div>
-</div>
-
+                    </div>
 
                     <!-- Tabel Siswa -->
                     <div class="table-responsive">
-                        <table id="siswaTable" class="table table-striped table-bordered table-sm">
-                            <thead class="bg-success text-white">
-                                <tr>
-                                    <th width="5%">No</th>
-                                    <th width="20%">Nama Siswa</th>
-                                    <th width="10%">NIS</th>
-                                    <th width="20%">Kelas</th>
-                                    <th width="15%">Tahun Ajaran</th>
-                                    <th width="10%">Status</th>
-                                    <th width="20%" class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($siswaList as $index => $siswa)
-                                    <tr class="{{ $siswa->status == 'aktif' ? 'table-success' : '' }}">
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $siswa->nama ?? '-' }}</td>
-                                        <td>{{ $siswa->nis ?? '-' }}</td>
-                                        <td>
-                                            @if($siswa->kelas)
-                                                {{ $siswa->kelas->nama_kelas }}
-                                                {!! $siswa->kelas->getStatusBadgeHtml() !!}
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if($siswa->tahunAjaran)
-                                                {{ $siswa->tahunAjaran->nama_tahun_ajaran }}
-                                                @if($siswa->tahunAjaran->aktif)
-                                                    <span class="badge bg-success">Aktif</span>
-                                                @endif
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if($siswa->status == 'aktif')
-                                                <span class="badge bg-success">Aktif</span>
-                                            @else
-                                                <span class="badge bg-secondary">Non-Aktif</span>
-                                            @endif
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
-                                                {{-- Tombol View --}}
-                                                <a href="javascript:void(0);" class="text-primary btn-view-siswa"
-                                                    data-siswa='@json($siswa)' data-bs-toggle="modal"
-                                                    data-bs-target="#modalViewSiswa" title="Lihat">
-                                                    <i class="bi bi-eye-fill fs-5"></i>
-                                                </a>
-
-                                                <!-- Edit Button -->
-                                                <a href="{{ url('siswa/' . $siswa->id_siswa . '/edit') }}"
-                                                    class="text-warning" title="Edit">
-                                                    <i class="bi bi-pencil-square fs-5"></i>
-                                                </a>
-                                                
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
+                        @if($siswaList->isEmpty())
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i> Tidak ada data siswa.
+                            </div>
+                        @else
+                            <table id="siswaTable" class="table table-striped table-bordered table-sm">
+                                <thead class="bg-success text-white">
                                     <tr>
-                                        <td colspan="7" class="text-center py-3">Tidak ada data siswa.</td>
+                                        <th width="5%">No</th>
+                                        <th width="30%">Nama Siswa</th>
+                                        <th width="10%">NIS</th>
+                                        <th width="10%">Kelas</th>
+                                        <th width="25%">Tahun Ajaran</th>
+                                        <th width="10%">Status</th>
+                                        <th width="10%" class="text-center">Aksi</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach ($siswaList as $index => $siswa)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $siswa->nama ?? '-' }}</td>
+                                            <td>{{ $siswa->nis ?? '-' }}</td>
+                                            <td>
+                                                @if($siswa->kelas)
+                                                    {{ $siswa->kelas->nama_kelas }}
+                                                    {!! $siswa->kelas->getStatusBadgeHtml() !!}
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($siswa->tahunAjaran)
+                                                    {{ $siswa->tahunAjaran->nama_tahun_ajaran }}
+                                                    @if($siswa->tahunAjaran->aktif)
+                                                        <span class="badge bg-success">Aktif</span>
+                                                    @endif
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($siswa->status == 'aktif')
+                                                    <span class="badge bg-success">Aktif</span>
+                                                @else
+                                                    <span class="badge bg-secondary">Non-Aktif</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <a href="javascript:void(0);" class="text-primary btn-view-siswa"
+                                                        data-id="{{ $siswa->id_siswa }}" title="Lihat">
+                                                        <i class="bi bi-eye-fill fs-5"></i>
+                                                    </a>
+
+                                                    <a href="{{ url('siswa/' . $siswa->id_siswa . '/edit') }}"
+                                                        class="text-warning" title="Edit">
+                                                        <i class="bi bi-pencil-square fs-5"></i>
+                                                    </a>
+                                                    
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @endif
                     </div>
                 </div>
             </div>
         </main>
     </div>
+
 
     <!-- Modal View Siswa -->
     <div class="modal fade" id="modalViewSiswa" tabindex="-1" aria-labelledby="modalViewSiswaLabel" aria-hidden="true">
@@ -234,6 +213,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <a href="#" id="btn-edit-siswa" class="btn btn-warning">Edit</a>
+                    <button type="button" id="btn-update-status" class="btn btn-primary">Update Status</button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
@@ -375,62 +356,7 @@
                 }
             });
         });
-        
-        // Handle Delete
-        $('.btn-delete-siswa').on('click', function() {
-            const id = $(this).data('id');
-            const name = $(this).data('name');
-            
-            Swal.fire({
-                title: 'Konfirmasi Hapus',
-                text: `Apakah Anda yakin ingin menghapus siswa ${name}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/siswa/${id}`,
-                        type: 'DELETE',
-                        data: {
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                Swal.fire(
-                                    'Berhasil!',
-                                    response.message,
-                                    'success'
-                                ).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire(
-                                    'Gagal!',
-                                    response.message,
-                                    'error'
-                                );
-                            }
-                        },
-                        error: function(xhr) {
-                            let errorMessage = 'Terjadi kesalahan!';
-                            if (xhr.responseJSON && xhr.responseJSON.message) {
-                                errorMessage = xhr.responseJSON.message;
-                            }
-                            
-                            Swal.fire(
-                                'Error!',
-                                errorMessage,
-                                'error'
-                            );
-                        }
-                    });
-                }
-            });
-        });
+    
         
         // Form filter responsive behavior
         $(window).on('resize', function() {

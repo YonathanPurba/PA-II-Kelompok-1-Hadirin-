@@ -145,6 +145,30 @@ $(document).ready(function () {
     });
 });
 
+$(document).ready(function () {
+    $('#guruTable, #orangtuaTable, #siswaTable, #kelasTable, #taTable').DataTable({
+        searching: false, // Nonaktifkan search jika tidak perlu
+        language: {
+            lengthMenu: "Tampilkan _MENU_ entri",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "Berikutnya",
+                previous: "Sebelumnya"
+            },
+            zeroRecords: "Tidak ditemukan data yang cocok",
+            emptyTable: "Tidak ada data tersedia"
+        },
+        // dom: '<"top d-flex justify-content-end"l>rt<"bottom d-flex justify-content-between"ip>',
+        //                        ↑ pindah length menu ke kanan atas
+                dom: '<"top d-flex justify-content-start"l>rt<"bottom d-flex justify-content-between"ip>',
+
+    });
+});
+
+
+
 
 
 // $(document).ready(function () {

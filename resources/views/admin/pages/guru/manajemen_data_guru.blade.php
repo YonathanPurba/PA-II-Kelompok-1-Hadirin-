@@ -11,64 +11,61 @@
                     <h1 class="mb-3">Manajemen Data Guru</h1>
                     <p class="mb-2">Filter data guru berdasarkan mata pelajaran dan status</p>
                 </header>
-<div class="data">
-    <!-- Filter Bar -->
-    <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-nowrap">
-        <form method="GET" action="{{ route('guru.index') }}" class="d-flex align-items-center gap-3 flex-nowrap">
-            <div class="d-flex align-items-center gap-2">
-                <label for="mata_pelajaran" class="form-label form-label-md me-2 mb-0">Mapel:</label>
-                <select name="mata_pelajaran" id="mata_pelajaran" class="form-select form-select-md" style="min-width: 140px; max-width: 160px;">
-                    <option value="">Semua</option>
-                    @foreach ($mataPelajaranList as $mapel)
-                        <option value="{{ $mapel->id_mata_pelajaran }}"
-                            {{ request('mata_pelajaran') == $mapel->id_mata_pelajaran ? 'selected' : '' }}>
-                            {{ $mapel->nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+                <div class="data">
+                    <!-- Filter Bar -->
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                        <form method="GET" action="{{ route('guru.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="mata_pelajaran" class="form-label form-label-sm me-2 mb-0">Mapel:</label>
+                                <select name="mata_pelajaran" id="mata_pelajaran" class="form-select form-select-sm" style="min-width: 140px; max-width: 160px;">
+                                    <option value="">Semua</option>
+                                    @foreach ($mataPelajaranList as $mapel)
+                                        <option value="{{ $mapel->id_mata_pelajaran }}"
+                                            {{ request('mata_pelajaran') == $mapel->id_mata_pelajaran ? 'selected' : '' }}>
+                                            {{ $mapel->nama }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-            <div class="d-flex align-items-center gap-2">
-                <label for="status" class="me-2 mb-0">Status:</label>
-                <select name="status" id="status" class="form-select form-select-md" style="min-width: 140px; max-width: 160px;">
-                    <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua</option>
-                    <option value="aktif" {{ (request('status') == 'aktif' || !request()->has('status')) ? 'selected' : '' }}>Aktif</option>
-                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                </select>
-            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="status" class="me-2 mb-0">Status:</label>
+                                <select name="status" id="status" class="form-select form-select-sm" style="min-width: 140px; max-width: 160px;">
+                                    <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua</option>
+                                    <option value="aktif" {{ (request('status') == 'aktif' || !request()->has('status')) ? 'selected' : '' }}>Aktif</option>
+                                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                                </select>
+                            </div>
 
-            <input type="text" name="search" class="form-control form-control-md" placeholder="Cari nama/NIP..." 
-                   value="{{ request('search') }}" style="width: 220px; min-width: 180px;">
+                            <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama/NIP..." 
+                                value="{{ request('search') }}" style="width: 220px; min-width: 180px;">
 
-            <button type="submit" class="btn btn-outline-success btn-md d-flex align-items-center gap-2">
-                <i class="bi bi-filter"></i> Filter
-            </button>
+                            <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-filter"></i> Filter
+                            </button>
 
-            @if(request()->has('mata_pelajaran') || request()->has('status') || request()->has('search'))
-                <a href="{{ route('guru.index') }}" class="btn btn-outline-secondary btn-md d-flex align-items-center gap-2">
-                    <i class="bi bi-x-circle"></i> Reset
-                </a>
-            @endif
-        </form>
+                            @if(request()->has('mata_pelajaran') || request()->has('status') || request()->has('search'))
+                                <a href="{{ route('guru.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                                    <i class="bi bi-x-circle"></i> Reset
+                                </a>
+                            @endif
+                        </form>
 
-        <!-- Export Buttons -->
-        <div class="d-flex gap-3 flex-nowrap">
-            <a href="{{ route('guru.export.pdf', ['mata_pelajaran' => request('mata_pelajaran'), 'status' => request('status'), 'search' => request('search')]) }}" 
-               class="btn btn-danger btn-md d-flex align-items-center gap-2">
-                <i class="bi bi-file-earmark-pdf-fill"></i> PDF
-            </a>
-            <a href="{{ route('guru.export.excel', ['mata_pelajaran' => request('mata_pelajaran'), 'status' => request('status'), 'search' => request('search')]) }}" 
-               class="btn btn-success btn-md d-flex align-items-center gap-2">
-                <i class="bi bi-file-earmark-excel-fill"></i> Excel
-            </a>
-            <a href="{{ url('guru/create') }}" class="btn btn-success btn-md d-flex align-items-center gap-2">
-                <i class="bi bi-plus-circle"></i> Tambah
-            </a>
-        </div>
-    </div>
-</div>
-
-
+                        <!-- Export Buttons -->
+                        <div class="d-flex gap-3">
+                            <a href="{{ route('guru.export.pdf', ['mata_pelajaran' => request('mata_pelajaran'), 'status' => request('status'), 'search' => request('search')]) }}" 
+                            class="btn btn-danger btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+                            </a>
+                            <a href="{{ route('guru.export.excel', ['mata_pelajaran' => request('mata_pelajaran'), 'status' => request('status'), 'search' => request('search')]) }}" 
+                            class="btn btn-success btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-excel-fill"></i> Excel
+                            </a>
+                            <a href="{{ url('guru/create') }}" class="btn btn-success btn-sm d-flex align-items-center gap-2">
+                                <i class="bi bi-plus-circle"></i> Tambah
+                            </a>
+                        </div>
+                    </div>
 
                     <!-- Tabel Data Guru -->
                     <div class="table-responsive">
@@ -78,9 +75,9 @@
                                     <th width="5%">No</th>
                                     <th width="30%">Nama Lengkap</th>
                                     <th width="15%">NIP</th>
-                                    <th width="20%">Mata Pelajaran</th>
-                                    <th width="15%">Status</th>
-                                    <th width="15%" class="text-center">Aksi</th>
+                                    <th width="30%">Mata Pelajaran</th>
+                                    <th width="10%">Status</th>
+                                    <th width="10%" class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -280,10 +277,10 @@
                             tableContent += `
                                 <tr>
                                     <td class="text-center">${index + 1}</td>
-                                    <td>${jadwal.hari}</td>
+                                    <td class="text-center">${jadwal.hari}</td>
                                     <td class="text-center">${jadwal.waktu_mulai} - ${jadwal.waktu_selesai}</td>
-                                    <td>${jadwal.kelas}</td>
-                                    <td>${jadwal.mata_pelajaran}</td>
+                                    <td class="text-center">${jadwal.kelas}</td>
+                                    <td class="text-center">${jadwal.mata_pelajaran}</td>
                                 </tr>
                             `;
                         });
