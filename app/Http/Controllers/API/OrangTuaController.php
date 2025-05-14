@@ -351,16 +351,46 @@ class OrangTuaController extends Controller
                     'id' => $item->id_notifikasi,
                     'judul' => $item->judul,
                     'pesan' => $item->pesan,
-                    'tipe' => $item->tipe,
+                    'dibuat_pada' => \Carbon\Carbon::parse($item->dibuat_pada)->toIso8601String(), // format ISO 8601
                     'dibaca' => (bool) $item->dibaca,
-                    'waktu_dibaca' => $item->waktu_dibaca,
-                    'tanggal' => \Carbon\Carbon::parse($item->dibuat_pada)->translatedFormat('d F Y, H:i'),
+                    'status' => $item->tipe ?? null, // opsional: jika kolom tersedia
+                    'jenis' => $item->jenis ?? null,   // opsional: jika kolom tersedia
+                    'tanggal_mulai' => $item->tanggal_mulai ? \Carbon\Carbon::parse($item->tanggal_mulai)->toIso8601String() : null,
+                    'tanggal_selesai' => $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->toIso8601String() : null,
                 ];
             });
 
         return response()->json([
             'success' => true,
             'data' => $notifikasi
+        ]);
+    }
+    public function bacaNotifikasi($idNotifikasi)
+    {
+        if (!$idNotifikasi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ID notifikasi tidak disertakan.'
+            ], 400);
+        }
+
+        $notifikasi = Notifikasi::find($idNotifikasi);
+
+        if (!$notifikasi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notifikasi tidak ditemukan.'
+            ], 404);
+        }
+
+        // Update status 'dibaca'
+        $notifikasi->dibaca = true;
+        // $notifikasi->waktu_dibaca = now(); // opsional
+        $notifikasi->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notifikasi berhasil ditandai sebagai dibaca.'
         ]);
     }
 

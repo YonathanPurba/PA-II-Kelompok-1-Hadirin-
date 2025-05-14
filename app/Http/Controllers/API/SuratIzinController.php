@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\User;
 use App\Models\OrangTua;
 use App\Models\SuratIzin;
 use Illuminate\Http\Request;
@@ -284,5 +285,55 @@ class SuratIzinController extends Controller
 
         // Mengembalikan file dengan header yang sesuai
         return response()->file($filePath);
+    }
+    public function updateStatusSurat(Request $request, $id_user, $id_surat)
+    {
+        // Validasi input
+        $request->validate([
+            'status' => 'required|in:menunggu,disetujui,ditolak',
+        ]);
+
+        // Ambil user beserta guru dan kelasnya
+        $user = User::with('guru.kelas.siswa')->where('id_user', $id_user)->first();
+
+        if (!$user || !$user->guru || !$user->guru->kelas) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data guru tidak valid.',
+            ], 404);
+        }
+
+        $surat = SuratIzin::where('id_surat_izin', $id_surat)->first();
+
+        if (!$surat) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Surat tidak ditemukan.',
+            ], 404);
+        }
+
+        // Pastikan surat berada dalam pengawasan guru
+        $kelas = $user->guru->kelas;
+        $siswaIds = $kelas->siswa->pluck('id_siswa')->toArray();
+
+        if (!in_array($surat->id_siswa, $siswaIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Surat tidak termasuk dalam pengawasan guru ini.',
+            ], 403);
+        }
+
+        // Update status surat
+        $surat->status = $request->status;
+        $surat->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status surat berhasil diperbarui.',
+            'data' => [
+                'id_surat_izin' => $surat->id_surat_izin,
+                'status' => $surat->status,
+            ],
+        ]);
     }
 }

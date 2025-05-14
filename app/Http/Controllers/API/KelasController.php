@@ -47,8 +47,8 @@ class KelasController extends Controller
 
         $perPage = $request->input('per_page', 15);
         $kelas = $query->orderBy('tingkat')
-                      ->orderBy('nama_kelas')
-                      ->paginate($perPage);
+            ->orderBy('nama_kelas')
+            ->paginate($perPage);
 
         return $this->paginatedResponse($kelas, 'Data kelas berhasil diambil');
     }
@@ -93,7 +93,7 @@ class KelasController extends Controller
     {
         try {
             $kelas = Kelas::with(['guru', 'tahunAjaran', 'siswa'])
-                         ->findOrFail($id);
+                ->findOrFail($id);
 
             return $this->successResponse($kelas, 'Data kelas berhasil diambil');
         } catch (\Exception $e) {
@@ -123,23 +123,23 @@ class KelasController extends Controller
 
         try {
             $kelas = Kelas::findOrFail($id);
-            
+
             if ($request->has('nama_kelas')) {
                 $kelas->nama_kelas = $request->nama_kelas;
             }
-            
+
             if ($request->has('tingkat')) {
                 $kelas->tingkat = $request->tingkat;
             }
-            
+
             if ($request->has('id_guru')) {
                 $kelas->id_guru = $request->id_guru;
             }
-            
+
             if ($request->has('id_tahun_ajaran')) {
                 $kelas->id_tahun_ajaran = $request->id_tahun_ajaran;
             }
-            
+
             $kelas->diperbarui_oleh = $request->user()->username;
             $kelas->save();
 
@@ -159,17 +159,35 @@ class KelasController extends Controller
     {
         try {
             $kelas = Kelas::findOrFail($id);
-            
+
             // Check if there are students in this class
             if ($kelas->siswa()->count() > 0) {
                 return $this->errorResponse('Kelas tidak dapat dihapus karena masih memiliki siswa', 422);
             }
-            
+
             $kelas->delete();
 
             return $this->successResponse(null, 'Kelas berhasil dihapus');
         } catch (\Exception $e) {
             return $this->errorResponse('Data kelas tidak ditemukan', 404);
+        }
+    }
+
+    public function getAllKelas()
+    {
+        try {
+            $kelas = Kelas::select('id_kelas', 'nama_kelas')->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $kelas,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'data' => [],
+            ], 500);
         }
     }
 }
