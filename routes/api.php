@@ -63,6 +63,11 @@ Route::post('/save_fcm_token', [AuthController::class, 'saveFcmToken']);
 // get fcm token
 Route::post('/get_fcm_token_by_id', [NotifikasiController::class, 'getFcmTokenById']);
 
+// Mengambil semua kelas
+Route::get('guru/daftar-kelas', [KelasController::class, 'getAllKelas']);
+
+Route::get('guru/rekapitulasi', [GuruController::class, 'getRekapitulasi']);
+
 // Protected routes - menggunakan middleware 
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
@@ -158,7 +163,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [GuruController::class, 'destroy']);
 
         Route::get('/profile/{id}', [GuruController::class, 'getProfile']);
+        Route::post('/profile/{id}', [GuruController::class, 'updateProfile']);
         Route::get('{id_user}/notifikasi-surat-izin', [GuruController::class, 'getNotifikasiSuratIzin']);
+        Route::post('/surat/update-status', [GuruController::class, 'updateStatusSurat']);
+        Route::put('/{id_user}/surat-izin/{id_surat}/update-status', [SuratIzinController::class, 'updateStatusSurat']);
         Route::get('/{id_user}/jadwal-mingguan', [GuruController::class, 'jadwalMingguan']);
 
         // Additional useful routes
@@ -173,12 +181,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('kelas/{id}', [GuruController::class, 'getDetailKelas']); // opsional
         Route::get('siswa', [GuruController::class, 'getSiswaByKelasId']);
         Route::get('siswa/kelas/{id}', [GuruController::class, 'getSiswaKelas']); // fallback
+        
+        Route::get('/riwayat-kehadiran/{id_kelas}', [GuruController::class, 'getRiwayatKehadiran']); // fallback
 
         Route::get('/jadwal/{idJadwal}/absensi/check', [AbsensiController::class, 'checkAbsensiExist']);
         Route::get('/jadwal/{idJadwal}/absensi', [AbsensiController::class, 'getAbsensiData']);
-
+        Route::get('/jadwal/{idJadwal}/siswa', [GuruController::class, 'getSiswaByJadwal']);
+        
         // POST: Simpan data absensi
         Route::post('/jadwal/{idJadwal}/absensi', [AbsensiController::class, 'saveAbsensi']);
+
+        Route::get('/riwayat/siswa/{id_siswa}', [GuruController::class, 'getDetailSiswa']);
+        
+        Route::get('/rekapitulasi/detail', [GuruController::class, 'getDetailRekapitulasi']);
+
     });
 
     // Orangtua Routes
@@ -197,6 +213,7 @@ Route::middleware('auth:sanctum')->group(function () {
         //Digunakan di Flutter
         Route::get('/anak/{id_user}', [OrangtuaController::class, 'getDaftarAnak']);
         Route::get('/notifikasi/{id_user}', [OrangtuaController::class, 'getNotifikasi']);
+        Route::post('/notifikasi/{id}/baca', [OrangtuaController::class, 'bacaNotifikasi']);
         Route::get('/profile/{id_user}', [OrangtuaController::class, 'getProfile']);
         Route::get('/surat-izin/{id_user}', [OrangtuaController::class, 'riwayatOrangTua']);
 
@@ -207,7 +224,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/surat-izin', [SuratIzinController::class, 'store']);
         Route::post('/surat-izin', [SuratIzinController::class, 'store']);
-        Route::get('/storage/lampiran_surat_izin/{fileName}', [SuratIzinController::class, 'viewFile']);
+        Route::get('/storage/{fileName}', [SuratIzinController::class, 'viewFile']);
     });
 
     // Mata Pelajaran Routes
