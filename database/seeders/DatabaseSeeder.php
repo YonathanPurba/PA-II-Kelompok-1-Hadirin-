@@ -15,17 +15,18 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             TahunAjaranSeeder::class,
             UserSeeder::class,
-            MataPelajaranSeeder::class,
+            StafSeeder::class,
             GuruSeeder::class,
+            OrangtuaSeeder::class,
+            MataPelajaranSeeder::class,
             GuruMataPelajaranSeeder::class,
             KelasSeeder::class,
-            OrangtuaSeeder::class,
             SiswaSeeder::class,
             JadwalSeeder::class,
             AbsensiSeeder::class,
-            RekapAbsensiSeeder::class,
             SuratIzinSeeder::class,
             NotifikasiSeeder::class,
+            RekapAbsensiSeeder::class,
         ]);
     }
 }

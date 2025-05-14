@@ -13,44 +13,56 @@ class RekapAbsensiSeeder extends Seeder
      */
     public function run(): void
     {
-        // Bulan dan tahun saat ini
-        $bulanIni = Carbon::now()->format('m');
-        $tahunIni = Carbon::now()->format('Y');
+        // Get all students
+        $siswas = DB::table('siswa')->get();
         
-        // Siswa dan kelas
-        $siswaKelas = [
-            ['id_siswa' => 1, 'id_kelas' => 1], // Andi di kelas 7A
-            ['id_siswa' => 2, 'id_kelas' => 2], // Budi di kelas 7B
-            ['id_siswa' => 3, 'id_kelas' => 1], // Citra di kelas 7A
-        ];
+        $rekap = [];
+        $id = 1;
         
-        $rekapAbsensi = [];
-        
-        foreach ($siswaKelas as $sk) {
-            // Hitung jumlah kehadiran dari tabel absensi (ini hanya simulasi, seharusnya query ke DB)
-            // Untuk contoh, kita buat data random
-            $jumlahHadir = rand(15, 20);
-            $jumlahSakit = rand(0, 3);
-            $jumlahIzin = rand(0, 2);
-            $jumlahAlpa = rand(0, 1);
-            
-            $rekapAbsensi[] = [
-                'id_siswa' => $sk['id_siswa'],
-                'id_kelas' => $sk['id_kelas'],
-                'bulan' => $bulanIni,
-                'tahun' => $tahunIni,
-                'jumlah_hadir' => $jumlahHadir,
-                'jumlah_sakit' => $jumlahSakit,
-                'jumlah_izin' => $jumlahIzin,
-                'jumlah_alpa' => $jumlahAlpa,
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ];
+        // Buat rekap untuk bulan April dan Mei 2025
+        foreach (['04', '05'] as $bulan) {
+            foreach ($siswas as $siswa) {
+                // Hitung jumlah kehadiran berdasarkan data absensi
+                $absensi = DB::table('absensi')
+                    ->join('jadwal', 'absensi.id_jadwal', '=', 'jadwal.id_jadwal')
+                    ->where('absensi.id_siswa', $siswa->id_siswa)
+                    ->where('jadwal.id_kelas', $siswa->id_kelas)
+                    ->whereRaw("DATE_FORMAT(absensi.tanggal, '%m') = ?", [$bulan])
+                    ->whereRaw("DATE_FORMAT(absensi.tanggal, '%Y') = ?", ['2025'])
+                    ->select('absensi.status')
+                    ->get();
+                
+                $jumlahHadir = $absensi->where('status', 'hadir')->count();
+                $jumlahSakit = $absensi->where('status', 'sakit')->count();
+                $jumlahIzin = $absensi->where('status', 'izin')->count();
+                $jumlahAlpa = $absensi->where('status', 'alpa')->count();
+                
+                $rekap[] = [
+                    'id_rekap' => $id++,
+                    'id_siswa' => $siswa->id_siswa,
+                    'id_kelas' => $siswa->id_kelas,
+                    'bulan' => $bulan,
+                    'tahun' => 2025,
+                    'jumlah_hadir' => $jumlahHadir,
+                    'jumlah_sakit' => $jumlahSakit,
+                    'jumlah_izin' => $jumlahIzin,
+                    'jumlah_alpa' => $jumlahAlpa,
+                    'dibuat_pada' => Carbon::now(),
+                    'dibuat_oleh' => 'system',
+                    'diperbarui_pada' => Carbon::now(),
+                    'diperbarui_oleh' => 'system'
+                ];
+                
+                // To prevent the data from being too large, we'll limit the number of records
+                if ($id > 1000) {
+                    break 2; // Break out of both loops
+                }
+            }
         }
         
-        // Insert batch rekap absensi
-        DB::table('rekap_absensi')->insert($rekapAbsensi);
+        // Insert in chunks to avoid memory issues
+        foreach (array_chunk($rekap, 100) as $chunk) {
+            DB::table('rekap_absensi')->insert($chunk);
+        }
     }
 }

@@ -11,7 +11,7 @@
                     <h1 class="mb-3">Manajemen Data Orang Tua</h1>
                     <p class="mb-2">Filter data orang tua berdasarkan kelas anak dan status</p>
                 </header>
-                <div class="data">
+                <div class="data">        
                     <!-- Filter Bar -->
                     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                         <form method="GET" action="{{ route('orang-tua.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
@@ -54,15 +54,18 @@
                         </form>
 
                         <!-- Export Buttons -->
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-3">
                             <a href="{{ route('orang-tua.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
                                class="btn btn-danger">
-                                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export PDF
+                                <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
                             </a>
                             <a href="{{ route('orang-tua.export.excel', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
                                class="btn btn-success">
-                                <i class="bi bi-file-earmark-excel-fill me-1"></i> Export Excel
+                                <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
                             </a>
+                            <a href="{{ route('orang-tua.create') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Tambah
+                        </a>
                         </div>
                     </div>
 
@@ -129,21 +132,8 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        
-                        <!-- Pagination -->
-                        @if($orangTuaList instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                            <div class="d-flex justify-content-center mt-3">
-                                {{ $orangTuaList->appends(request()->query())->links() }}
-                            </div>
-                        @endif
                     </div>
                     
-                    <!-- Tombol Tambah -->
-                    <div class="mt-4 text-end">
-                        <a href="{{ route('orang-tua.create') }}" class="btn btn-success">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah Orang Tua
-                        </a>
-                    </div>
                 </div>
             </div>
         </main>
@@ -308,4 +298,4 @@
         });
     });
 </script>
-@endsection 
+@endsection

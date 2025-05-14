@@ -128,7 +128,7 @@ if (barCanvas) {
 
 // Data Table 
 $(document).ready(function () {
-    $('#siswaTable, #guruTable, #orangtuaTable, #mataPelajaranTable, #tahunAjaranTable, #kelasTable').DataTable({
+    $('#usersTable, #mataPelajaranTable').DataTable({
         language: {
             search: "Cari:",
             lengthMenu: "Tampilkan _MENU_ entri",
@@ -144,6 +144,8 @@ $(document).ready(function () {
         }
     });
 });
+
+
 
 // $(document).ready(function () {
 //     $('#orangtuaTable').DataTable({

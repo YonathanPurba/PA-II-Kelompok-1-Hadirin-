@@ -13,62 +13,59 @@ class NotifikasiSeeder extends Seeder
      */
     public function run(): void
     {
-        $notifikasi = [
-            // Notifikasi untuk admin
-            [
-                'id_user' => 1, // admin
-                'judul' => 'Surat Izin Baru',
-                'pesan' => 'Ada surat izin baru yang perlu disetujui',
-                'tipe' => 'info',
-                'dibaca' => false,
-                'waktu_dibaca' => null,
-                'dibuat_pada' => Carbon::now()->subHours(1),
-                'dibuat_oleh' => 'system',
-                'diperbarui_pada' => Carbon::now()->subHours(1),
-                'diperbarui_oleh' => 'system'
-            ],
-            
-            // Notifikasi untuk guru
-            [
-                'id_user' => 2, // guru1
-                'judul' => 'Jadwal Mengajar Hari Ini',
-                'pesan' => 'Anda memiliki jadwal mengajar Matematika di kelas 7A pukul 07:30',
-                'tipe' => 'info',
-                'dibaca' => true,
-                'waktu_dibaca' => Carbon::now()->subHours(3),
-                'dibuat_pada' => Carbon::now()->subHours(12),
-                'dibuat_oleh' => 'system',
-                'diperbarui_pada' => Carbon::now()->subHours(3),
-                'diperbarui_oleh' => 'system'
-            ],
-            
-            // Notifikasi untuk orangtua
-            [
-                'id_user' => 4, // orangtua1
-                'judul' => 'Surat Izin Disetujui',
-                'pesan' => 'Surat izin untuk Andi telah disetujui',
-                'tipe' => 'success',
-                'dibaca' => false,
-                'waktu_dibaca' => null,
-                'dibuat_pada' => Carbon::now()->subDays(5),
-                'dibuat_oleh' => 'system',
-                'diperbarui_pada' => Carbon::now()->subDays(5),
-                'diperbarui_oleh' => 'system'
-            ],
-            [
-                'id_user' => 5, // orangtua2
-                'judul' => 'Surat Izin Disetujui',
-                'pesan' => 'Surat izin untuk Citra telah disetujui',
-                'tipe' => 'success',
-                'dibaca' => true,
-                'waktu_dibaca' => Carbon::now()->subDays(2),
-                'dibuat_pada' => Carbon::now()->subDays(3),
-                'dibuat_oleh' => 'system',
-                'diperbarui_pada' => Carbon::now()->subDays(2),
-                'diperbarui_oleh' => 'system'
-            ],
+        $notifikasi = [];
+        $id = 1;
+        
+        // Get all users
+        $allUsers = DB::table('users')->get();
+        
+        $jenisNotifikasi = [
+            'Absensi' => 'Notifikasi terkait absensi siswa',
+            'Surat Izin' => 'Notifikasi terkait surat izin',
+            'Pengumuman' => 'Pengumuman penting dari sekolah',
+            'Jadwal' => 'Perubahan jadwal pelajaran',
+            'Nilai' => 'Notifikasi terkait nilai siswa',
+            'Kegiatan' => 'Informasi kegiatan sekolah',
+            'Tagihan' => 'Informasi tagihan pembayaran',
+            'Lainnya' => 'Notifikasi lainnya'
         ];
-
-        DB::table('notifikasi')->insert($notifikasi);
+        
+        // Generate notifications for April and May 2025
+        $months = [4, 5]; // April and May
+        $year = 2025;
+        
+        // For each user, create 5-10 notifications
+        foreach ($allUsers as $user) {
+            $numNotifications = rand(5, 10);
+            
+            for ($i = 0; $i < $numNotifications; $i++) {
+                $month = $months[array_rand($months)];
+                $daysInMonth = Carbon::createFromDate($year, $month, 1)->daysInMonth;
+                $day = rand(1, $daysInMonth);
+                $date = Carbon::createFromDate($year, $month, $day);
+                
+                $jenis = array_rand($jenisNotifikasi);
+                $pesan = $jenisNotifikasi[$jenis];
+                
+                $notifikasi[] = [
+                    'id_notifikasi' => $id++,
+                    'id_user' => $user->id_user,
+                    'judul' => $jenis . ' - ' . substr(md5(rand()), 0, 8),
+                    'pesan' => $pesan . ' - ' . substr(md5(rand()), 0, 16),
+                    'tipe' => ['info', 'warning', 'success', 'danger'][rand(0, 3)],
+                    'dibaca' => rand(0, 1),
+                    'waktu_dibaca' => rand(0, 1) ? Carbon::now() : null,
+                    'dibuat_pada' => Carbon::now(),
+                    'dibuat_oleh' => 'system',
+                    'diperbarui_pada' => Carbon::now(),
+                    'diperbarui_oleh' => 'system'
+                ];
+            }
+        }
+        
+        // Insert in chunks to avoid memory issues
+        foreach (array_chunk($notifikasi, 1000) as $chunk) {
+            DB::table('notifikasi')->insert($chunk);
+        }
     }
 }

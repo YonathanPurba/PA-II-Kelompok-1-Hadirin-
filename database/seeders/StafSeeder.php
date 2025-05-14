@@ -2,31 +2,35 @@
 
 namespace Database\Seeders;
 
-use App\Models\Staf;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class StafSeeder extends Seeder
 {
-    // public function run()
-    // {
-    //     $jabatan = [
-    //         'Kepala Tata Usaha',
-    //         'Staf Administrasi',
-    //         'Staf Keuangan',
-    //         'Staf Perpustakaan',
-    //         'Staf Laboratorium'
-    //     ];
-
-    //     for ($i = 1; $i <= 5; $i++) {
-    //         Staf::create([
-    //             'id_user' => $i + 31, // User ID mulai dari 32 (setelah orangtua)
-    //             'nama_lengkap' => 'Staf ' . $i,
-    //             'nip' => '9876543210' . $i,
-    //             'nomor_telepon' => '08765432' . str_pad($i, 4, '0', STR_PAD_LEFT),
-    //             'jabatan' => $jabatan[$i - 1],
-    //             'dibuat_pada' => now(),
-    //             'dibuat_oleh' => 'system'
-    //         ]);
-    //     }
-    // }
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $jabatan = ['Kepala Sekolah', 'Wakil Kepala Sekolah', 'Tata Usaha', 'Bendahara', 'Pustakawan', 'Petugas Kebersihan', 'Petugas Keamanan', 'Teknisi IT', 'Administrasi', 'Petugas Kesehatan'];
+        $staf = [];
+        
+        for ($i = 1; $i <= 10; $i++) {
+            $staf[] = [
+                'id_staf' => $i,
+                'id_user' => $i, // User IDs 1-10 are staff
+                'nama_lengkap' => 'Staf ' . $i,
+                'nip' => '1980' . str_pad($i, 6, '0', STR_PAD_LEFT),
+                'nomor_telepon' => '08' . rand(1000000000, 9999999999),
+                'jabatan' => $jabatan[$i - 1],
+                'dibuat_pada' => Carbon::now(),
+                'dibuat_oleh' => 'system',
+                'diperbarui_pada' => Carbon::now(),
+                'diperbarui_oleh' => 'system'
+            ];
+        }
+        
+        DB::table('staf')->insert($staf);
+    }
 }

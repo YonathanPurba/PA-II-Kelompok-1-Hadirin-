@@ -13,8 +13,9 @@
                 </header>
 
                 <div class="data">
+
                     <!-- Informasi Status -->
-                    <div class="row mb-4">
+                    <!-- <div class="row mb-4">
                         <div class="col-md-12">
                             <div class="alert alert-info">
                                 <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Status:</strong>
@@ -25,7 +26,7 @@
                                 </ul>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Filter & Action Bar -->
                     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
@@ -41,7 +42,7 @@
                             </div>
 
                             <div class="d-flex align-items-center gap-2">
-                                <label for="tahun_ajaran" class="me-2 mb-0">Tahun Ajaran:</label>
+                                <label for="tahun_ajaran" class="me-2 mb-0">T/A:</label>
                                 <select name="tahun_ajaran" id="tahun_ajaran" class="form-select">
                                     <option value="">Semua Tahun Ajaran</option>
                                     @foreach($tahunAjaranList as $ta)
@@ -61,16 +62,19 @@
                                 <i class="bi bi-filter me-1"></i> Filter
                             </button>
 
+                             <a href="{{ route('kelas.create') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Tambah
+                        </a>
+
                             @if(request()->has('tingkat') || request()->has('tahun_ajaran') || request()->has('search'))
                                 <a href="{{ route('kelas.index') }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-x-circle me-1"></i> Reset
                                 </a>
+                                
                             @endif
                         </form>
 
-                        <a href="{{ route('kelas.create') }}" class="btn btn-success">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah Kelas
-                        </a>
+                        
                     </div>
 
                     <!-- Tabel Kelas -->

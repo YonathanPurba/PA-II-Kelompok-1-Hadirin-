@@ -11,61 +11,64 @@
                     <h1 class="mb-3">Manajemen Data Guru</h1>
                     <p class="mb-2">Filter data guru berdasarkan mata pelajaran dan status</p>
                 </header>
-                <div class="data">
-                    <!-- Filter Bar -->
-                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                        <form method="GET" action="{{ route('guru.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
-                        <div class="d-flex align-items-center gap-1">
-    <label for="mata_pelajaran" class="form-label form-label-sm me-1 mb-0">Mapel:</label>
-    <select name="mata_pelajaran" id="mata_pelajaran" class="form-select form-select-sm">
-        <option value="">Semua</option>
-        @foreach ($mataPelajaranList as $mapel)
-            <option value="{{ $mapel->id_mata_pelajaran }}"
-                {{ request('mata_pelajaran') == $mapel->id_mata_pelajaran ? 'selected' : '' }}>
-                {{ $mapel->nama }}
-            </option>
-        @endforeach
-    </select>
+<div class="data">
+    <!-- Filter Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-nowrap">
+        <form method="GET" action="{{ route('guru.index') }}" class="d-flex align-items-center gap-3 flex-nowrap">
+            <div class="d-flex align-items-center gap-2">
+                <label for="mata_pelajaran" class="form-label form-label-md me-2 mb-0">Mapel:</label>
+                <select name="mata_pelajaran" id="mata_pelajaran" class="form-select form-select-md" style="min-width: 140px; max-width: 160px;">
+                    <option value="">Semua</option>
+                    @foreach ($mataPelajaranList as $mapel)
+                        <option value="{{ $mapel->id_mata_pelajaran }}"
+                            {{ request('mata_pelajaran') == $mapel->id_mata_pelajaran ? 'selected' : '' }}>
+                            {{ $mapel->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <label for="status" class="me-2 mb-0">Status:</label>
+                <select name="status" id="status" class="form-select form-select-md" style="min-width: 140px; max-width: 160px;">
+                    <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua</option>
+                    <option value="aktif" {{ (request('status') == 'aktif' || !request()->has('status')) ? 'selected' : '' }}>Aktif</option>
+                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                </select>
+            </div>
+
+            <input type="text" name="search" class="form-control form-control-md" placeholder="Cari nama/NIP..." 
+                   value="{{ request('search') }}" style="width: 220px; min-width: 180px;">
+
+            <button type="submit" class="btn btn-outline-success btn-md d-flex align-items-center gap-2">
+                <i class="bi bi-filter"></i> Filter
+            </button>
+
+            @if(request()->has('mata_pelajaran') || request()->has('status') || request()->has('search'))
+                <a href="{{ route('guru.index') }}" class="btn btn-outline-secondary btn-md d-flex align-items-center gap-2">
+                    <i class="bi bi-x-circle"></i> Reset
+                </a>
+            @endif
+        </form>
+
+        <!-- Export Buttons -->
+        <div class="d-flex gap-3 flex-nowrap">
+            <a href="{{ route('guru.export.pdf', ['mata_pelajaran' => request('mata_pelajaran'), 'status' => request('status'), 'search' => request('search')]) }}" 
+               class="btn btn-danger btn-md d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+            </a>
+            <a href="{{ route('guru.export.excel', ['mata_pelajaran' => request('mata_pelajaran'), 'status' => request('status'), 'search' => request('search')]) }}" 
+               class="btn btn-success btn-md d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-excel-fill"></i> Excel
+            </a>
+            <a href="{{ url('guru/create') }}" class="btn btn-success btn-md d-flex align-items-center gap-2">
+                <i class="bi bi-plus-circle"></i> Tambah
+            </a>
+        </div>
+    </div>
 </div>
 
-                            
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="status" class="me-2 mb-0">Status:</label>
-                                <select name="status" id="status" class="form-select">
-                                    <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
-                                    <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status'))) ? 'selected' : '' }}>Aktif</option>
-                                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                                </select>
-                            </div>
-                            
-                            <div class="d-flex align-items-center gap-2">
-                                <input type="text" name="search" class="form-control" placeholder="Cari nama/NIP..." 
-                                       value="{{ request('search') }}">
-                            </div>
-                            
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-filter me-1"></i> Filter
-                            </button>
-                            
-                            @if(request()->has('mata_pelajaran') || request()->has('status') || request()->has('search'))
-                                <a href="{{ route('guru.index') }}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-x-circle me-1"></i> Reset
-                                </a>
-                            @endif
-                        </form>
 
-                        <!-- Export Buttons -->
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('guru.export.pdf', ['mata_pelajaran' => request('mata_pelajaran'), 'status' => request('status'), 'search' => request('search')]) }}" 
-                               class="btn btn-danger">
-                                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export PDF
-                            </a>
-                            <a href="{{ route('guru.export.excel', ['mata_pelajaran' => request('mata_pelajaran'), 'status' => request('status'), 'search' => request('search')]) }}" 
-                               class="btn btn-success">
-                                <i class="bi bi-file-earmark-excel-fill me-1"></i> Export Excel
-                            </a>
-                        </div>
-                    </div>
 
                     <!-- Tabel Data Guru -->
                     <div class="table-responsive">
@@ -122,17 +125,6 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $gurus->links() }}
-                    </div>
-
-                    <div class="mt-4 text-end">
-                        <a href="{{ url('guru/create') }}" class="btn btn-success">
-                            <i class="bi bi-plus-circle me-1"></i>Tambah Guru
-                        </a>
                     </div>
                 </div>
             </div>

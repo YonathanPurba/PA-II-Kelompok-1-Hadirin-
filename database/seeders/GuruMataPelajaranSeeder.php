@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class GuruMataPelajaranSeeder extends Seeder
 {
@@ -12,41 +13,31 @@ class GuruMataPelajaranSeeder extends Seeder
      */
     public function run(): void
     {
-        $guruMataPelajaran = [
-            [
-                'id_guru' => 1, // Budi Santoso
-                'id_mata_pelajaran' => 1, // Matematika
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            [
-                'id_guru' => 1, // Budi Santoso
-                'id_mata_pelajaran' => 4, // IPA
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            [
-                'id_guru' => 2, // Siti Rahayu
-                'id_mata_pelajaran' => 2, // Bahasa Indonesia
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            [
-                'id_guru' => 2, // Siti Rahayu
-                'id_mata_pelajaran' => 3, // Bahasa Inggris
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-        ];
-
+        $guruMataPelajaran = [];
+        $id = 1;
+        
+        // Each teacher can teach 2-3 subjects
+        for ($idGuru = 1; $idGuru <= 30; $idGuru++) {
+            $numSubjects = rand(2, 3);
+            $subjects = array_rand(range(1, 20), $numSubjects);
+            
+            if (!is_array($subjects)) {
+                $subjects = [$subjects];
+            }
+            
+            foreach ($subjects as $subject) {
+                $guruMataPelajaran[] = [
+                    'id_guru_mata_pelajaran' => $id++,
+                    'id_guru' => $idGuru,
+                    'id_mata_pelajaran' => $subject + 1,
+                    'dibuat_pada' => Carbon::now(),
+                    'dibuat_oleh' => 'system',
+                    'diperbarui_pada' => Carbon::now(),
+                    'diperbarui_oleh' => 'system'
+                ];
+            }
+        }
+        
         DB::table('guru_mata_pelajaran')->insert($guruMataPelajaran);
     }
 }

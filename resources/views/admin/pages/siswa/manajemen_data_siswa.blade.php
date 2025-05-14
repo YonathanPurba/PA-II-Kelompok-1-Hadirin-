@@ -13,8 +13,11 @@
                 </header>
 
                 <div class="data">
+                    <!-- Tombol Tambah -->
+
+
                     <!-- Informasi Status -->
-                    <div class="row mb-4">
+                    <!-- <div class="row mb-4">
                         <div class="col-md-12">
                             <div class="alert alert-info">
                                 <i class="bi bi-info-circle-fill me-2"></i> <strong>Informasi Status Siswa:</strong>
@@ -26,66 +29,71 @@
                                 </ul>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Filter & Export Bar -->
-                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                        <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="kelas" class="me-2 mb-0">Kelas:</label>
-                                <select name="kelas" id="kelas" class="form-select">
-                                    <option value="">Semua Kelas</option>
-                                    @foreach ($kelasList as $kelas)
-                                        <option value="{{ $kelas->id_kelas }}"
-                                            {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
-                                            {{ $kelas->nama_kelas }}
-                                            @if($kelas->tahunAjaran)
-                                                ({{ $kelas->tahunAjaran->nama_tahun_ajaran }})
-                                                @if($kelas->tahunAjaran->aktif)
-                                                    - Aktif
-                                                @endif
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="status" class="me-2 mb-0">Status:</label>
-                                <select name="status" id="status" class="form-select">
-                                    <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
-                                    <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status'))) ? 'selected' : '' }}>Aktif</option>
-                                    <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                                </select>
-                            </div>
-                            
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="search" class="me-2 mb-0">Cari:</label>
-                                <input type="text" name="search" id="search" class="form-control" placeholder="Nama atau NIS..." value="{{ request('search') }}">
-                            </div>
-                            
-                            <button type="submit" class="btn btn-outline-success">
-                                <i class="bi bi-filter me-1"></i> Filter
-                            </button>
-                            
-                            @if(request()->has('kelas') || request()->has('status') || request()->has('search'))
-                                <a href="{{ route('siswa.index') }}" class="btn btn-outline-secondary">
-                                    <i class="bi bi-x-circle me-1"></i> Reset
-                                </a>
+<div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-nowrap">
+    <form method="GET" action="{{ route('siswa.index') }}" class="d-flex align-items-center gap-3 flex-nowrap">
+        <div class="d-flex align-items-center gap-2">
+            <label for="kelas" class="me-2 mb-0">Kelas:</label>
+            <select name="kelas" id="kelas" class="form-select form-select-md" style="min-width: 120px; max-width: 140px;">
+                <option value="">Semua Kelas</option>
+                @foreach ($kelasList as $kelas)
+                    <option value="{{ $kelas->id_kelas }}"
+                        {{ request('kelas') == $kelas->id_kelas ? 'selected' : '' }}>
+                        {{ $kelas->nama_kelas }}
+                        @if($kelas->tahunAjaran)
+                            ({{ $kelas->tahunAjaran->nama_tahun_ajaran }})
+                            @if($kelas->tahunAjaran->aktif)
+                                - Aktif
                             @endif
-                        </form>
+                        @endif
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2">
+            <label for="status" class="me-2 mb-0">Status:</label>
+            <select name="status" id="status" class="form-select form-select-md" style="min-width: 120px; max-width: 140px;">
+                <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
+                <option value="aktif" {{ (request('status') == 'aktif' || (!request()->has('status'))) ? 'selected' : '' }}>Aktif</option>
+                <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+            </select>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2">
+            <label for="search" class="me-2 mb-0">Cari:</label>
+            <input type="text" name="search" id="search" class="form-control form-control-md" placeholder="Nama atau NIS..." value="{{ request('search') }}" style="width: 220px;">
+        </div>
+        
+        <button type="submit" class="btn btn-outline-success btn-md">
+            <i class="bi bi-filter me-1"></i> Filter
+        </button>
+        
+        @if(request()->has('kelas') || request()->has('status') || request()->has('search'))
+            <a href="{{ route('siswa.index') }}" class="btn btn-outline-secondary btn-md">
+                <i class="bi bi-x-circle me-1"></i> Reset
+            </a>
+        @endif
+    </form>
 
-                        <div class="d-flex gap-2 flex-wrap">
-                            <a href="{{ route('siswa.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}"
-                                class="btn btn-danger">
-                                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export PDF
+                            <div class="d-flex gap-3">
+                            <a href="{{ route('orang-tua.export.pdf', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
+                               class="btn btn-danger">
+                                <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
                             </a>
-                            <a href="{{ route('siswa.export.excel', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}"
-                                class="btn btn-success">
-                                <i class="bi bi-file-earmark-excel-fill me-1"></i> Export Excel
+                            <a href="{{ route('orang-tua.export.excel', ['kelas' => request('kelas'), 'status' => request('status'), 'search' => request('search')]) }}" 
+                               class="btn btn-success">
+                                <i class="bi bi-file-earmark-excel-fill me-1"></i> Excel
                             </a>
+                            <a href="{{ route('orang-tua.create') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Tambah
+                        </a>
                         </div>
-                    </div>
+    </div>
+</div>
+
 
                     <!-- Tabel Siswa -->
                     <div class="table-responsive">
@@ -157,18 +165,6 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div class="mt-4">
-                        {{ $siswaList->links() }}
-                    </div>
-
-                    <!-- Tombol Tambah -->
-                    <div class="mt-4 text-end">
-                        <a href="{{ route('siswa.create') }}" class="btn btn-success px-4">
-                            <i class="bi bi-plus-circle me-1"></i> Tambah Siswa
-                        </a>
                     </div>
                 </div>
             </div>

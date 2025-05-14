@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class KelasSeeder extends Seeder
 {
@@ -12,29 +13,34 @@ class KelasSeeder extends Seeder
      */
     public function run(): void
     {
-        $kelas = [
-            [
-                'nama_kelas' => '7A',
-                'tingkat' => '7',
-                'id_guru' => 1, // Budi Santoso (wali kelas)
-                'id_tahun_ajaran' => 1, // 2024/2025
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            [
-                'nama_kelas' => '7B',
-                'tingkat' => '7',
-                'id_guru' => 2, // Siti Rahayu (wali kelas)
-                'id_tahun_ajaran' => 1, // 2024/2025
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-        ];
-
+        $kelas = [];
+        $id = 1;
+        
+        $tingkat = ['7', '8', '9'];
+        $nama = ['A', 'B', 'C', 'D'];
+        
+        // Get active tahun ajaran
+        $tahunAjaranAktif = DB::table('tahun_ajaran')->where('aktif', 1)->first();
+        $idTahunAjaran = $tahunAjaranAktif ? $tahunAjaranAktif->id_tahun_ajaran : 1;
+        
+        foreach ($tingkat as $t) {
+            foreach ($nama as $n) {
+                $walikelas = rand(1, 30); // Random teacher as homeroom teacher
+                
+                $kelas[] = [
+                    'id_kelas' => $id++,
+                    'nama_kelas' => $t . $n,
+                    'tingkat' => $t,
+                    'id_guru' => $walikelas,
+                    'id_tahun_ajaran' => $idTahunAjaran,
+                    'dibuat_pada' => Carbon::now(),
+                    'dibuat_oleh' => 'system',
+                    'diperbarui_pada' => Carbon::now(),
+                    'diperbarui_oleh' => 'system'
+                ];
+            }
+        }
+        
         DB::table('kelas')->insert($kelas);
     }
 }

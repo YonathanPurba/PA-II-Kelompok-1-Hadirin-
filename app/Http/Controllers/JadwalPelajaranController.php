@@ -35,6 +35,7 @@ class JadwalPelajaranController extends Controller
         // Ambil data untuk filter dropdown
         $kelasList = Kelas::orderBy('tingkat')->orderBy('nama_kelas')->get();
         $tahunAjaranList = TahunAjaran::orderBy('nama_tahun_ajaran', 'desc')->get();
+        $tahunAjaranAktif = TahunAjaran::where('aktif', true)->first();
         $hariList = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
 
         // Query jadwal dengan filter
@@ -50,6 +51,12 @@ class JadwalPelajaranController extends Controller
 
         if ($tahunAjaranId) {
             $query->where('id_tahun_ajaran', $tahunAjaranId);
+        } else {
+            // Default to active academic year if no specific year is selected
+            if ($tahunAjaranAktif) {
+                $query->where('id_tahun_ajaran', $tahunAjaranAktif->id_tahun_ajaran);
+                $tahunAjaranId = $tahunAjaranAktif->id_tahun_ajaran; // Set for the view
+            }
         }
 
         if ($status && $status !== 'semua') {
@@ -78,6 +85,7 @@ class JadwalPelajaranController extends Controller
             'jadwalByHariKelas',
             'kelasList',
             'tahunAjaranList',
+            'tahunAjaranAktif',
             'hariList'
         ));
     }
@@ -100,6 +108,7 @@ class JadwalPelajaranController extends Controller
             ->get();
         
         $tahunAjaranAktif = TahunAjaran::where('aktif', true)->first();
+        $tahunAjaranList = TahunAjaran::orderBy('nama_tahun_ajaran', 'desc')->get();
         
         // Generate sesi waktu (8 sesi, mulai 07:30, durasi 45 menit, istirahat 5 menit)
         $sesiList = $this->generateSesiWaktu();
@@ -111,6 +120,7 @@ class JadwalPelajaranController extends Controller
             'mataPelajaranList',
             'guruList',
             'tahunAjaranAktif',
+            'tahunAjaranList',
             'sesiList',
             'hariList'
         ));
@@ -145,6 +155,15 @@ class JadwalPelajaranController extends Controller
             return redirect()->back()
                 ->with('error', 'Tidak ada tahun ajaran aktif. Silakan aktifkan tahun ajaran terlebih dahulu.')
                 ->withInput();
+        }
+
+        // Ambil tahun ajaran dari kelas yang dipilih
+        $kelas = Kelas::find($request->id_kelas);
+        if ($kelas && $kelas->id_tahun_ajaran) {
+            $tahunAjaranKelas = TahunAjaran::find($kelas->id_tahun_ajaran);
+            if ($tahunAjaranKelas) {
+                $tahunAjaranAktif = $tahunAjaranKelas;
+            }
         }
 
         DB::beginTransaction();
@@ -335,47 +354,47 @@ class JadwalPelajaranController extends Controller
                             ($conflict->id_kelas == $request->id_kelas ? 
                                 "Kelas sudah memiliki jadwal dengan " . $conflict->mataPelajaran->nama : 
                                 "Guru " . $conflict->guru->nama_lengkap . " sudah mengajar di kelas " . $conflict->kelas->nama_kelas);
+                    }
                 }
             }
-        }
-        
-        // If there are conflicts, rollback and show error
-        if (!empty($conflictErrors)) {
+            
+            // If there are conflicts, rollback and show error
+            if (!empty($conflictErrors)) {
+                DB::rollBack();
+                return redirect()->back()
+                    ->with('error', 'Terdapat konflik jadwal:<br>' . implode('<br>', $conflictErrors))
+                    ->withInput();
+            }
+            
+            // Create new jadwal entries for each session
+            for ($sesi = $sesiMulai; $sesi <= $sesiSelesai; $sesi++) {
+                $waktuMulai = $sesiList[$sesi - 1]['waktu_mulai'];
+                $waktuSelesai = $sesiList[$sesi - 1]['waktu_selesai'];
+                
+                $jadwal = new Jadwal();
+                $jadwal->id_kelas = $request->id_kelas;
+                $jadwal->id_mata_pelajaran = $request->id_mata_pelajaran;
+                $jadwal->id_guru = $request->id_guru;
+                $jadwal->id_tahun_ajaran = $originalJadwal->id_tahun_ajaran;
+                $jadwal->hari = $request->hari;
+                $jadwal->waktu_mulai = $waktuMulai;
+                $jadwal->waktu_selesai = $waktuSelesai;
+                $jadwal->status = $request->status;
+                $jadwal->dibuat_pada = now();
+                $jadwal->dibuat_oleh = Auth::user()->username ?? 'system';
+                $jadwal->save();
+            }
+            
+            DB::commit();
+            return redirect()->route('jadwal-pelajaran.index')
+                ->with('success', 'Jadwal pelajaran berhasil diperbarui.');
+        } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Terdapat konflik jadwal:<br>' . implode('<br>', $conflictErrors))
+                ->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage())
                 ->withInput();
         }
-        
-        // Create new jadwal entries for each session
-        for ($sesi = $sesiMulai; $sesi <= $sesiSelesai; $sesi++) {
-            $waktuMulai = $sesiList[$sesi - 1]['waktu_mulai'];
-            $waktuSelesai = $sesiList[$sesi - 1]['waktu_selesai'];
-            
-            $jadwal = new Jadwal();
-            $jadwal->id_kelas = $request->id_kelas;
-            $jadwal->id_mata_pelajaran = $request->id_mata_pelajaran;
-            $jadwal->id_guru = $request->id_guru;
-            $jadwal->id_tahun_ajaran = $originalJadwal->id_tahun_ajaran;
-            $jadwal->hari = $request->hari;
-            $jadwal->waktu_mulai = $waktuMulai;
-            $jadwal->waktu_selesai = $waktuSelesai;
-            $jadwal->status = $request->status;
-            $jadwal->dibuat_pada = now();
-            $jadwal->dibuat_oleh = Auth::user()->username ?? 'system';
-            $jadwal->save();
-        }
-        
-        DB::commit();
-        return redirect()->route('jadwal-pelajaran.index')
-            ->with('success', 'Jadwal pelajaran berhasil diperbarui.');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return redirect()->back()
-            ->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage())
-            ->withInput();
     }
-}
 
     /**
      * Remove the specified resource from storage.

@@ -13,29 +13,36 @@ class TahunAjaranSeeder extends Seeder
      */
     public function run(): void
     {
-        $tahunAjaran = [
-            [
-                'nama_tahun_ajaran' => '2024/2025',
-                'tanggal_mulai' => '2024-07-15',
-                'tanggal_selesai' => '2025-06-30',
-                'aktif' => true,
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-            [
-                'nama_tahun_ajaran' => '2025/2026',
-                'tanggal_mulai' => '2025-07-15',
-                'tanggal_selesai' => '2026-06-30',
-                'aktif' => false,
-                'dibuat_pada' => now(),
-                'dibuat_oleh' => 'seeder',
-                'diperbarui_pada' => now(),
-                'diperbarui_oleh' => 'seeder'
-            ],
-        ];
-
+        $tahunAjaran = [];
+        $id = 1;
+        
+        // Generate academic years from 2020-2021 to 2026-2027
+        for ($tahun = 2020; $tahun <= 2026; $tahun++) {
+            $tahunAjaran[] = [
+                'id_tahun_ajaran' => $id++,
+                'nama_tahun_ajaran' => $tahun . '/' . ($tahun + 1) . ' Semester Ganjil',
+                'tanggal_mulai' => Carbon::createFromDate($tahun, 7, 15)->format('Y-m-d'),
+                'tanggal_selesai' => Carbon::createFromDate($tahun, 12, 20)->format('Y-m-d'),
+                'aktif' => ($tahun == 2025) ? 1 : 0,
+                'dibuat_pada' => Carbon::now(),
+                'dibuat_oleh' => 'system',
+                'diperbarui_pada' => Carbon::now(),
+                'diperbarui_oleh' => 'system'
+            ];
+            
+            $tahunAjaran[] = [
+                'id_tahun_ajaran' => $id++,
+                'nama_tahun_ajaran' => $tahun . '/' . ($tahun + 1) . ' Semester Genap',
+                'tanggal_mulai' => Carbon::createFromDate($tahun + 1, 1, 5)->format('Y-m-d'),
+                'tanggal_selesai' => Carbon::createFromDate($tahun + 1, 6, 15)->format('Y-m-d'),
+                'aktif' => 0,
+                'dibuat_pada' => Carbon::now(),
+                'dibuat_oleh' => 'system',
+                'diperbarui_pada' => Carbon::now(),
+                'diperbarui_oleh' => 'system'
+            ];
+        }
+        
         DB::table('tahun_ajaran')->insert($tahunAjaran);
     }
 }
